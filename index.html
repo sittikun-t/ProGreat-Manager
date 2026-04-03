@@ -236,9 +236,75 @@ tr:last-child td{border-bottom:none}
 .rpt-bar-fill{height:100%;background:#2d8a59;border-radius:5px;transition:.3s}
 .rpt-bar-label{font-size:11px;color:#6b7280;white-space:nowrap}
 #rpt-custom-range{display:none;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── AUTH OVERLAY ── */
+#auth-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a5f3c 0%,#0f3d28 100%);display:flex;align-items:center;justify-content:center;z-index:9999}
+#auth-box{background:#fff;border-radius:16px;padding:40px;width:min(420px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#auth-box .auth-logo{text-align:center;margin-bottom:28px}
+#auth-box .auth-logo .auth-icon{font-size:52px;line-height:1}
+#auth-box .auth-logo h2{font-size:22px;font-weight:700;color:#1a5f3c;margin-top:10px}
+#auth-box .auth-logo p{font-size:13px;color:#6b7280;margin-top:4px}
+.auth-label{font-size:12px;font-weight:600;color:#374151;margin-bottom:5px}
+.auth-input{width:100%;padding:11px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;transition:.2s;font-family:inherit}
+.auth-input:focus{border-color:#1a5f3c;box-shadow:0 0 0 3px rgba(26,95,60,.1)}
+.auth-error{color:#ef4444;font-size:12px;margin-top:6px;min-height:20px;text-align:center}
+#pending-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a5f3c,#0f3d28);display:none;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:20px}
+#pending-box{background:#fff;border-radius:16px;padding:40px 36px;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+/* ── USER MANAGEMENT ── */
+.user-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f3f4f6}
+.user-row:last-child{border-bottom:none}
+.user-role-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.user-role-badge.admin{background:#d1fae5;color:#065f46}
+.user-role-badge.client{background:#dbeafe;color:#1e40af}
+.user-role-badge.pending{background:#fef3c7;color:#92400e}
+.user-role-badge.disabled{background:#f3f4f6;color:#9ca3af}
+/* ── USER INFO in header ── */
+#user-info{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 4px}
+#user-email-label{font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;max-width:160px;text-overflow:ellipsis}
+.logout-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;transition:.15s;white-space:nowrap}
+.logout-btn:hover{background:rgba(255,255,255,.25)}
 </style>
+
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
+<!-- ===== AUTH OVERLAY ===== -->
+<div id="auth-overlay">
+  <div id="auth-box">
+    <div class="auth-logo">
+      <div class="auth-icon">🌾</div>
+      <h2>ProGreat Manager</h2>
+      <p>กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <div class="auth-label">อีเมล</div>
+        <input class="auth-input" type="email" id="login-email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
+      </div>
+      <div>
+        <div class="auth-label">รหัสผ่าน</div>
+        <input class="auth-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-error" class="auth-error"></div>
+      <button class="btn btn-green" id="btn-login" onclick="doLogin()" style="padding:13px;font-size:15px;width:100%;border-radius:8px">🔐 เข้าสู่ระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PENDING SCREEN ===== -->
+<div id="pending-overlay">
+  <div id="pending-box">
+    <div style="font-size:56px">⏳</div>
+    <h2 style="font-size:20px;font-weight:700;color:#1a5f3c;margin:14px 0 8px">รอการอนุมัติ</h2>
+    <p style="color:#6b7280;font-size:14px;line-height:1.6">บัญชีของคุณอยู่ระหว่างรอ Admin อนุมัติสิทธิ์<br>กรุณาติดต่อ Admin เพื่อขอสิทธิ์เข้าถึง</p>
+    <p id="pending-email" style="font-size:12px;color:#9ca3af;margin-top:8px"></p>
+    <button class="btn btn-outline" onclick="doLogout()" style="margin-top:20px;padding:8px 24px">ออกจากระบบ</button>
+  </div>
+</div>
 
 <div id="header">
   <h1>🌾 ProGreat Manager <span>ระบบจัดการสถานะลูกค้าและต้นทุน</span></h1>
@@ -247,9 +313,14 @@ tr:last-child td{border-bottom:none}
     <button class="tab-btn" onclick="showTab('cost')">🧮 คำนวนต้นทุน</button>
     <button class="tab-btn" onclick="showTab('bonus')">🎁 โบนัสคนงาน</button>
     <button class="tab-btn" onclick="showTab('report')">📊 รายงาน</button>
+    <button class="tab-btn" id="tab-btn-users" onclick="showTab('users')" style="display:none">👥 ผู้ใช้</button>
   </div>
   <button class="settings-btn" onclick="openSettings()" title="ตั้งค่า Claude API Key สำหรับอ่านเอกสาร">⚙️ ตั้งค่า</button>
-  <div id="save-indicator">💾 บันทึกอัตโนมัติ</div>
+  <div id="user-info">
+    <span id="user-email-label"></span>
+    <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+  <div id="save-indicator" style="margin-left:0">☁️ กำลังโหลด...</div>
 </div>
 
 <div id="content">
@@ -264,7 +335,7 @@ tr:last-child td{border-bottom:none}
         <h3>📄 Purchase Orders</h3>
         <div style="display:flex;gap:8px">
           <button class="btn btn-outline btn-sm" onclick="toggleClosedPOs()" id="btn-toggle-closed">📋 ดู PO ที่จบแล้ว</button>
-          <button class="btn btn-green btn-sm" onclick="openPOModal()">+ สร้าง PO ใหม่</button>
+          <button class="btn btn-green btn-sm" id="btn-add-po" onclick="openPOModal()">+ สร้าง PO ใหม่</button>
         </div>
       </div>
       <div id="po-list-active"></div>
@@ -282,7 +353,7 @@ tr:last-child td{border-bottom:none}
         <option value="paid">ชำระแล้ว</option>
         <option value="unpaid">ค้างชำระ</option>
       </select>
-      <button class="btn btn-green ml-auto" onclick="openModal()">+ เพิ่มรายการ</button>
+      <button class="btn btn-green ml-auto" id="btn-add-record" onclick="openModal()">+ เพิ่มรายการ</button>
       <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
     </div>
     <div class="table-wrap">
@@ -367,7 +438,7 @@ tr:last-child td{border-bottom:none}
   <!-- ===== TAB: BONUS ===== -->
   <div id="tab-bonus" style="display:none">
     <div class="panel">
-      <h2>🎁 คำนวนโบนัสคนงาน <button class="btn btn-outline btn-sm" style="margin-left:12px;font-size:12px" onclick="openWorkerModal()">⚙️ จัดการรายชื่อคนงาน</button></h2>
+      <h2>🎁 คำนวนโบนัสคนงาน <button id="btn-edit-workers" class="btn btn-outline btn-sm" style="margin-left:12px;font-size:12px" onclick="openWorkerModal()">⚙️ จัดการรายชื่อคนงาน</button></h2>
       <div class="bonus-input">
         <label>ปริมาณ ProGreat ที่ขายได้</label>
         <input type="number" id="bonus-tons" value="223" step="1" oninput="calcBonus()">
@@ -507,6 +578,21 @@ tr:last-child td{border-bottom:none}
 
   </div>
 
+</div>
+
+<!-- ===== TAB: USER MANAGEMENT ===== -->
+<div id="tab-users" style="display:none">
+  <div id="content">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2 style="font-size:16px;font-weight:700;color:#1a5f3c">👥 จัดการผู้ใช้งาน</h2>
+        <button class="btn btn-outline btn-sm" onclick="loadUserList()">🔄 รีเฟรช</button>
+      </div>
+      <div id="user-mgmt-list">
+        <div style="text-align:center;color:#9ca3af;padding:30px">กำลังโหลด...</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ===== MODAL: WORKER MANAGEMENT ===== -->
@@ -785,6 +871,203 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <script>
+// ─── FIREBASE CONFIG & AUTH ───────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyA3vKsG90qBGpeeDKZslOySmOFGqHz65ZM",
+  authDomain: "progreat-manager.firebaseapp.com",
+  projectId: "progreat-manager",
+  storageBucket: "progreat-manager.firebasestorage.app",
+  messagingSenderId: "337307403398",
+  appId: "1:337307403398:web:27dd4d145b6233179ebd07"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+let currentUser = null;
+let currentRole = null; // 'admin' | 'client' | 'pending'
+
+// ── Auth State Listener ──
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('auth-overlay').style.display = 'none';
+    document.getElementById('pending-overlay').style.display = 'none';
+
+    // Load or create user profile
+    const uRef = db.collection('users').doc(user.uid);
+    const uDoc = await uRef.get();
+    if (!uDoc.exists) {
+      await uRef.set({ email: user.email, role: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      currentRole = 'pending';
+    } else {
+      currentRole = uDoc.data().role;
+    }
+
+    if (currentRole === 'pending') {
+      document.getElementById('pending-overlay').style.display = 'flex';
+      document.getElementById('pending-email').textContent = user.email;
+      return;
+    }
+
+    // Show app
+    document.getElementById('user-email-label').textContent = user.email;
+    applyRoleUI();
+    await loadDataFromFirestore();
+    loadFormulas();
+    loadCostInputs();
+    renderAll();
+    updateSortHeaders();
+    calcAndRender('general');
+    calcAndRender('hiasang');
+    calcBonus();
+
+  } else {
+    currentUser = null;
+    currentRole = null;
+    document.getElementById('auth-overlay').style.display = 'flex';
+    document.getElementById('pending-overlay').style.display = 'none';
+    document.getElementById('login-error').textContent = '';
+  }
+});
+
+// ── Login / Logout ──
+async function doLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('btn-login');
+  if (!email || !password) { errEl.textContent = 'กรุณากรอก Email และรหัสผ่าน'; return; }
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังเข้าสู่ระบบ...';
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch(e) {
+    errEl.textContent = authErrMsg(e.code);
+    btn.disabled = false;
+    btn.textContent = '🔐 เข้าสู่ระบบ';
+  }
+}
+function doLogout() { auth.signOut(); }
+function authErrMsg(code) {
+  if(code==='auth/user-not-found'||code==='auth/wrong-password'||code==='auth/invalid-credential') return 'Email หรือรหัสผ่านไม่ถูกต้อง';
+  if(code==='auth/too-many-requests') return 'ลองใหม่อีกครั้งในภายหลัง (พยายามมากเกินไป)';
+  if(code==='auth/invalid-email') return 'รูปแบบ Email ไม่ถูกต้อง';
+  return 'เกิดข้อผิดพลาด: ' + code;
+}
+
+// ── Role-based UI ──
+function applyRoleUI() {
+  const isAdmin  = currentRole === 'admin';
+  const canAdd   = isAdmin || currentRole === 'client';
+  // Show user mgmt tab only for admin
+  document.getElementById('tab-btn-users').style.display = isAdmin ? '' : 'none';
+  // Show/hide Add button
+  const addBtn = document.getElementById('btn-add-record');
+  if (addBtn) addBtn.style.display = canAdd ? '' : 'none';
+  // Show/hide PO create button
+  const addPO = document.getElementById('btn-add-po');
+  if (addPO) addPO.style.display = isAdmin ? '' : 'none';
+  // Show/hide Bonus worker edit
+  const editWorkers = document.getElementById('btn-edit-workers');
+  if (editWorkers) editWorkers.style.display = isAdmin ? '' : 'none';
+}
+
+// ── Load data from Firestore ──
+async function loadDataFromFirestore() {
+  const ind = document.getElementById('save-indicator');
+  ind.textContent = '☁️ กำลังโหลด...';
+  try {
+    const doc = await db.collection('app_data').doc('main').get();
+    if (doc.exists) {
+      const d = doc.data();
+      records      = d.records      || JSON.parse(JSON.stringify(INITIAL_RECORDS));
+      bonusHistory = d.bonusHistory  || [];
+      pos          = d.pos           || [];
+      bonusWorkers = d.bonusWorkers  || JSON.parse(JSON.stringify(DEFAULT_BONUS_WORKERS));
+    } else {
+      // First run — seed with initial data
+      records      = JSON.parse(JSON.stringify(INITIAL_RECORDS));
+      bonusHistory = [];
+      pos          = [];
+      bonusWorkers = JSON.parse(JSON.stringify(DEFAULT_BONUS_WORKERS));
+      await persistDataToFirestore();
+    }
+    ind.textContent = '☁️ ซิงค์แล้ว';
+  } catch(e) {
+    console.error('Firestore load error:', e);
+    ind.textContent = '⚠️ โหลดไม่สำเร็จ';
+    // Fallback to localStorage
+    const saved = localStorage.getItem('progreat_records');
+    records      = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(INITIAL_RECORDS));
+    const savedB = localStorage.getItem('progreat_bonus_history');
+    bonusHistory = savedB ? JSON.parse(savedB) : [];
+    const savedP = localStorage.getItem('progreat_pos');
+    pos          = savedP ? JSON.parse(savedP) : [];
+    const savedW = localStorage.getItem('progreat_bonus_workers');
+    bonusWorkers = savedW ? JSON.parse(savedW) : JSON.parse(JSON.stringify(DEFAULT_BONUS_WORKERS));
+  }
+}
+
+// ── Save data to Firestore ──
+async function persistDataToFirestore() {
+  const ind = document.getElementById('save-indicator');
+  ind.textContent = '⏳ กำลังบันทึก...';
+  try {
+    await db.collection('app_data').doc('main').set({
+      records, bonusHistory, pos, bonusWorkers,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: currentUser ? currentUser.email : 'unknown'
+    });
+    ind.textContent = '✅ บันทึกแล้ว ' + new Date().toLocaleTimeString('th-TH');
+    setTimeout(() => { ind.textContent = '☁️ ซิงค์แล้ว'; }, 3000);
+  } catch(e) {
+    console.error('Firestore save error:', e);
+    ind.textContent = '❌ บันทึกไม่สำเร็จ';
+  }
+}
+
+// ── User Management ──
+async function loadUserList() {
+  const container = document.getElementById('user-mgmt-list');
+  container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:20px">กำลังโหลด...</div>';
+  try {
+    const snap = await db.collection('users').get();
+    if (snap.empty) { container.innerHTML = '<div style="color:#9ca3af;padding:20px">ยังไม่มีผู้ใช้</div>'; return; }
+    let html = '';
+    snap.forEach(doc => {
+      const u = doc.data();
+      const uid = doc.id;
+      const roleBadge = `<span class="user-role-badge ${u.role}">${u.role==='admin'?'Admin':u.role==='client'?'Client':'รอการอนุมัติ'}</span>`;
+      html += `<div class="user-row">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px">${u.email||uid}</div>
+          <div style="font-size:11px;color:#9ca3af">${u.createdAt ? new Date(u.createdAt.seconds*1000).toLocaleDateString('th-TH') : ''}</div>
+        </div>
+        ${roleBadge}
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${u.role!=='admin' ? `<button class="btn btn-green btn-sm" onclick="setUserRole('${uid}','admin')">Admin</button>` : ''}
+          ${u.role!=='client' ? `<button class="btn btn-outline btn-sm" onclick="setUserRole('${uid}','client')">Client</button>` : ''}
+          ${u.role!=='pending' ? `<button class="btn btn-red btn-sm" onclick="setUserRole('${uid}','pending')">ระงับ</button>` : ''}
+        </div>
+      </div>`;
+    });
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = `<div style="color:#ef4444;padding:20px">เกิดข้อผิดพลาด: ${e.message}</div>`;
+  }
+}
+
+async function setUserRole(uid, role) {
+  try {
+    await db.collection('users').doc(uid).update({ role });
+    await loadUserList();
+  } catch(e) {
+    alert('เกิดข้อผิดพลาด: ' + e.message);
+  }
+}
+
 // ─── INITIAL DATA FROM EXCEL ─────────────────────────────────────
 const INITIAL_RECORDS = [
   {id:336,delivDate:'2568-06-07',customer:'TRF',product:'ProGreat',price:9.75,weight:28017.4,amount:273169.65,payDate:'2568-06-20',payMethod:'โอนเข้า บช. BBL 53035xxx',note:'',po:'เริ่ม PO 120 ton',poBalance:91982.6,poSold:28017.4},
@@ -889,13 +1172,13 @@ function updateSortHeaders() {
 
 // ─── STORAGE ──────────────────────────────────────────────────────
 function loadData() {
+  // Legacy localStorage fallback (used only if Firebase not ready)
   const saved = localStorage.getItem('progreat_records');
   records = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(INITIAL_RECORDS));
   const savedBonus = localStorage.getItem('progreat_bonus_history');
   bonusHistory = savedBonus ? JSON.parse(savedBonus) : [];
   const savedPOs = localStorage.getItem('progreat_pos');
   pos = savedPOs ? JSON.parse(savedPOs) : [];
-  // Load bonus workers list
   const savedWorkers = localStorage.getItem('progreat_bonus_workers');
   bonusWorkers = savedWorkers ? JSON.parse(savedWorkers) : JSON.parse(JSON.stringify(DEFAULT_BONUS_WORKERS));
 }
@@ -928,13 +1211,13 @@ function loadCostInputs() {
 }
 
 function saveData() {
+  // Also keep localStorage as offline backup
   localStorage.setItem('progreat_records', JSON.stringify(records));
   localStorage.setItem('progreat_bonus_history', JSON.stringify(bonusHistory));
   localStorage.setItem('progreat_pos', JSON.stringify(pos));
   localStorage.setItem('progreat_bonus_workers', JSON.stringify(bonusWorkers));
-  const ind = document.getElementById('save-indicator');
-  ind.textContent = '✅ บันทึกแล้ว ' + new Date().toLocaleTimeString('th-TH');
-  setTimeout(()=>{ind.textContent='💾 บันทึกอัตโนมัติ'},3000);
+  // Primary save: Firestore
+  persistDataToFirestore();
 }
 
 function saveCostInputs() {
@@ -995,15 +1278,18 @@ function prefillCurrentDate(prefix) {
 
 // ─── TABS ─────────────────────────────────────────────────────────
 function showTab(tab) {
-  ['customers','cost','bonus','report'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
-    document.querySelectorAll('.tab-btn').forEach((b,i) => {
-      b.classList.toggle('active', ['customers','cost','bonus','report'][i]===tab);
-    });
+  ['customers','cost','bonus','report','users'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if(el) el.style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const onclick = b.getAttribute('onclick')||'';
+    b.classList.toggle('active', onclick.includes(`'${tab}'`));
   });
   if(tab==='cost'){calcAndRender('general');calcAndRender('hiasang');}
   if(tab==='bonus'){calcBonus();renderBonusHistory();}
   if(tab==='report'){populateReportFilters();renderReport();}
+  if(tab==='users'){loadUserList();}
 }
 function showSubTab(id, btn) {
   document.getElementById('cost-general').style.display = id==='cost-general'?'block':'none';
@@ -1133,8 +1419,9 @@ function renderTable() {
       <td>${poCell}</td>
       <td>${noteDisp}</td>
       <td><div class="actions">
-        <button class="btn btn-outline btn-sm" onclick="openModal(${r.id})">✏️</button>
-        <button class="btn btn-red btn-sm" onclick="askDelete(${r.id})">🗑️</button>
+        ${currentRole==='admin' ? `<button class="btn btn-outline btn-sm" onclick="openModal(${r.id})">✏️</button>` : ''}
+        ${currentRole==='admin' ? `<button class="btn btn-red btn-sm" onclick="askDelete(${r.id})">🗑️</button>` : ''}
+        ${currentRole==='client' ? `<span style="font-size:11px;color:#9ca3af">เพิ่มเท่านั้น</span>` : ''}
       </div></td>
     </tr>`;
   }).join('');
@@ -2203,14 +2490,9 @@ document.getElementById('f_po_id').addEventListener('change', function() {
 });
 
 // ─── INIT ─────────────────────────────────────────────────────────
-loadData();
-loadFormulas();
-loadCostInputs();
-renderAll();
-updateSortHeaders();
-calcAndRender('general');
-calcAndRender('hiasang');
-calcBonus();
+// App initialisation is handled by auth.onAuthStateChanged() above.
+// No loadData() call here — Firebase auth state drives everything.
+loadFormulas();   // Load local formula preferences (not user data)
 </script>
 </body>
 </html>
