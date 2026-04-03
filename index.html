@@ -296,6 +296,7 @@ tr:last-child td{border-bottom:none}
             <th class="num th-sort" onclick="setSort('price')">ราคา<br><small>บาท/กก.</small> <span class="sort-arrow">↕</span></th>
             <th class="num th-sort" onclick="setSort('weight')">น้ำหนัก<br><small>กก.</small> <span class="sort-arrow">↕</span></th>
             <th class="num th-sort" onclick="setSort('amount')">ยอดชำระ<br><small>บาท</small> <span class="sort-arrow">↕</span></th>
+            <th class="th-sort" onclick="setSort('dueDate')">วันที่ต้องชำระ <span class="sort-arrow">↕</span></th>
             <th>วันที่ชำระ</th>
             <th>วิธีชำระ</th>
             <th>สถานะ</th>
@@ -621,6 +622,22 @@ tr:last-child td{border-bottom:none}
       <div class="form-group">
         <label>จำนวนเงิน (บาท) <span class="hint">คำนวนอัตโนมัติ</span></label>
         <input type="number" id="f_amount" step="0.01" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>วันที่ต้องชำระ <span class="hint">วันนัดหมายชำระเงิน</span></label>
+        <div class="date-parts">
+          <input type="number" id="f_duedate_d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="f_duedate_m" class="date-part-m">
+            <option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option>
+            <option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option>
+            <option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option>
+            <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="f_duedate_y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
       </div>
       <div class="form-group">
         <label>วันที่ชำระเงิน <span class="hint">ว่างไว้ถ้ายังไม่ชำระ</span></label>
@@ -1109,6 +1126,7 @@ function renderTable() {
       <td class="num">${N(r.price,2)}</td>
       <td class="num">${N(r.weight,1)}</td>
       <td class="num" style="font-weight:700">${N0(r.amount)}</td>
+      <td style="white-space:nowrap;color:#1d4ed8">${r.dueDate||'—'}</td>
       <td style="white-space:nowrap;color:${paid?'#065f46':'#92400e'}">${r.payDate||'—'}</td>
       <td style="font-size:12px;max-width:150px">${r.payMethod||'—'}</td>
       <td>${statusBadge}</td>
@@ -1138,6 +1156,7 @@ function openModal(id) {
     document.getElementById('f_price').value = r.price;
     document.getElementById('f_weight').value = r.weight;
     document.getElementById('f_amount').value = r.amount;
+    setDateParts('f_duedate', r.dueDate||'');
     setDateParts('f_paydate', r.payDate);
     document.getElementById('f_paymethod').value = r.payMethod;
     document.getElementById('f_note').value = r.note;
@@ -1152,6 +1171,7 @@ function openModal(id) {
     document.getElementById('f_price').value = '';
     document.getElementById('f_weight').value = '';
     document.getElementById('f_amount').value = '';
+    setDateParts('f_duedate', '');
     setDateParts('f_paydate', '');
     document.getElementById('f_paymethod').value = 'โอนเข้า บช. BBL 53035xxx';
     document.getElementById('f_note').value = '';
@@ -1175,6 +1195,7 @@ function saveRecord() {
     price: parseFloat(document.getElementById('f_price').value)||0,
     weight: parseFloat(document.getElementById('f_weight').value)||0,
     amount: parseFloat(document.getElementById('f_amount').value)||0,
+    dueDate: getDateStr('f_duedate'),
     payDate: getDateStr('f_paydate'),
     payMethod: document.getElementById('f_paymethod').value.trim(),
     note: document.getElementById('f_note').value.trim(),
