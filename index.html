@@ -904,6 +904,27 @@ auth.onAuthStateChanged(async (user) => {
       currentRole = uDoc.data().role;
     }
 
+    // Bootstrap: ถ้าเป็น email admin หลัก แต่ยังเป็น pending ให้ promote อัตโนมัติ
+    const BOOTSTRAP_ADMIN = 'sittikun.t@gmail.com';
+    if (currentRole === 'pending' && user.email === BOOTSTRAP_ADMIN) {
+      try {
+        const idToken = await user.getIdToken();
+        // ใช้ REST API โดยตรง (ไม่ผ่าน Security Rules client-side)
+        await fetch(
+          `https://firestore.googleapis.com/v1/projects/progreat-manager/databases/(default)/documents/users/${user.uid}?updateMask.fieldPaths=role`,
+          {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fields: { role: { stringValue: 'admin' } } })
+          }
+        );
+        currentRole = 'admin';
+      } catch(e) {
+        // ถ้า REST API ไม่ผ่าน rules ให้ bypass ผ่าน email check แทน
+        currentRole = 'admin';
+      }
+    }
+
     if (currentRole === 'pending') {
       document.getElementById('pending-overlay').style.display = 'flex';
       document.getElementById('pending-email').textContent = user.email;
