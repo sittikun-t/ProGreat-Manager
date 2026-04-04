@@ -185,6 +185,7 @@ tr:hover td{background:#f8faff}
   <div id="tabs">
     <button class="tab-btn" onclick="showTab('dashboard')">📊 แดชบอร์ด</button>
     <button class="tab-btn active" onclick="showTab('production')">🏭 การผลิต</button>
+    <button class="tab-btn" onclick="showTab('warehouse')">📦 คลังสินค้า</button>
     <button class="tab-btn" onclick="showTab('sales')">🛒 การขาย</button>
     <button class="tab-btn" onclick="showTab('payments')">💰 การชำระเงิน</button>
     <button class="tab-btn" onclick="showTab('settings')">⚙️ ตั้งค่า</button>
@@ -311,10 +312,6 @@ tr:hover td{background:#f8faff}
       <div class="card orange"><label>กากมัน รวม</label><div class="val" id="card-cassava">—</div><div class="sub">กิโลกรัม</div></div>
       <div class="card teal"><label>ProGreat เปียก</label><div class="val" id="card-wet">—</div><div class="sub">กก. (กากมัน + น้ำ)</div></div>
       <div class="card purple"><label>ProGreat แห้ง Forecast</label><div class="val" id="card-forecast">—</div><div class="sub">กก. (เปียก × Yield)</div></div>
-      <div class="card green"><label>ProGreat แห้ง รับจริง</label><div class="val" id="card-dry-in">—</div><div class="sub">กิโลกรัม</div></div>
-      <div class="card red"><label>ผลต่าง (จริง − Forecast)</label><div class="val" id="card-diff">—</div><div class="sub">กิโลกรัม</div></div>
-      <div class="card purple"><label>ProGreat แห้ง นำส่ง</label><div class="val" id="card-dry-out">—</div><div class="sub">กิโลกรัม</div></div>
-      <div class="card green"><label>คงเหลือในโกดัง</label><div class="val" id="card-stock">—</div><div class="sub">กิโลกรัม</div></div>
     </div>
 
     <!-- 1. น้ำ A-teins -->
@@ -384,35 +381,82 @@ tr:hover td{background:#f8faff}
       </div>
     </div>
 
-    <!-- 4. ProGreat แห้ง รับเข้าโกดัง -->
+  </div>
+</div>
+
+<!-- ===== TAB: WAREHOUSE ===== -->
+<div id="tab-warehouse" style="display:none">
+  <div id="content">
+
+    <!-- Lot selector for warehouse tab -->
+    <div class="lot-bar">
+      <label style="font-weight:600;font-size:13px;color:#1a4f7a">เลือก Lot (สำหรับเพิ่มรายการ):</label>
+      <select id="wh-lot-select" onchange="onWhLotChange()">
+        <option value="">-- เลือก Lot --</option>
+      </select>
+    </div>
+
+    <!-- All-lots Summary Cards -->
+    <div class="cards" id="warehouse-cards">
+      <div class="card purple"><label>ProGreat แห้ง Forecast รวมทุก Lot</label><div class="val" id="wh-card-forecast">—</div><div class="sub">กก. (เปียก × Yield)</div></div>
+      <div class="card green"><label>ProGreat แห้ง รับจริง รวมทุก Lot</label><div class="val" id="wh-card-dry-in">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card red"><label>ผลต่าง (จริง − Forecast)</label><div class="val" id="wh-card-diff">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card purple" style="background:#ede9fe"><label>ProGreat แห้ง นำส่ง รวมทุก Lot</label><div class="val" id="wh-card-dry-out">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card green" style="background:#d1fae5"><label>คงเหลือในโกดัง รวมทุก Lot</label><div class="val" id="wh-card-stock">—</div><div class="sub">กิโลกรัม</div></div>
+    </div>
+
+    <!-- Forecast vs จริง comparison panel (all lots) -->
+    <div class="panel">
+      <div class="section-title" style="margin-bottom:12px">📊 Forecast vs รับเข้าจริง <span class="hint" style="font-size:12px;font-weight:400;color:#6b7280">(ทุก Lot รวมกัน)</span></div>
+      <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:14px 16px;font-size:13px;color:#374151;margin-bottom:10px">
+        <div style="font-weight:700;color:#92400e;margin-bottom:8px">① ProGreat แห้ง Forecast รวมทุก Lot</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+          <div>Yield: <strong><span id="wh-yield-display">—</span>%</strong></div>
+          <div style="color:#6b7280">→</div>
+          <div style="font-weight:700;color:#92400e;font-size:16px">Forecast รวม = <span id="wh-forecast-total">0</span> กก.</div>
+        </div>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:14px 16px;font-size:13px;color:#374151">
+        <div style="font-weight:700;color:#166534;margin-bottom:8px">② เปรียบเทียบ Forecast vs รับเข้าจริง (ทุก Lot)</div>
+        <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:center">
+          <div>แห้ง Forecast รวม: <strong id="wh-cmp-forecast">0</strong> กก.</div>
+          <div>แห้ง รับจริง รวม: <strong id="wh-cmp-actual">0</strong> กก.</div>
+          <div>ผลต่าง: <strong id="wh-cmp-diff" style="font-size:15px">0</strong> กก.</div>
+          <div>Yield จริงเฉลี่ย: <strong id="wh-cmp-yield-actual">—</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ProGreat แห้ง รับเข้าโกดัง (all lots) -->
     <div class="panel">
       <div class="section-header">
-        <div class="section-title">🏚️ ProGreat แห้ง — รับเข้าโกดัง</div>
+        <div class="section-title">🏚️ ProGreat แห้ง — รับเข้าโกดัง (ทุก Lot)</div>
         <button class="btn btn-green btn-sm" id="btn-add-dry-in" onclick="openModal('dryIn')">+ เพิ่มรายการ</button>
       </div>
       <div class="table-wrap">
         <table><thead><tr>
-          <th>วันที่</th><th>โกดัง</th><th class="num">น้ำหนัก (กก.)</th><th class="num">ค่าตาก+เก็บ/กก.</th><th class="num">รวม (บาท)</th><th>สถานะ</th><th></th>
+          <th>วันที่</th><th>Lot</th><th>โกดัง</th><th class="num">น้ำหนัก (กก.)</th><th class="num">ค่าตาก+เก็บ/กก.</th><th class="num">รวม (บาท)</th><th>สถานะ</th><th></th>
         </tr></thead>
-        <tbody id="dry-in-body"><tr><td colspan="7" class="empty">เลือก Lot ก่อน</td></tr></tbody>
+        <tbody id="dry-in-body"><tr><td colspan="8" class="empty">ยังไม่มีรายการ</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- 5. ProGreat แห้ง นำส่ง -->
+    <!-- ProGreat แห้ง นำส่ง (all lots) -->
     <div class="panel">
       <div class="section-header">
-        <div class="section-title">🚛 ProGreat แห้ง — นำส่ง</div>
+        <div class="section-title">🚛 ProGreat แห้ง — นำส่ง (ทุก Lot)</div>
         <button class="btn btn-purple btn-sm" id="btn-add-dry-out" onclick="openModal('dryOut')" style="background:#8b5cf6;color:#fff">+ เพิ่มรายการ</button>
       </div>
       <div class="table-wrap">
         <table><thead><tr>
-          <th>วันที่</th><th>ทะเบียนรถ</th><th>โกดังต้นทาง</th><th class="num">น้ำหนักต้นทาง</th><th>โกดังปลายทาง</th><th class="num">น้ำหนักปลายทาง</th><th class="num">ค่าขนส่ง (บาท)</th><th>สถานะ</th><th></th>
+          <th>วันที่</th><th>Lot</th><th>ทะเบียนรถ</th><th>โกดังต้นทาง</th><th class="num">น้ำหนักต้นทาง</th><th>โกดังปลายทาง</th><th class="num">น้ำหนักปลายทาง</th><th class="num">ค่าขนส่ง (บาท)</th><th>สถานะ</th><th></th>
         </tr></thead>
-        <tbody id="dry-out-body"><tr><td colspan="9" class="empty">เลือก Lot ก่อน</td></tr></tbody>
+        <tbody id="dry-out-body"><tr><td colspan="10" class="empty">ยังไม่มีรายการ</td></tr></tbody>
         </table>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -1110,13 +1154,14 @@ function applySettingsToUI(){
 
 // ─── TABS ──────────────────────────────────────────────────────────
 function showTab(tab){
-  ['dashboard','production','sales','payments','settings','users'].forEach(t=>{
+  ['dashboard','production','warehouse','sales','payments','settings','users'].forEach(t=>{
     const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
   });
   document.querySelectorAll('.tab-btn').forEach(b=>{
     b.classList.toggle('active',(b.getAttribute('onclick')||'').includes(`'${tab}'`));
   });
   if(tab==='dashboard')renderDashboard();
+  if(tab==='warehouse')renderWarehouse();
   if(tab==='sales')renderSales();
   if(tab==='payments')renderPayments();
   if(tab==='settings'){renderWarehouses();renderDestWarehouses();}
@@ -1126,6 +1171,7 @@ function renderAll(){
   populateLotSelect();
   populateWarehouseSelects();
   renderProduction();
+  renderWarehouse();
   renderSales();
   renderPayments();
   renderWarehouses();
@@ -1139,9 +1185,29 @@ function populateLotSelect(){
   sel.innerHTML='<option value="">-- เลือก Lot --</option>';
   lots.forEach(l=>{sel.innerHTML+=`<option value="${l.id}">${l.code} — ${l.desc}</option>`;});
   if(cur)sel.value=cur;
+  // Also populate warehouse tab lot selector
+  const whSel=document.getElementById('wh-lot-select');
+  if(whSel){
+    const whCur=whSel.value||currentLotId;
+    whSel.innerHTML='<option value="">-- เลือก Lot --</option>';
+    lots.forEach(l=>{whSel.innerHTML+=`<option value="${l.id}">${l.code} — ${l.desc}</option>`;});
+    if(whCur)whSel.value=whCur;
+  }
+}
+function onWhLotChange(){
+  currentLotId=document.getElementById('wh-lot-select').value;
+  // Sync back to production tab selector
+  const prodSel=document.getElementById('lot-select');
+  if(prodSel)prodSel.value=currentLotId;
+  const delBtn=document.getElementById('btn-del-lot');
+  if(delBtn)delBtn.style.display=(currentLotId&&currentRole==='admin')?'':'none';
+  renderWarehouse();
 }
 function onLotChange(){
   currentLotId=document.getElementById('lot-select').value;
+  // Sync warehouse tab lot selector
+  const whSel=document.getElementById('wh-lot-select');
+  if(whSel)whSel.value=currentLotId;
   const delBtn=document.getElementById('btn-del-lot');
   if(delBtn)delBtn.style.display=(currentLotId&&currentRole==='admin')?'':'none';
   renderProduction();
@@ -1434,11 +1500,6 @@ function renderProduction(){
   document.getElementById('card-cassava').textContent=lid?N0(totalCassavaKg):'—';
   document.getElementById('card-wet').textContent=lid?N0(wetKg):'—';
   document.getElementById('card-forecast').textContent=lid?N0(forecastDryKg):'—';
-  document.getElementById('card-dry-in').textContent=lid?N0(totalDryInKg):'—';
-  const diffEl=document.getElementById('card-diff');
-  if(diffEl){diffEl.textContent=lid?N0(diffKg):'—';diffEl.style.color=diffKg>=0?'#16a34a':'#dc2626';}
-  document.getElementById('card-dry-out').textContent=lid?N0(totalDryOutKg):'—';
-  document.getElementById('card-stock').textContent=lid?N0(stock):'—';
   // ProGreat เปียก panel
   document.getElementById('wet-cassava-total').textContent=N0(totalCassavaKg);
   document.getElementById('wet-water-total').textContent=N0(totalWaterKg);
@@ -1469,16 +1530,89 @@ function renderProduction(){
   document.getElementById('cassava-body').innerHTML=!lid?'<tr><td colspan="6" class="empty">เลือก Lot ก่อน</td></tr>':
     lotCassava.length===0?'<tr><td colspan="6" class="empty">ยังไม่มีรายการ</td></tr>':
     lotCassava.map(e=>`<tr><td>${e.date||'—'}</td><td class="num">${N0(e.weightKg)}</td><td class="num">${N(e.price,2)}</td><td class="num">${N0(e.total)}</td><td>${paidTag(e.paid)}</td><td>${acts('cassava',e)}</td></tr>`).join('');
+}
 
-  // Dry-in table
-  document.getElementById('dry-in-body').innerHTML=!lid?'<tr><td colspan="7" class="empty">เลือก Lot ก่อน</td></tr>':
-    lotDryIn.length===0?'<tr><td colspan="7" class="empty">ยังไม่มีรายการ</td></tr>':
-    lotDryIn.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.warehouse||'—'}</td><td class="num">${N0(e.weightKg)}</td><td class="num">${N(e.costPerKg,2)}</td><td class="num">${N0(e.total)}</td><td>${paidTag(e.paid)}</td><td>${acts('dryIn',e)}</td></tr>`).join('');
+// ─── RENDER: WAREHOUSE ─────────────────────────────────────────────
+function renderWarehouse(){
+  const yld=settings.yield/100;
 
-  // Dry-out table
-  document.getElementById('dry-out-body').innerHTML=!lid?'<tr><td colspan="9" class="empty">เลือก Lot ก่อน</td></tr>':
-    lotDryOut.length===0?'<tr><td colspan="9" class="empty">ยังไม่มีรายการ</td></tr>':
-    lotDryOut.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.truck||'—'}</td><td>${e.fromWarehouse||'—'}</td><td class="num">${N0(e.fromWeight)}</td><td>${e.toWarehouse||'—'}</td><td class="num">${N0(e.toWeight)}</td><td class="num">${N0(e.transport)}${e.transportRate?' <span style="font-size:11px;color:#9ca3af">('+N(e.transportRate,2)+' บ/กก.)</span>':''}</td><td>${paidTag(e.paid)}</td><td>${acts('dryOut',e)}</td></tr>`).join('');
+  // All-lots totals for forecast (sum across all lots)
+  let totalAllWetKg=0;
+  lots.forEach(l=>{
+    const lWater=water.filter(x=>x.lotId===l.id).reduce((s,x)=>s+(x.weightKg||0),0);
+    const lCassava=cassava.filter(x=>x.lotId===l.id).reduce((s,x)=>s+(x.weightKg||0),0);
+    totalAllWetKg+=(lCassava+lWater);
+  });
+  const totalForecast=totalAllWetKg*yld;
+  const totalDryIn=dryIn.reduce((s,x)=>s+(x.weightKg||0),0);
+  const totalDryOut=dryOut.reduce((s,x)=>s+(x.fromWeight||0),0);
+  const stock=totalDryIn-totalDryOut;
+  const diffKg=totalDryIn-totalForecast;
+  const actualYield=totalAllWetKg>0?(totalDryIn/totalAllWetKg*100):0;
+
+  // Update summary cards
+  const fc=document.getElementById('wh-card-forecast');if(fc)fc.textContent=N0(totalForecast);
+  const di=document.getElementById('wh-card-dry-in');if(di)di.textContent=N0(totalDryIn);
+  const diffEl=document.getElementById('wh-card-diff');
+  if(diffEl){diffEl.textContent=N0(diffKg);diffEl.style.color=diffKg>=0?'#16a34a':'#dc2626';}
+  const doEl=document.getElementById('wh-card-dry-out');if(doEl)doEl.textContent=N0(totalDryOut);
+  const stEl=document.getElementById('wh-card-stock');if(stEl)stEl.textContent=N0(stock);
+
+  // Update comparison panel
+  const yd=document.getElementById('wh-yield-display');if(yd)yd.textContent=settings.yield;
+  const ft=document.getElementById('wh-forecast-total');if(ft)ft.textContent=N0(totalForecast);
+  const cf=document.getElementById('wh-cmp-forecast');if(cf)cf.textContent=N0(totalForecast);
+  const ca=document.getElementById('wh-cmp-actual');if(ca)ca.textContent=N0(totalDryIn);
+  const cd=document.getElementById('wh-cmp-diff');
+  if(cd){cd.textContent=N0(diffKg);cd.style.color=diffKg>=0?'#16a34a':'#dc2626';}
+  const cy=document.getElementById('wh-cmp-yield-actual');
+  if(cy)cy.textContent=totalAllWetKg>0?N(actualYield,1)+'%':'—';
+
+  // Inline helpers (same as renderProduction)
+  const paidTag=p=>`<span class="${p?'paid-tag':'unpaid-tag'}">${p?'✅ ชำระ':'❌ ค้าง'}</span>`;
+  const isAdmin=currentRole==='admin';
+  const acts=(type,e)=>isAdmin?`<div style="display:flex;gap:4px">
+    <button class="btn btn-outline btn-sm" onclick='openModal("${type}",${JSON.stringify(e)})'>✏️</button>
+    ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:''}
+    <button class="btn btn-red btn-sm" onclick="deleteEntry('${type}','${e.id}')">🗑️</button>
+  </div>`:!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:'';
+
+  // Helper: get lot code for display
+  const lotCode=id=>{const l=lots.find(x=>x.id===id);return l?l.code:'—';};
+
+  // Dry-in table (all lots, with Lot column)
+  const diBody=document.getElementById('dry-in-body');
+  if(diBody){
+    diBody.innerHTML=dryIn.length===0?'<tr><td colspan="8" class="empty">ยังไม่มีรายการ</td></tr>':
+      dryIn.map(e=>`<tr>
+        <td>${e.date||'—'}</td>
+        <td><span class="lot-badge" style="font-size:11px">${lotCode(e.lotId)}</span></td>
+        <td>${e.warehouse||'—'}</td>
+        <td class="num">${N0(e.weightKg)}</td>
+        <td class="num">${N(e.costPerKg,2)}</td>
+        <td class="num">${N0(e.total)}</td>
+        <td>${paidTag(e.paid)}</td>
+        <td>${acts('dryIn',e)}</td>
+      </tr>`).join('');
+  }
+
+  // Dry-out table (all lots, with Lot column)
+  const doBody=document.getElementById('dry-out-body');
+  if(doBody){
+    doBody.innerHTML=dryOut.length===0?'<tr><td colspan="10" class="empty">ยังไม่มีรายการ</td></tr>':
+      dryOut.map(e=>`<tr>
+        <td>${e.date||'—'}</td>
+        <td><span class="lot-badge" style="font-size:11px">${lotCode(e.lotId)}</span></td>
+        <td>${e.truck||'—'}</td>
+        <td>${e.fromWarehouse||'—'}</td>
+        <td class="num">${N0(e.fromWeight)}</td>
+        <td>${e.toWarehouse||'—'}</td>
+        <td class="num">${N0(e.toWeight)}</td>
+        <td class="num">${N0(e.transport)}${e.transportRate?' <span style="font-size:11px;color:#9ca3af">('+N(e.transportRate,2)+' บ/กก.)</span>':''}</td>
+        <td>${paidTag(e.paid)}</td>
+        <td>${acts('dryOut',e)}</td>
+      </tr>`).join('');
+  }
 }
 
 // ─── DASHBOARD FILTER ───────────────────────────────────────────────
