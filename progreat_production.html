@@ -428,9 +428,9 @@ tr:hover td{background:#f8faff}
           <div class="unit">ต่อกิโลกรัมที่ขาย</div>
         </div>
         <div class="setting-item">
-          <label>🚛 ค่าขนส่ง ProGreat (บาท/เที่ยว)</label>
-          <input type="number" id="s-transport-prod" value="5000" step="500" oninput="saveSettings()">
-          <div class="unit">ค่าขนส่งเฉลี่ยต่อเที่ยว (ปรับได้ทีหลัง)</div>
+          <label>🚛 ค่าขนส่ง ProGreat (บาท/กก.)</label>
+          <input type="number" id="s-transport-prod" value="0.5" step="0.05" oninput="saveSettings()">
+          <div class="unit">อัตรากลางต่อกิโลกรัม × น้ำหนักปลายทาง</div>
         </div>
         <div class="setting-item">
           <label>🚚 ค่าขนส่งการขาย (บาท/กก.)</label>
@@ -708,11 +708,15 @@ tr:hover td{background:#f8faff}
       </div>
       <div class="form-group">
         <label>น้ำหนักปลายทาง (กก.)</label>
-        <input type="number" id="do-to-weight" step="1" placeholder="0">
+        <input type="number" id="do-to-weight" step="1" placeholder="0" oninput="calcDryOutCost()">
       </div>
       <div class="form-group">
-        <label>ค่าขนส่ง (บาท)</label>
-        <input type="number" id="do-transport" step="100" placeholder="0">
+        <label>ค่าขนส่ง/กก. (บาท)</label>
+        <input type="number" id="do-transport-rate" step="0.05" placeholder="0.5" oninput="calcDryOutCost()">
+      </div>
+      <div class="form-group">
+        <label>ค่าขนส่ง รวม (บาท)</label>
+        <input type="number" id="do-transport" readonly style="background:#f3f4f6">
       </div>
       <div class="form-group">
         <label>ชำระเงินแล้ว?</label>
@@ -1124,8 +1128,8 @@ function openModal(type, entry=null){
     document.getElementById('modal-dryIn').classList.add('open');
   } else if(type==='dryOut'){
     prefillToday('do');
-    if(entry){setDateParts('do',entry.date);document.getElementById('do-truck').value=entry.truck||'';document.getElementById('do-from').value=entry.fromWarehouse||'';document.getElementById('do-from-weight').value=entry.fromWeight;document.getElementById('do-to').value=entry.toWarehouse||'';document.getElementById('do-to-weight').value=entry.toWeight;document.getElementById('do-transport').value=entry.transport;document.getElementById('do-paid').value=entry.paid?'yes':'no';setDateParts('do-p',entry.payDate||'');}
-    else{document.getElementById('do-truck').value='';document.getElementById('do-from-weight').value='';document.getElementById('do-to').value='';document.getElementById('do-to-weight').value='';document.getElementById('do-transport').value=settings.transportProd;document.getElementById('do-paid').value='no';setDateParts('do-p','');}
+    if(entry){setDateParts('do',entry.date);document.getElementById('do-truck').value=entry.truck||'';document.getElementById('do-from').value=entry.fromWarehouse||'';document.getElementById('do-from-weight').value=entry.fromWeight;document.getElementById('do-to').value=entry.toWarehouse||'';document.getElementById('do-to-weight').value=entry.toWeight;document.getElementById('do-transport-rate').value=entry.transportRate!==undefined?entry.transportRate:settings.transportProd;document.getElementById('do-transport').value=entry.transport||0;document.getElementById('do-paid').value=entry.paid?'yes':'no';setDateParts('do-p',entry.payDate||'');}
+    else{document.getElementById('do-truck').value='';document.getElementById('do-from-weight').value='';document.getElementById('do-to').value='';document.getElementById('do-to-weight').value='';document.getElementById('do-transport-rate').value=settings.transportProd||0.5;document.getElementById('do-transport').value='';document.getElementById('do-paid').value='no';setDateParts('do-p','');}
     document.getElementById('modal-dryOut').classList.add('open');
   } else if(type==='sale'){
     prefillToday('s');
@@ -1140,6 +1144,7 @@ function openModal(type, entry=null){
 function calcWaterCost(){ const v=parseFloat(document.getElementById('w-volume').value)||0,p=parseFloat(document.getElementById('w-price').value)||0;document.getElementById('w-total').value=(v*p).toFixed(2); }
 function calcCassavaCost(){ const w=parseFloat(document.getElementById('c-weight').value)||0,p=parseFloat(document.getElementById('c-price').value)||0;document.getElementById('c-total').value=(w*p).toFixed(2); }
 function calcDryInCost(){ const w=parseFloat(document.getElementById('di-weight').value)||0,p=parseFloat(document.getElementById('di-cost').value)||0;document.getElementById('di-total').value=(w*p).toFixed(2); }
+function calcDryOutCost(){ const w=parseFloat(document.getElementById('do-to-weight').value)||0,r=parseFloat(document.getElementById('do-transport-rate').value)||0;document.getElementById('do-transport').value=(w*r).toFixed(2); }
 function calcSaleCost(){
   const w=parseFloat(document.getElementById('s-weight').value)||0;
   const r=parseFloat(document.getElementById('s-grind-rate').value)||0;
@@ -1193,6 +1198,7 @@ function saveEntry(type){
       truck:document.getElementById('do-truck').value.trim(),
       fromWarehouse:document.getElementById('do-from').value,fromWeight:parseFloat(document.getElementById('do-from-weight').value)||0,
       toWarehouse:document.getElementById('do-to').value.trim(),toWeight:parseFloat(document.getElementById('do-to-weight').value)||0,
+      transportRate:parseFloat(document.getElementById('do-transport-rate').value)||0,
       transport:parseFloat(document.getElementById('do-transport').value)||0,
       paid:document.getElementById('do-paid').value==='yes',payDate:getDateStr('do-p')};
     if(editingEntry){const i=dryOut.findIndex(x=>x.id===editingEntry.id);if(i>=0)dryOut[i]=entry;else dryOut.push(entry);}
@@ -1303,7 +1309,7 @@ function renderProduction(){
   // Dry-out table
   document.getElementById('dry-out-body').innerHTML=!lid?'<tr><td colspan="9" class="empty">เลือก Lot ก่อน</td></tr>':
     lotDryOut.length===0?'<tr><td colspan="9" class="empty">ยังไม่มีรายการ</td></tr>':
-    lotDryOut.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.truck||'—'}</td><td>${e.fromWarehouse||'—'}</td><td class="num">${N0(e.fromWeight)}</td><td>${e.toWarehouse||'—'}</td><td class="num">${N0(e.toWeight)}</td><td class="num">${N0(e.transport)}</td><td>${paidTag(e.paid)}</td><td>${acts('dryOut',e)}</td></tr>`).join('');
+    lotDryOut.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.truck||'—'}</td><td>${e.fromWarehouse||'—'}</td><td class="num">${N0(e.fromWeight)}</td><td>${e.toWarehouse||'—'}</td><td class="num">${N0(e.toWeight)}</td><td class="num">${N0(e.transport)}${e.transportRate?' <span style="font-size:11px;color:#9ca3af">('+N(e.transportRate,2)+' บ/กก.)</span>':''}</td><td>${paidTag(e.paid)}</td><td>${acts('dryOut',e)}</td></tr>`).join('');
 }
 
 // ─── RENDER: DASHBOARD ─────────────────────────────────────────────
