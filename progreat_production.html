@@ -201,6 +201,7 @@ tr:hover td{background:#f8faff}
         <option value="">-- เลือก Lot --</option>
       </select>
       <button class="btn btn-blue btn-sm" id="btn-add-lot" onclick="openLotModal()">+ สร้าง Lot ใหม่</button>
+      <button class="btn btn-red btn-sm" id="btn-del-lot" onclick="deleteLotCurrent()" style="display:none">🗑️ ลบ Lot นี้</button>
       <span id="lot-info-badge"></span>
     </div>
 
@@ -467,13 +468,13 @@ tr:hover td{background:#f8faff}
       <div class="form-group" id="w-paydate-group">
         <label>วันที่ชำระ</label>
         <div class="date-parts">
-          <input type="number" id="w-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
-          <select id="w-pm" class="date-part-m"><option value="">— เดือน —</option>
+          <input type="number" id="w-p-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="w-p-m" class="date-part-m"><option value="">— เดือน —</option>
             <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
             <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
             <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
           </select>
-          <input type="number" id="w-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+          <input type="number" id="w-p-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
         </div>
       </div>
     </div>
@@ -520,13 +521,13 @@ tr:hover td{background:#f8faff}
       <div class="form-group">
         <label>วันที่ชำระ</label>
         <div class="date-parts">
-          <input type="number" id="c-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
-          <select id="c-pm" class="date-part-m"><option value="">— เดือน —</option>
+          <input type="number" id="c-p-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="c-p-m" class="date-part-m"><option value="">— เดือน —</option>
             <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
             <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
             <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
           </select>
-          <input type="number" id="c-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+          <input type="number" id="c-p-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
         </div>
       </div>
     </div>
@@ -577,13 +578,13 @@ tr:hover td{background:#f8faff}
       <div class="form-group">
         <label>วันที่ชำระ</label>
         <div class="date-parts">
-          <input type="number" id="di-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
-          <select id="di-pm" class="date-part-m"><option value="">— เดือน —</option>
+          <input type="number" id="di-p-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="di-p-m" class="date-part-m"><option value="">— เดือน —</option>
             <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
             <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
             <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
           </select>
-          <input type="number" id="di-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+          <input type="number" id="di-p-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
         </div>
       </div>
     </div>
@@ -642,13 +643,13 @@ tr:hover td{background:#f8faff}
       <div class="form-group">
         <label>วันที่ชำระ</label>
         <div class="date-parts">
-          <input type="number" id="do-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
-          <select id="do-pm" class="date-part-m"><option value="">— เดือน —</option>
+          <input type="number" id="do-p-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="do-p-m" class="date-part-m"><option value="">— เดือน —</option>
             <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
             <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
             <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
           </select>
-          <input type="number" id="do-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+          <input type="number" id="do-p-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
         </div>
       </div>
     </div>
@@ -722,13 +723,13 @@ tr:hover td{background:#f8faff}
       <div class="form-group">
         <label>วันที่ชำระ</label>
         <div class="date-parts">
-          <input type="number" id="s-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
-          <select id="s-pm" class="date-part-m"><option value="">— เดือน —</option>
+          <input type="number" id="s-p-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="s-p-m" class="date-part-m"><option value="">— เดือน —</option>
             <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
             <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
             <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
           </select>
-          <input type="number" id="s-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+          <input type="number" id="s-p-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
         </div>
       </div>
     </div>
@@ -853,6 +854,8 @@ function applyRoleUI(){
   ['btn-add-lot','btn-add-water','btn-add-cassava','btn-add-dry-in','btn-add-dry-out','btn-add-sale'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display=canAdd?'':'none';
   });
+  const delBtn=document.getElementById('btn-del-lot');
+  if(delBtn)delBtn.style.display=(currentLotId&&isAdmin)?'':'none';
 }
 
 // ─── FIRESTORE DATA ────────────────────────────────────────────────
@@ -945,6 +948,8 @@ function populateLotSelect(){
 }
 function onLotChange(){
   currentLotId=document.getElementById('lot-select').value;
+  const delBtn=document.getElementById('btn-del-lot');
+  if(delBtn)delBtn.style.display=(currentLotId&&currentRole==='admin')?'':'none';
   renderProduction();
 }
 function openLotModal(){ document.getElementById('lot-code').value='';document.getElementById('lot-desc').value='';document.getElementById('modal-lot').classList.add('open'); }
@@ -954,6 +959,25 @@ function saveLot(){
   if(!code){alert('กรุณากรอกรหัส Lot');return;}
   lots.push({id:genId(),code,desc,createdAt:new Date().toISOString()});
   saveAll();closeModal('modal-lot');populateLotSelect();
+}
+function deleteLotCurrent(){
+  if(!currentLotId){alert('กรุณาเลือก Lot ก่อน');return;}
+  deleteLot(currentLotId);
+}
+function deleteLot(id){
+  const lot=lots.find(x=>x.id===id);
+  if(!lot)return;
+  const hasData=[...water,...cassava,...dryIn,...dryOut].some(x=>x.lotId===id);
+  const warn=hasData?'\n\n⚠️ มีรายการข้อมูลอยู่ใน Lot นี้ แต่จะยังคงอยู่ในระบบ':'';
+  if(!confirm(`ลบ Lot "${lot.code} — ${lot.desc}" ?${warn}`))return;
+  lots=lots.filter(x=>x.id!==id);
+  if(currentLotId===id){
+    currentLotId='';
+    document.getElementById('lot-select').value='';
+    const delBtn=document.getElementById('btn-del-lot');
+    if(delBtn)delBtn.style.display='none';
+  }
+  saveAll();populateLotSelect();renderProduction();
 }
 
 // ─── WAREHOUSES ────────────────────────────────────────────────────
