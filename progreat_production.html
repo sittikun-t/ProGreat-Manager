@@ -35,6 +35,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f4f8;color:#1a202c;f
 .card.red{border-left-color:#ef4444}
 .card.purple{border-left-color:#8b5cf6}
 .card.teal{border-left-color:#0d9488}
+.card.red{border-left-color:#ef4444}
 .card label{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
 .card .val{font-size:19px;font-weight:700;color:#1a202c;margin-top:4px}
 .card .sub{font-size:11px;color:#9ca3af;margin-top:2px}
@@ -178,6 +179,7 @@ tr:hover td{background:#f8faff}
 <div id="header">
   <h1>🏭 ProGreat Production <span>ระบบจัดการการผลิตและการขาย</span></h1>
   <div id="tabs">
+    <button class="tab-btn" onclick="showTab('dashboard')">📊 แดชบอร์ด</button>
     <button class="tab-btn active" onclick="showTab('production')">🏭 การผลิต</button>
     <button class="tab-btn" onclick="showTab('sales')">🛒 การขาย</button>
     <button class="tab-btn" onclick="showTab('payments')">💰 การชำระเงิน</button>
@@ -189,6 +191,47 @@ tr:hover td{background:#f8faff}
     <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
   </div>
   <div id="save-indicator" style="margin-left:8px">☁️ กำลังโหลด...</div>
+</div>
+
+<!-- ===== TAB: DASHBOARD ===== -->
+<div id="tab-dashboard" style="display:none">
+  <div id="content">
+    <!-- Overall Summary Cards -->
+    <div class="cards">
+      <div class="card"><label>จำนวน Lot ทั้งหมด</label><div class="val" id="db-lots">—</div><div class="sub">Lot</div></div>
+      <div class="card orange"><label>กากมัน รวมทุก Lot</label><div class="val" id="db-cassava">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card"><label>น้ำ A-teins รวมทุก Lot</label><div class="val" id="db-water">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card teal"><label>ProGreat เปียก รวม</label><div class="val" id="db-wet">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card purple"><label>ProGreat แห้ง Forecast</label><div class="val" id="db-forecast">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card green"><label>ProGreat แห้ง รับจริง</label><div class="val" id="db-actual">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card red"><label>ผลต่าง (จริง − Forecast)</label><div class="val" id="db-diff">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card green"><label>ยอดขายรวม</label><div class="val" id="db-sales">—</div><div class="sub">บาท</div></div>
+    </div>
+
+    <!-- Per-Lot Table -->
+    <div class="panel">
+      <div class="panel-title">📊 สรุปการผลิตรายล็อต</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Lot</th>
+            <th class="num">น้ำ A-teins<br><span style="font-weight:400;font-size:11px">กก.</span></th>
+            <th class="num">กากมัน<br><span style="font-weight:400;font-size:11px">กก.</span></th>
+            <th class="num">ProGreat เปียก<br><span style="font-weight:400;font-size:11px">กก. (กากมัน+น้ำ)</span></th>
+            <th class="num">แห้ง Forecast<br><span style="font-weight:400;font-size:11px">กก. (เปียก × Yield)</span></th>
+            <th class="num">แห้ง รับจริง<br><span style="font-weight:400;font-size:11px">กก.</span></th>
+            <th class="num">ผลต่าง<br><span style="font-weight:400;font-size:11px">จริง − Forecast</span></th>
+            <th class="num">Yield จริง<br><span style="font-weight:400;font-size:11px">%</span></th>
+            <th class="num">ค่าตาก+เก็บ<br><span style="font-weight:400;font-size:11px">บาท</span></th>
+            <th class="num">ยอดขาย<br><span style="font-weight:400;font-size:11px">บาท</span></th>
+          </tr></thead>
+          <tbody id="dashboard-body">
+            <tr><td colspan="10" class="empty"><div class="icon">📊</div>ยังไม่มีข้อมูล Lot</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ===== TAB: PRODUCTION ===== -->
@@ -209,8 +252,10 @@ tr:hover td{background:#f8faff}
     <div class="cards" id="production-cards">
       <div class="card"><label>น้ำ A-teins รวม</label><div class="val" id="card-water">—</div><div class="sub">กก. / กล.</div></div>
       <div class="card orange"><label>กากมัน รวม</label><div class="val" id="card-cassava">—</div><div class="sub">กิโลกรัม</div></div>
-      <div class="card teal"><label>ProGreat เปียก (คาด)</label><div class="val" id="card-wet">—</div><div class="sub">กิโลกรัม</div></div>
-      <div class="card green"><label>ProGreat แห้ง รับเข้า</label><div class="val" id="card-dry-in">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card teal"><label>ProGreat เปียก</label><div class="val" id="card-wet">—</div><div class="sub">กก. (กากมัน + น้ำ)</div></div>
+      <div class="card purple"><label>ProGreat แห้ง Forecast</label><div class="val" id="card-forecast">—</div><div class="sub">กก. (เปียก × Yield)</div></div>
+      <div class="card green"><label>ProGreat แห้ง รับจริง</label><div class="val" id="card-dry-in">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card red"><label>ผลต่าง (จริง − Forecast)</label><div class="val" id="card-diff">—</div><div class="sub">กิโลกรัม</div></div>
       <div class="card purple"><label>ProGreat แห้ง นำส่ง</label><div class="val" id="card-dry-out">—</div><div class="sub">กิโลกรัม</div></div>
       <div class="card green"><label>คงเหลือในโกดัง</label><div class="val" id="card-stock">—</div><div class="sub">กิโลกรัม</div></div>
     </div>
@@ -245,16 +290,39 @@ tr:hover td{background:#f8faff}
       </div>
     </div>
 
-    <!-- 3. ProGreat เปียก (calculated) -->
+    <!-- 3. ProGreat เปียก → แห้ง Forecast vs จริง -->
     <div class="panel">
-      <div class="section-title" style="margin-bottom:12px">🫧 ProGreat เปียก <span class="hint" style="font-size:12px;font-weight:400;color:#6b7280">(คำนวนอัตโนมัติ)</span></div>
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;font-size:13px;color:#374151">
-        <div style="margin-bottom:8px">สูตร: <strong>(น้ำหนักกากมัน + น้ำหนักน้ำ A-teins) × Yield</strong></div>
-        <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div class="section-title" style="margin-bottom:12px">🫧 ProGreat เปียก → แห้ง Forecast <span class="hint" style="font-size:12px;font-weight:400;color:#6b7280">(คำนวนอัตโนมัติ)</span></div>
+      <!-- Step 1: เปียก -->
+      <div style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:8px;padding:12px 14px;font-size:13px;color:#374151;margin-bottom:8px">
+        <div style="font-weight:700;color:#0369a1;margin-bottom:6px">① ProGreat เปียก = กากมัน + น้ำ A-teins</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
           <div>กากมัน: <strong id="wet-cassava-total">0</strong> กก.</div>
+          <div style="color:#6b7280">+</div>
           <div>น้ำ A-teins: <strong id="wet-water-total">0</strong> กก.</div>
-          <div>Yield: <strong><span id="wet-yield-display">85</span>%</strong> <span style="font-size:11px;color:#9ca3af">(ตั้งค่าได้ในหน้า ⚙️)</span></div>
-          <div style="font-weight:700;color:#065f46">ProGreat เปียก ≈ <span id="wet-result">0</span> กก.</div>
+          <div style="color:#6b7280">=</div>
+          <div style="font-weight:700;color:#0369a1;font-size:15px">ProGreat เปียก = <span id="wet-result">0</span> กก.</div>
+        </div>
+      </div>
+      <!-- Step 2: Forecast แห้ง -->
+      <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:13px;color:#374151;margin-bottom:8px">
+        <div style="font-weight:700;color:#92400e;margin-bottom:6px">② ProGreat แห้ง Forecast = ProGreat เปียก × Yield</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+          <div><span id="forecast-wet-ref">0</span> กก.</div>
+          <div style="color:#6b7280">×</div>
+          <div>Yield <strong><span id="wet-yield-display">85</span>%</strong> <span style="font-size:11px;color:#9ca3af">(⚙️ ตั้งค่าได้)</span></div>
+          <div style="color:#6b7280">=</div>
+          <div style="font-weight:700;color:#92400e;font-size:15px">Forecast = <span id="forecast-result">0</span> กก.</div>
+        </div>
+      </div>
+      <!-- Step 3: เปรียบเทียบ -->
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 14px;font-size:13px;color:#374151">
+        <div style="font-weight:700;color:#166534;margin-bottom:6px">③ เปรียบเทียบ Forecast vs รับเข้าจริง</div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+          <div>แห้ง Forecast: <strong id="cmp-forecast">0</strong> กก.</div>
+          <div>แห้ง รับจริง: <strong id="cmp-actual">0</strong> กก.</div>
+          <div>ผลต่าง: <strong id="cmp-diff" style="font-size:15px">0</strong> กก.</div>
+          <div>Yield จริง: <strong id="cmp-yield-actual">—</strong></div>
         </div>
       </div>
     </div>
@@ -370,22 +438,32 @@ tr:hover td{background:#f8faff}
           <div class="unit">ค่าขนส่งเฉลี่ยต่อเที่ยว (ปรับได้ทีหลัง)</div>
         </div>
         <div class="setting-item">
-          <label>📦 Yield ProGreat เปียก (%)</label>
-          <input type="number" id="s-yield" value="85" step="1" min="1" max="100" oninput="saveSettings();renderProduction()">
-          <div class="unit">% ของ (กากมัน + น้ำ) ที่ได้เป็น ProGreat เปียก</div>
+          <label>📦 Yield ProGreat แห้ง (%)</label>
+          <input type="number" id="s-yield" value="50" step="1" min="1" max="100" oninput="saveSettings();renderProduction()">
+          <div class="unit">% ของ ProGreat เปียก (กากมัน+น้ำ) ที่ได้เป็น ProGreat แห้ง</div>
         </div>
       </div>
       <div style="margin-top:14px;font-size:12px;color:#9ca3af">ราคาเหล่านี้เป็น default — สามารถแก้ไขรายการ ๆ ได้</div>
     </div>
 
-    <!-- Warehouse Management -->
+    <!-- Source Warehouse Management -->
     <div class="panel">
-      <div class="panel-title">🏚️ จัดการโกดัง</div>
+      <div class="panel-title">🏚️ จัดการโกดังต้นทาง <span style="font-size:12px;font-weight:400;color:#6b7280">(ProGreat แห้ง รับเข้า / นำส่งต้นทาง)</span></div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <input type="text" id="new-warehouse" placeholder="ชื่อโกดังใหม่" style="padding:7px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none">
         <button class="btn btn-blue btn-sm" onclick="addWarehouse()">เพิ่ม</button>
       </div>
       <div id="warehouse-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+
+    <!-- Destination Warehouse Management -->
+    <div class="panel">
+      <div class="panel-title">🏭 จัดการโกดังปลายทาง <span style="font-size:12px;font-weight:400;color:#6b7280">(สถานที่รับ ProGreat แห้ง นำส่ง)</span></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="new-dest-warehouse" placeholder="ชื่อโกดังปลายทางใหม่" style="padding:7px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none">
+        <button class="btn btn-blue btn-sm" onclick="addDestWarehouse()">เพิ่ม</button>
+      </div>
+      <div id="dest-warehouse-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
     </div>
   </div>
 </div>
@@ -626,7 +704,7 @@ tr:hover td{background:#f8faff}
       </div>
       <div class="form-group">
         <label>โกดังปลายทาง</label>
-        <input type="text" id="do-to" placeholder="ชื่อโกดัง/ที่อยู่ปลายทาง">
+        <select id="do-to" style="border:1.5px solid #d1d5db;border-radius:7px;padding:8px 10px;font-size:13px;outline:none;background:#fff"></select>
       </div>
       <div class="form-group">
         <label>น้ำหนักปลายทาง (กก.)</label>
@@ -757,8 +835,9 @@ const db   = firebase.firestore();
 // ─── STATE ─────────────────────────────────────────────────────────
 let currentUser = null, currentRole = null;
 let lots = [], water = [], cassava = [], dryIn = [], dryOut = [], sales = [];
-let settings = { waterPrice:500, cassavaPrice:1.5, dryingCost:0.5, grindingCost:0.3, transportProd:5000, yield:85 };
+let settings = { waterPrice:500, cassavaPrice:1.5, dryingCost:0.5, grindingCost:0.3, transportProd:5000, yield:50 };
 let warehouses = ['โกดัง A','โกดัง B'];
+let destWarehouses = ['โกดัง RBM'];
 let currentLotId = '';
 let editingEntry = null; // {type, id}
 let payFilter = 'all';
@@ -869,6 +948,7 @@ async function loadAllData(){
       lots=d.lots||[];water=d.water||[];cassava=d.cassava||[];
       dryIn=d.dryIn||[];dryOut=d.dryOut||[];sales=d.sales||[];
       warehouses=d.warehouses||['โกดัง A','โกดัง B'];
+      destWarehouses=d.destWarehouses||['โกดัง RBM'];
     }
     const sDoc=await db.collection('pgp_data').doc('settings').get();
     if(sDoc.exists){ Object.assign(settings,sDoc.data()); applySettingsToUI(); }
@@ -880,7 +960,7 @@ async function saveAll(){
   ind.textContent='⏳ กำลังบันทึก...';
   try{
     await db.collection('pgp_data').doc('main').set({
-      lots,water,cassava,dryIn,dryOut,sales,warehouses,
+      lots,water,cassava,dryIn,dryOut,sales,warehouses,destWarehouses,
       updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
       updatedBy:currentUser?currentUser.email:'unknown'
     });
@@ -909,14 +989,16 @@ function applySettingsToUI(){
 
 // ─── TABS ──────────────────────────────────────────────────────────
 function showTab(tab){
-  ['production','sales','payments','settings','users'].forEach(t=>{
+  ['dashboard','production','sales','payments','settings','users'].forEach(t=>{
     const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
   });
   document.querySelectorAll('.tab-btn').forEach(b=>{
     b.classList.toggle('active',(b.getAttribute('onclick')||'').includes(`'${tab}'`));
   });
+  if(tab==='dashboard')renderDashboard();
   if(tab==='sales')renderSales();
   if(tab==='payments')renderPayments();
+  if(tab==='settings'){renderWarehouses();renderDestWarehouses();}
   if(tab==='users')loadUserList();
 }
 function renderAll(){
@@ -926,6 +1008,7 @@ function renderAll(){
   renderSales();
   renderPayments();
   renderWarehouses();
+  renderDestWarehouses();
 }
 
 // ─── LOTS ──────────────────────────────────────────────────────────
@@ -987,12 +1070,20 @@ function populateWarehouseSelects(){
     el.innerHTML='';
     warehouses.forEach(w=>{el.innerHTML+=`<option value="${w}">${w}</option>`;});
   });
-  renderWarehouses();
+  const doTo=document.getElementById('do-to');
+  if(doTo){doTo.innerHTML='';destWarehouses.forEach(w=>{doTo.innerHTML+=`<option value="${w}">${w}</option>`;});}
+  renderWarehouses();renderDestWarehouses();
 }
 function renderWarehouses(){
   const el=document.getElementById('warehouse-list');if(!el)return;
   el.innerHTML=warehouses.map((w,i)=>`<span style="background:#dbeafe;color:#1e40af;padding:4px 12px;border-radius:16px;font-size:13px;display:inline-flex;align-items:center;gap:6px">
     ${w} <button onclick="removeWarehouse(${i})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;line-height:1">×</button>
+  </span>`).join('');
+}
+function renderDestWarehouses(){
+  const el=document.getElementById('dest-warehouse-list');if(!el)return;
+  el.innerHTML=destWarehouses.map((w,i)=>`<span style="background:#d1fae5;color:#065f46;padding:4px 12px;border-radius:16px;font-size:13px;display:inline-flex;align-items:center;gap:6px">
+    ${w} <button onclick="removeDestWarehouse(${i})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;line-height:1">×</button>
   </span>`).join('');
 }
 function addWarehouse(){
@@ -1004,6 +1095,16 @@ function addWarehouse(){
 }
 function removeWarehouse(i){
   if(confirm(`ลบโกดัง "${warehouses[i]}"?`)){warehouses.splice(i,1);saveAll();populateWarehouseSelects();}
+}
+function addDestWarehouse(){
+  const name=document.getElementById('new-dest-warehouse').value.trim();
+  if(!name)return;
+  if(!destWarehouses.includes(name))destWarehouses.push(name);
+  document.getElementById('new-dest-warehouse').value='';
+  saveAll();populateWarehouseSelects();
+}
+function removeDestWarehouse(i){
+  if(confirm(`ลบโกดังปลายทาง "${destWarehouses[i]}"?`)){destWarehouses.splice(i,1);saveAll();populateWarehouseSelects();}
 }
 
 // ─── MODAL OPEN/CLOSE ──────────────────────────────────────────────
@@ -1130,22 +1231,37 @@ function renderProduction(){
   const totalWaterKg=lotWater.reduce((s,x)=>s+(x.weightKg||0),0);
   const totalWaterKl=lotWater.reduce((s,x)=>s+(x.volumeKl||0),0);
   const totalCassavaKg=lotCassava.reduce((s,x)=>s+(x.weightKg||0),0);
+  // Correct formula: เปียก = กากมัน + น้ำ, forecast = เปียก × yield
+  const wetKg=totalCassavaKg+totalWaterKg;
   const yld=settings.yield/100;
-  const wetKg=(totalCassavaKg+totalWaterKg)*yld;
+  const forecastDryKg=wetKg*yld;
   const totalDryInKg=lotDryIn.reduce((s,x)=>s+(x.weightKg||0),0);
   const totalDryOutKg=lotDryOut.reduce((s,x)=>s+(x.fromWeight||0),0);
   const stock=totalDryInKg-totalDryOutKg;
+  const diffKg=totalDryInKg-forecastDryKg;
+  const actualYield=wetKg>0?(totalDryInKg/wetKg*100):0;
 
   document.getElementById('card-water').textContent=lid?`${N0(totalWaterKg)} / ${N(totalWaterKl,1)}`:'—';
   document.getElementById('card-cassava').textContent=lid?N0(totalCassavaKg):'—';
   document.getElementById('card-wet').textContent=lid?N0(wetKg):'—';
+  document.getElementById('card-forecast').textContent=lid?N0(forecastDryKg):'—';
   document.getElementById('card-dry-in').textContent=lid?N0(totalDryInKg):'—';
+  const diffEl=document.getElementById('card-diff');
+  if(diffEl){diffEl.textContent=lid?N0(diffKg):'—';diffEl.style.color=diffKg>=0?'#16a34a':'#dc2626';}
   document.getElementById('card-dry-out').textContent=lid?N0(totalDryOutKg):'—';
   document.getElementById('card-stock').textContent=lid?N0(stock):'—';
+  // ProGreat เปียก panel
   document.getElementById('wet-cassava-total').textContent=N0(totalCassavaKg);
   document.getElementById('wet-water-total').textContent=N0(totalWaterKg);
-  document.getElementById('wet-yield-display').textContent=settings.yield;
   document.getElementById('wet-result').textContent=N0(wetKg);
+  document.getElementById('wet-yield-display').textContent=settings.yield;
+  document.getElementById('forecast-wet-ref').textContent=N0(wetKg);
+  document.getElementById('forecast-result').textContent=N0(forecastDryKg);
+  document.getElementById('cmp-forecast').textContent=N0(forecastDryKg);
+  document.getElementById('cmp-actual').textContent=N0(totalDryInKg);
+  const cmpDiff=document.getElementById('cmp-diff');
+  cmpDiff.textContent=N0(diffKg);cmpDiff.style.color=diffKg>=0?'#16a34a':'#dc2626';
+  document.getElementById('cmp-yield-actual').textContent=lid&&wetKg>0?N(actualYield,1)+'%':'—';
 
   const paidTag=p=>`<span class="${p?'paid-tag':'unpaid-tag'}">${p?'✅ ชำระ':'❌ ค้าง'}</span>`;
   const isAdmin=currentRole==='admin';
@@ -1174,6 +1290,68 @@ function renderProduction(){
   document.getElementById('dry-out-body').innerHTML=!lid?'<tr><td colspan="9" class="empty">เลือก Lot ก่อน</td></tr>':
     lotDryOut.length===0?'<tr><td colspan="9" class="empty">ยังไม่มีรายการ</td></tr>':
     lotDryOut.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.truck||'—'}</td><td>${e.fromWarehouse||'—'}</td><td class="num">${N0(e.fromWeight)}</td><td>${e.toWarehouse||'—'}</td><td class="num">${N0(e.toWeight)}</td><td class="num">${N0(e.transport)}</td><td>${paidTag(e.paid)}</td><td>${acts('dryOut',e)}</td></tr>`).join('');
+}
+
+// ─── RENDER: DASHBOARD ─────────────────────────────────────────────
+function renderDashboard(){
+  const yld=settings.yield/100;
+  let totalCassava=0,totalWater=0,totalWet=0,totalForecast=0,totalActual=0,totalSalesAmt=0;
+  const rows=lots.map(lot=>{
+    const lid=lot.id;
+    const lotWaterKg=water.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
+    const lotCassavaKg=cassava.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
+    const lotWetKg=lotCassavaKg+lotWaterKg;
+    const lotForecastKg=lotWetKg*yld;
+    const lotDryInKg=dryIn.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
+    const lotDryInCost=dryIn.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.total||0),0);
+    const lotSalesAmt=sales.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.total||0),0);
+    const diff=lotDryInKg-lotForecastKg;
+    const actualYield=lotWetKg>0?(lotDryInKg/lotWetKg*100):0;
+    totalCassava+=lotCassavaKg;totalWater+=lotWaterKg;totalWet+=lotWetKg;
+    totalForecast+=lotForecastKg;totalActual+=lotDryInKg;totalSalesAmt+=lotSalesAmt;
+    const diffColor=diff>=0?'#16a34a':'#dc2626';
+    return `<tr>
+      <td><span class="lot-badge">${lot.code}</span><div style="font-size:11px;color:#6b7280;margin-top:2px">${lot.desc||''}</div></td>
+      <td class="num">${lotWaterKg>0?N0(lotWaterKg):'—'}</td>
+      <td class="num">${lotCassavaKg>0?N0(lotCassavaKg):'—'}</td>
+      <td class="num" style="color:#0369a1;font-weight:${lotWetKg>0?'700':'400'}">${lotWetKg>0?N0(lotWetKg):'—'}</td>
+      <td class="num" style="color:#92400e;font-weight:${lotForecastKg>0?'700':'400'}">${lotForecastKg>0?N0(lotForecastKg):'—'}</td>
+      <td class="num" style="color:#166534;font-weight:${lotDryInKg>0?'700':'400'}">${lotDryInKg>0?N0(lotDryInKg):'—'}</td>
+      <td class="num" style="color:${diffColor};font-weight:700">${lotDryInKg>0||lotForecastKg>0?N0(diff):'—'}</td>
+      <td class="num" style="color:${diffColor}">${lotWetKg>0&&lotDryInKg>0?N(actualYield,1)+'%':'—'}</td>
+      <td class="num">${lotDryInCost>0?N0(lotDryInCost):'—'}</td>
+      <td class="num" style="font-weight:${lotSalesAmt>0?'700':'400'}">${lotSalesAmt>0?N0(lotSalesAmt):'—'}</td>
+    </tr>`;
+  });
+  // Overall totals
+  const totDiff=totalActual-totalForecast;
+  const totActualYield=totalWet>0?(totalActual/totalWet*100):0;
+  const totColor=totDiff>=0?'#16a34a':'#dc2626';
+  if(rows.length>0){
+    rows.push(`<tr style="background:#f0f7ff;font-weight:700;border-top:2px solid #bfdbfe">
+      <td>รวมทั้งหมด</td>
+      <td class="num">${N0(totalWater)}</td>
+      <td class="num">${N0(totalCassava)}</td>
+      <td class="num" style="color:#0369a1">${N0(totalWet)}</td>
+      <td class="num" style="color:#92400e">${N0(totalForecast)}</td>
+      <td class="num" style="color:#166534">${N0(totalActual)}</td>
+      <td class="num" style="color:${totColor}">${N0(totDiff)}</td>
+      <td class="num" style="color:${totColor}">${totalWet>0?N(totActualYield,1)+'%':'—'}</td>
+      <td class="num">—</td>
+      <td class="num">${N0(totalSalesAmt)}</td>
+    </tr>`);
+  }
+  document.getElementById('dashboard-body').innerHTML=rows.length===0?'<tr><td colspan="10" class="empty"><div class="icon">📊</div>ยังไม่มีข้อมูล Lot</td></tr>':rows.join('');
+  // Summary cards
+  document.getElementById('db-lots').textContent=lots.length||'0';
+  document.getElementById('db-cassava').textContent=N0(totalCassava);
+  document.getElementById('db-water').textContent=N0(totalWater);
+  document.getElementById('db-wet').textContent=N0(totalWet);
+  document.getElementById('db-forecast').textContent=N0(totalForecast);
+  document.getElementById('db-actual').textContent=N0(totalActual);
+  const dbDiff=document.getElementById('db-diff');
+  dbDiff.textContent=N0(totDiff);dbDiff.style.color=totDiff>=0?'#16a34a':'#dc2626';
+  document.getElementById('db-sales').textContent=N0(totalSalesAmt);
 }
 
 // ─── RENDER: SALES ──────────────────────────────────────────────────
