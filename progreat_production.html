@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProGreat Production</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f4f8;color:#1a202c;font-size:14px}
+
+/* HEADER */
+#header{background:linear-gradient(135deg,#1a4f7a 0%,#2d7ab8 100%);color:#fff;padding:0 20px;display:flex;align-items:center;gap:0;box-shadow:0 2px 8px rgba(0,0,0,.25);position:sticky;top:0;z-index:100;flex-wrap:wrap}
+#header h1{font-size:17px;font-weight:700;padding:12px 18px 12px 0;border-right:1px solid rgba(255,255,255,.3);white-space:nowrap}
+#header h1 span{font-size:11px;opacity:.8;display:block;font-weight:400}
+#tabs{display:flex;margin-left:8px;flex-wrap:wrap}
+.tab-btn{background:none;border:none;color:rgba(255,255,255,.75);padding:14px 16px;cursor:pointer;font-size:13px;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap}
+.tab-btn:hover{color:#fff;background:rgba(255,255,255,.1)}
+.tab-btn.active{color:#fff;border-bottom-color:#7ec8f0;font-weight:600}
+#user-info{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 4px}
+#user-email-label{font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;max-width:150px;text-overflow:ellipsis}
+.logout-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;transition:.15s}
+.logout-btn:hover{background:rgba(255,255,255,.25)}
+#save-indicator{font-size:11px;opacity:.7;padding:8px 0;white-space:nowrap}
+
+/* CONTENT */
+#content{padding:18px;max-width:1400px;margin:0 auto}
+.panel{background:#fff;border-radius:10px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px}
+.panel-title{font-size:15px;font-weight:700;color:#1a4f7a;margin-bottom:14px;display:flex;align-items:center;gap:8px;border-bottom:2px solid #e0f0ff;padding-bottom:10px}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid #2d7ab8}
+.card.green{border-left-color:#2d8a59}
+.card.orange{border-left-color:#f59e0b}
+.card.red{border-left-color:#ef4444}
+.card.purple{border-left-color:#8b5cf6}
+.card.teal{border-left-color:#0d9488}
+.card label{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
+.card .val{font-size:19px;font-weight:700;color:#1a202c;margin-top:4px}
+.card .sub{font-size:11px;color:#9ca3af;margin-top:2px}
+
+/* BUTTONS */
+.btn{border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+.btn-blue{background:#2d7ab8;color:#fff}.btn-blue:hover{background:#1a5f9a}
+.btn-green{background:#2d8a59;color:#fff}.btn-green:hover{background:#1a6640}
+.btn-orange{background:#f59e0b;color:#fff}.btn-orange:hover{background:#d97706}
+.btn-red{background:#ef4444;color:#fff}.btn-red:hover{background:#dc2626}
+.btn-outline{background:#fff;border:1.5px solid #d1d5db;color:#374151}.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:4px 10px;font-size:12px}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;margin-top:4px}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th{background:#f0f7ff;padding:9px 10px;text-align:left;font-size:12px;color:#374151;border-bottom:2px solid #dbeafe;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f3f4f6;font-size:13px;vertical-align:middle}
+tr:hover td{background:#f8faff}
+.num{text-align:right}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700}
+.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-orange{background:#fef3c7;color:#92400e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f3f4f6;color:#374151}
+.badge-teal{background:#ccfbf1;color:#134e4a}
+.empty{text-align:center;padding:30px;color:#9ca3af}
+.empty .icon{font-size:36px;margin-bottom:8px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:600;color:#374151}
+.form-group input,.form-group select,.form-group textarea{border:1.5px solid #d1d5db;border-radius:7px;padding:8px 10px;font-size:13px;outline:none;font-family:inherit;transition:.15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#2d7ab8;box-shadow:0 0 0 3px rgba(45,122,184,.1)}
+.hint{font-size:11px;color:#9ca3af;font-weight:400}
+.date-parts{display:flex;gap:4px}
+.date-part-d{width:54px}.date-part-m{flex:1}.date-part-y{width:82px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:22px;width:min(680px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:16px;color:#1a4f7a;border-bottom:2px solid #dbeafe;padding-bottom:10px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #f3f4f6}
+
+/* PAID */
+.paid-tag{background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.unpaid-tag{background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+
+/* LOT selector */
+#lot-select-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;background:#f0f7ff;padding:10px 14px;border-radius:8px;border:1px solid #bfdbfe}
+#lot-select-bar label{font-weight:600;font-size:13px;color:#1a4f7a}
+#lot-select-bar select{padding:6px 10px;border:1.5px solid #93c5fd;border-radius:6px;font-size:13px;outline:none;background:#fff;min-width:200px}
+.lot-badge{background:#dbeafe;color:#1e40af;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700}
+
+/* SETTINGS */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.setting-item{background:#f8faff;border:1.5px solid #bfdbfe;border-radius:8px;padding:14px}
+.setting-item label{font-size:12px;font-weight:700;color:#1e40af;display:block;margin-bottom:6px}
+.setting-item input{width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:14px;font-family:inherit;outline:none}
+.setting-item input:focus{border-color:#2d7ab8}
+.setting-item .unit{font-size:11px;color:#6b7280;margin-top:4px}
+
+/* AUTH OVERLAY */
+#auth-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a4f7a 0%,#0f3050 100%);display:flex;align-items:center;justify-content:center;z-index:9999}
+#auth-box{background:#fff;border-radius:16px;padding:38px;width:min(420px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.auth-logo{text-align:center;margin-bottom:26px}
+.auth-logo .auth-icon{font-size:50px;line-height:1}
+.auth-logo h2{font-size:21px;font-weight:700;color:#1a4f7a;margin-top:10px}
+.auth-logo p{font-size:13px;color:#6b7280;margin-top:4px}
+.auth-label{font-size:12px;font-weight:600;color:#374151;margin-bottom:5px}
+.auth-input{width:100%;padding:11px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;transition:.2s;font-family:inherit}
+.auth-input:focus{border-color:#1a4f7a;box-shadow:0 0 0 3px rgba(26,79,122,.1)}
+.auth-error{color:#ef4444;font-size:12px;margin-top:6px;min-height:20px;text-align:center}
+#pending-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a4f7a,#0f3050);display:none;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:20px}
+#pending-box{background:#fff;border-radius:16px;padding:38px 34px;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+
+/* USERS */
+.user-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #f3f4f6}
+.user-row:last-child{border-bottom:none}
+.user-role-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.user-role-badge.admin{background:#d1fae5;color:#065f46}
+.user-role-badge.client{background:#dbeafe;color:#1e40af}
+.user-role-badge.pending{background:#fef3c7;color:#92400e}
+
+/* Section header */
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.section-title{font-size:14px;font-weight:700;color:#1a4f7a}
+
+/* payment filter */
+.pay-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pay-filter-btn{padding:5px 14px;border-radius:16px;border:1.5px solid #d1d5db;background:#fff;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.pay-filter-btn.active{background:#2d7ab8;color:#fff;border-color:#2d7ab8}
+
+@media(max-width:640px){#header{padding:0 10px}.tab-btn{padding:10px 10px;font-size:12px}#content{padding:10px}}
+</style>
+
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- ===== AUTH OVERLAY ===== -->
+<div id="auth-overlay">
+  <div id="auth-box">
+    <div class="auth-logo">
+      <div class="auth-icon">🏭</div>
+      <h2>ProGreat Production</h2>
+      <p>ระบบจัดการการผลิตและการขาย</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div><div class="auth-label">อีเมล</div>
+        <input class="auth-input" type="email" id="login-email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
+      </div>
+      <div><div class="auth-label">รหัสผ่าน</div>
+        <input class="auth-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-error" class="auth-error"></div>
+      <button class="btn btn-blue" id="btn-login" onclick="doLogin()" style="padding:12px;font-size:15px;width:100%;border-radius:8px">🔐 เข้าสู่ระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PENDING SCREEN ===== -->
+<div id="pending-overlay">
+  <div id="pending-box">
+    <div style="font-size:52px">⏳</div>
+    <h2 style="font-size:19px;font-weight:700;color:#1a4f7a;margin:12px 0 8px">รอการอนุมัติ</h2>
+    <p style="color:#6b7280;font-size:14px;line-height:1.6">บัญชีอยู่ระหว่างรอ Admin อนุมัติสิทธิ์<br>กรุณาติดต่อ Admin</p>
+    <p id="pending-email" style="font-size:12px;color:#9ca3af;margin-top:6px"></p>
+    <button class="btn btn-outline" onclick="doLogout()" style="margin-top:18px">ออกจากระบบ</button>
+  </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<div id="header">
+  <h1>🏭 ProGreat Production <span>ระบบจัดการการผลิตและการขาย</span></h1>
+  <div id="tabs">
+    <button class="tab-btn active" onclick="showTab('production')">🏭 การผลิต</button>
+    <button class="tab-btn" onclick="showTab('sales')">🛒 การขาย</button>
+    <button class="tab-btn" onclick="showTab('payments')">💰 การชำระเงิน</button>
+    <button class="tab-btn" onclick="showTab('settings')">⚙️ ตั้งค่า</button>
+    <button class="tab-btn" id="tab-btn-users" onclick="showTab('users')" style="display:none">👥 ผู้ใช้</button>
+  </div>
+  <div id="user-info">
+    <span id="user-email-label"></span>
+    <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+  <div id="save-indicator" style="margin-left:8px">☁️ กำลังโหลด...</div>
+</div>
+
+<!-- ===== TAB: PRODUCTION ===== -->
+<div id="tab-production">
+  <div id="content">
+    <!-- Lot Selector -->
+    <div id="lot-select-bar">
+      <label>📦 Lot การผลิต:</label>
+      <select id="lot-select" onchange="onLotChange()">
+        <option value="">-- เลือก Lot --</option>
+      </select>
+      <button class="btn btn-blue btn-sm" id="btn-add-lot" onclick="openLotModal()">+ สร้าง Lot ใหม่</button>
+      <span id="lot-info-badge"></span>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="cards" id="production-cards">
+      <div class="card"><label>น้ำ A-teins รวม</label><div class="val" id="card-water">—</div><div class="sub">กก. / กล.</div></div>
+      <div class="card orange"><label>กากมัน รวม</label><div class="val" id="card-cassava">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card teal"><label>ProGreat เปียก (คาด)</label><div class="val" id="card-wet">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card green"><label>ProGreat แห้ง รับเข้า</label><div class="val" id="card-dry-in">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card purple"><label>ProGreat แห้ง นำส่ง</label><div class="val" id="card-dry-out">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card green"><label>คงเหลือในโกดัง</label><div class="val" id="card-stock">—</div><div class="sub">กิโลกรัม</div></div>
+    </div>
+
+    <!-- 1. น้ำ A-teins -->
+    <div class="panel">
+      <div class="section-header">
+        <div class="section-title">💧 น้ำ A-teins</div>
+        <button class="btn btn-blue btn-sm" id="btn-add-water" onclick="openModal('water')">+ เพิ่มรายการ</button>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>วันที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">ปริมาตร (กล.)</th><th class="num">ราคา/กล.</th><th class="num">รวม (บาท)</th><th>สถานะ</th><th></th>
+        </tr></thead>
+        <tbody id="water-body"><tr><td colspan="8" class="empty">เลือก Lot ก่อน</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. กากมัน -->
+    <div class="panel">
+      <div class="section-header">
+        <div class="section-title">🌾 กากมัน</div>
+        <button class="btn btn-orange btn-sm" id="btn-add-cassava" onclick="openModal('cassava')">+ เพิ่มรายการ</button>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>วันที่</th><th class="num">น้ำหนัก (กก.)</th><th class="num">ราคา/กก.</th><th class="num">รวม (บาท)</th><th>สถานะ</th><th></th>
+        </tr></thead>
+        <tbody id="cassava-body"><tr><td colspan="6" class="empty">เลือก Lot ก่อน</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. ProGreat เปียก (calculated) -->
+    <div class="panel">
+      <div class="section-title" style="margin-bottom:12px">🫧 ProGreat เปียก <span class="hint" style="font-size:12px;font-weight:400;color:#6b7280">(คำนวนอัตโนมัติ)</span></div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;font-size:13px;color:#374151">
+        <div style="margin-bottom:8px">สูตร: <strong>(น้ำหนักกากมัน + น้ำหนักน้ำ A-teins) × Yield</strong></div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div>กากมัน: <strong id="wet-cassava-total">0</strong> กก.</div>
+          <div>น้ำ A-teins: <strong id="wet-water-total">0</strong> กก.</div>
+          <div>Yield: <strong><span id="wet-yield-display">85</span>%</strong> <span style="font-size:11px;color:#9ca3af">(ตั้งค่าได้ในหน้า ⚙️)</span></div>
+          <div style="font-weight:700;color:#065f46">ProGreat เปียก ≈ <span id="wet-result">0</span> กก.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ProGreat แห้ง รับเข้าโกดัง -->
+    <div class="panel">
+      <div class="section-header">
+        <div class="section-title">🏚️ ProGreat แห้ง — รับเข้าโกดัง</div>
+        <button class="btn btn-green btn-sm" id="btn-add-dry-in" onclick="openModal('dryIn')">+ เพิ่มรายการ</button>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>วันที่</th><th>โกดัง</th><th class="num">น้ำหนัก (กก.)</th><th class="num">ค่าตาก+เก็บ/กก.</th><th class="num">รวม (บาท)</th><th>สถานะ</th><th></th>
+        </tr></thead>
+        <tbody id="dry-in-body"><tr><td colspan="7" class="empty">เลือก Lot ก่อน</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. ProGreat แห้ง นำส่ง -->
+    <div class="panel">
+      <div class="section-header">
+        <div class="section-title">🚛 ProGreat แห้ง — นำส่ง</div>
+        <button class="btn btn-purple btn-sm" id="btn-add-dry-out" onclick="openModal('dryOut')" style="background:#8b5cf6;color:#fff">+ เพิ่มรายการ</button>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>วันที่</th><th>ทะเบียนรถ</th><th>โกดังต้นทาง</th><th class="num">น้ำหนักต้นทาง</th><th>โกดังปลายทาง</th><th class="num">น้ำหนักปลายทาง</th><th class="num">ค่าขนส่ง (บาท)</th><th>สถานะ</th><th></th>
+        </tr></thead>
+        <tbody id="dry-out-body"><tr><td colspan="9" class="empty">เลือก Lot ก่อน</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB: SALES ===== -->
+<div id="tab-sales" style="display:none">
+  <div id="content">
+    <div class="panel">
+      <div class="section-header">
+        <div class="section-title">🛒 รายการขาย</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="sales-lot-filter" onchange="renderSales()" style="padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none">
+            <option value="">-- ทุก Lot --</option>
+          </select>
+          <button class="btn btn-green btn-sm" id="btn-add-sale" onclick="openModal('sale')">+ เพิ่มการขาย</button>
+        </div>
+      </div>
+      <div class="cards" style="margin-bottom:12px">
+        <div class="card green"><label>ยอดขายรวม</label><div class="val" id="sale-card-total">—</div><div class="sub">บาท</div></div>
+        <div class="card"><label>น้ำหนักรวม</label><div class="val" id="sale-card-weight">—</div><div class="sub">กิโลกรัม</div></div>
+        <div class="card orange"><label>ค้างชำระ</label><div class="val" id="sale-card-unpaid">—</div><div class="sub">บาท</div></div>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>วันที่</th><th>Lot</th><th>ลูกค้า/สถานที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">จำนวนถุง</th><th>การจัดส่ง</th><th class="num">ค่าโม่บด</th><th class="num">ค่าขนส่ง</th><th class="num">รวม (บาท)</th><th>ชำระ</th><th></th>
+        </tr></thead>
+        <tbody id="sales-body"><tr><td colspan="12" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB: PAYMENTS ===== -->
+<div id="tab-payments" style="display:none">
+  <div id="content">
+    <div class="panel">
+      <div class="section-title" style="margin-bottom:14px">💰 ติดตามการชำระเงิน</div>
+      <div class="pay-filter" id="pay-filter">
+        <button class="pay-filter-btn active" onclick="setPayFilter('all',this)">ทั้งหมด</button>
+        <button class="pay-filter-btn" onclick="setPayFilter('water',this)">💧 น้ำ A-teins</button>
+        <button class="pay-filter-btn" onclick="setPayFilter('cassava',this)">🌾 กากมัน</button>
+        <button class="pay-filter-btn" onclick="setPayFilter('dryIn',this)">🏚️ ค่าตาก+เก็บ</button>
+        <button class="pay-filter-btn" onclick="setPayFilter('dryOut',this)">🚛 ขนส่งผลิต</button>
+        <button class="pay-filter-btn" onclick="setPayFilter('sale',this)">🛒 ค่าโม่บด+ขนส่งขาย</button>
+      </div>
+      <div id="payments-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB: SETTINGS ===== -->
+<div id="tab-settings" style="display:none">
+  <div id="content">
+    <div class="panel">
+      <div class="panel-title">⚙️ ตั้งค่าราคากลางและค่าคำนวน</div>
+      <div class="settings-grid" id="settings-grid">
+        <div class="setting-item">
+          <label>💧 ราคาน้ำ A-teins (บาท/กล.)</label>
+          <input type="number" id="s-water-price" value="500" step="10" oninput="saveSettings()">
+          <div class="unit">ราคาต่อกิโลลิตร (kL)</div>
+        </div>
+        <div class="setting-item">
+          <label>🌾 ราคากากมัน (บาท/กก.)</label>
+          <input type="number" id="s-cassava-price" value="1.5" step="0.1" oninput="saveSettings()">
+          <div class="unit">ราคาต่อกิโลกรัม</div>
+        </div>
+        <div class="setting-item">
+          <label>🏚️ ค่าตาก+เก็บ (บาท/กก.)</label>
+          <input type="number" id="s-drying-cost" value="0.5" step="0.1" oninput="saveSettings()">
+          <div class="unit">ต่อกิโลกรัม ProGreat แห้ง</div>
+        </div>
+        <div class="setting-item">
+          <label>🔧 ค่าโม่บด (บาท/กก.)</label>
+          <input type="number" id="s-grinding-cost" value="0.3" step="0.05" oninput="saveSettings()">
+          <div class="unit">ต่อกิโลกรัมที่ขาย</div>
+        </div>
+        <div class="setting-item">
+          <label>🚛 ค่าขนส่ง ProGreat (บาท/เที่ยว)</label>
+          <input type="number" id="s-transport-prod" value="5000" step="500" oninput="saveSettings()">
+          <div class="unit">ค่าขนส่งเฉลี่ยต่อเที่ยว (ปรับได้ทีหลัง)</div>
+        </div>
+        <div class="setting-item">
+          <label>📦 Yield ProGreat เปียก (%)</label>
+          <input type="number" id="s-yield" value="85" step="1" min="1" max="100" oninput="saveSettings();renderProduction()">
+          <div class="unit">% ของ (กากมัน + น้ำ) ที่ได้เป็น ProGreat เปียก</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:#9ca3af">ราคาเหล่านี้เป็น default — สามารถแก้ไขรายการ ๆ ได้</div>
+    </div>
+
+    <!-- Warehouse Management -->
+    <div class="panel">
+      <div class="panel-title">🏚️ จัดการโกดัง</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="new-warehouse" placeholder="ชื่อโกดังใหม่" style="padding:7px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none">
+        <button class="btn btn-blue btn-sm" onclick="addWarehouse()">เพิ่ม</button>
+      </div>
+      <div id="warehouse-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB: USERS ===== -->
+<div id="tab-users" style="display:none">
+  <div id="content">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="panel-title" style="margin-bottom:0">👥 จัดการผู้ใช้งาน</div>
+        <button class="btn btn-outline btn-sm" onclick="loadUserList()">🔄 รีเฟรช</button>
+      </div>
+      <div id="user-mgmt-list"><div class="empty">กำลังโหลด...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: LOT ===== -->
+<div class="modal-overlay" id="modal-lot">
+  <div class="modal" style="max-width:480px">
+    <h2 id="modal-lot-title">📦 สร้าง Lot การผลิต</h2>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>รหัส Lot <span class="hint">(เช่น LOT-001, JAN-69)</span></label>
+        <input type="text" id="lot-code" placeholder="LOT-001">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>รายละเอียด / ชื่อรอบการผลิต</label>
+        <input type="text" id="lot-desc" placeholder="เช่น มกราคม 2569 รอบแรก">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-lot')">ยกเลิก</button>
+      <button class="btn btn-blue" onclick="saveLot()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: WATER (น้ำ A-teins) ===== -->
+<div class="modal-overlay" id="modal-water">
+  <div class="modal" style="max-width:560px">
+    <h2>💧 บันทึกน้ำ A-teins</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>วันที่</label>
+        <div class="date-parts">
+          <input type="number" id="w-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="w-m" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="w-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>ทะเบียนรถ</label>
+        <input type="text" id="w-truck" placeholder="กข 1234">
+      </div>
+      <div class="form-group">
+        <label>น้ำหนัก (กก.)</label>
+        <input type="number" id="w-weight" step="1" placeholder="0" oninput="calcWaterCost()">
+      </div>
+      <div class="form-group">
+        <label>ปริมาตร (กิโลลิตร)</label>
+        <input type="number" id="w-volume" step="0.1" placeholder="0.0" oninput="calcWaterCost()">
+      </div>
+      <div class="form-group">
+        <label>ราคา/กิโลลิตร (บาท) <span class="hint">ค่า default จากตั้งค่า</span></label>
+        <input type="number" id="w-price" step="10" oninput="calcWaterCost()">
+      </div>
+      <div class="form-group">
+        <label>รวม (บาท)</label>
+        <input type="number" id="w-total" readonly style="background:#f3f4f6;color:#374151">
+      </div>
+      <div class="form-group">
+        <label>ชำระเงินแล้ว?</label>
+        <select id="w-paid"><option value="no">❌ ยังไม่ชำระ</option><option value="yes">✅ ชำระแล้ว</option></select>
+      </div>
+      <div class="form-group" id="w-paydate-group">
+        <label>วันที่ชำระ</label>
+        <div class="date-parts">
+          <input type="number" id="w-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="w-pm" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="w-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-water')">ยกเลิก</button>
+      <button class="btn btn-blue" onclick="saveEntry('water')">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: CASSAVA (กากมัน) ===== -->
+<div class="modal-overlay" id="modal-cassava">
+  <div class="modal" style="max-width:520px">
+    <h2>🌾 บันทึกกากมัน</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>วันที่</label>
+        <div class="date-parts">
+          <input type="number" id="c-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="c-m" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="c-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>น้ำหนัก (กก.)</label>
+        <input type="number" id="c-weight" step="1" placeholder="0" oninput="calcCassavaCost()">
+      </div>
+      <div class="form-group">
+        <label>ราคา/กก. (บาท)</label>
+        <input type="number" id="c-price" step="0.1" oninput="calcCassavaCost()">
+      </div>
+      <div class="form-group">
+        <label>รวม (บาท)</label>
+        <input type="number" id="c-total" readonly style="background:#f3f4f6">
+      </div>
+      <div class="form-group">
+        <label>ชำระเงินแล้ว?</label>
+        <select id="c-paid"><option value="no">❌ ยังไม่ชำระ</option><option value="yes">✅ ชำระแล้ว</option></select>
+      </div>
+      <div class="form-group">
+        <label>วันที่ชำระ</label>
+        <div class="date-parts">
+          <input type="number" id="c-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="c-pm" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="c-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-cassava')">ยกเลิก</button>
+      <button class="btn btn-orange" onclick="saveEntry('cassava')">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: DRY-IN ===== -->
+<div class="modal-overlay" id="modal-dryIn">
+  <div class="modal" style="max-width:560px">
+    <h2>🏚️ ProGreat แห้ง — รับเข้าโกดัง</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>วันที่</label>
+        <div class="date-parts">
+          <input type="number" id="di-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="di-m" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="di-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>โกดังเก็บ</label>
+        <select id="di-warehouse" style="border:1.5px solid #d1d5db;border-radius:7px;padding:8px 10px;font-size:13px;outline:none;background:#fff"></select>
+      </div>
+      <div class="form-group">
+        <label>น้ำหนักที่ชั่งเข้าโกดัง (กก.)</label>
+        <input type="number" id="di-weight" step="1" placeholder="0" oninput="calcDryInCost()">
+      </div>
+      <div class="form-group">
+        <label>ค่าตาก+เก็บ/กก. (บาท)</label>
+        <input type="number" id="di-cost" step="0.1" oninput="calcDryInCost()">
+      </div>
+      <div class="form-group">
+        <label>รวม (บาท)</label>
+        <input type="number" id="di-total" readonly style="background:#f3f4f6">
+      </div>
+      <div class="form-group">
+        <label>ชำระเงินแล้ว?</label>
+        <select id="di-paid"><option value="no">❌ ยังไม่ชำระ</option><option value="yes">✅ ชำระแล้ว</option></select>
+      </div>
+      <div class="form-group">
+        <label>วันที่ชำระ</label>
+        <div class="date-parts">
+          <input type="number" id="di-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="di-pm" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="di-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-dryIn')">ยกเลิก</button>
+      <button class="btn btn-green" onclick="saveEntry('dryIn')">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: DRY-OUT ===== -->
+<div class="modal-overlay" id="modal-dryOut">
+  <div class="modal">
+    <h2>🚛 ProGreat แห้ง — นำส่ง</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>วันที่</label>
+        <div class="date-parts">
+          <input type="number" id="do-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="do-m" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="do-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>ทะเบียนรถ</label>
+        <input type="text" id="do-truck" placeholder="กข 1234">
+      </div>
+      <div class="form-group">
+        <label>โกดังต้นทาง</label>
+        <select id="do-from" style="border:1.5px solid #d1d5db;border-radius:7px;padding:8px 10px;font-size:13px;outline:none;background:#fff"></select>
+      </div>
+      <div class="form-group">
+        <label>น้ำหนักต้นทาง (กก.)</label>
+        <input type="number" id="do-from-weight" step="1" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>โกดังปลายทาง</label>
+        <input type="text" id="do-to" placeholder="ชื่อโกดัง/ที่อยู่ปลายทาง">
+      </div>
+      <div class="form-group">
+        <label>น้ำหนักปลายทาง (กก.)</label>
+        <input type="number" id="do-to-weight" step="1" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>ค่าขนส่ง (บาท)</label>
+        <input type="number" id="do-transport" step="100" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>ชำระเงินแล้ว?</label>
+        <select id="do-paid"><option value="no">❌ ยังไม่ชำระ</option><option value="yes">✅ ชำระแล้ว</option></select>
+      </div>
+      <div class="form-group">
+        <label>วันที่ชำระ</label>
+        <div class="date-parts">
+          <input type="number" id="do-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="do-pm" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="do-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-dryOut')">ยกเลิก</button>
+      <button class="btn btn-blue" onclick="saveEntry('dryOut')" style="background:#8b5cf6">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: SALE ===== -->
+<div class="modal-overlay" id="modal-sale">
+  <div class="modal">
+    <h2>🛒 บันทึกการขาย</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>วันที่</label>
+        <div class="date-parts">
+          <input type="number" id="s-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="s-m" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="s-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Lot การผลิต</label>
+        <select id="s-lot" style="border:1.5px solid #d1d5db;border-radius:7px;padding:8px 10px;font-size:13px;outline:none;background:#fff"></select>
+      </div>
+      <div class="form-group">
+        <label>ทะเบียนรถรับสินค้า</label>
+        <input type="text" id="s-truck" placeholder="กข 5678">
+      </div>
+      <div class="form-group">
+        <label>ชื่อลูกค้า / สถานที่ส่ง</label>
+        <input type="text" id="s-customer" placeholder="ชื่อลูกค้าหรือสถานที่">
+      </div>
+      <div class="form-group">
+        <label>น้ำหนักสินค้า (กก.)</label>
+        <input type="number" id="s-weight" step="1" placeholder="0" oninput="calcSaleCost()">
+      </div>
+      <div class="form-group">
+        <label>จำนวนถุง</label>
+        <input type="number" id="s-bags" step="1" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>ค่าโม่บด/กก. (บาท)</label>
+        <input type="number" id="s-grind-rate" step="0.05" oninput="calcSaleCost()">
+      </div>
+      <div class="form-group">
+        <label>ค่าโม่บด รวม (บาท)</label>
+        <input type="number" id="s-grind-total" readonly style="background:#f3f4f6">
+      </div>
+      <div class="form-group">
+        <label>การจัดส่ง</label>
+        <select id="s-delivery" onchange="calcSaleCost()">
+          <option value="pickup">🚗 ลูกค้ามารับเอง</option>
+          <option value="delivered">🚛 ส่งถึง</option>
+        </select>
+      </div>
+      <div class="form-group" id="s-transport-group">
+        <label>ค่าขนส่ง (บาท)</label>
+        <input type="number" id="s-transport" step="100" value="0" oninput="calcSaleCost()">
+      </div>
+      <div class="form-group">
+        <label>ชำระเงินแล้ว?</label>
+        <select id="s-paid"><option value="no">❌ ยังไม่ชำระ</option><option value="yes">✅ ชำระแล้ว</option></select>
+      </div>
+      <div class="form-group">
+        <label>วันที่ชำระ</label>
+        <div class="date-parts">
+          <input type="number" id="s-pd" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="s-pm" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="s-py" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-sale')">ยกเลิก</button>
+      <button class="btn btn-green" onclick="saveEntry('sale')">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── FIREBASE CONFIG ───────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyA3vKsG90qBGpeeDKZslOySmOFGqHz65ZM",
+  authDomain: "progreat-manager.firebaseapp.com",
+  projectId: "progreat-manager",
+  storageBucket: "progreat-manager.firebasestorage.app",
+  messagingSenderId: "337307403398",
+  appId: "1:337307403398:web:27dd4d145b6233179ebd07"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ─── STATE ─────────────────────────────────────────────────────────
+let currentUser = null, currentRole = null;
+let lots = [], water = [], cassava = [], dryIn = [], dryOut = [], sales = [];
+let settings = { waterPrice:500, cassavaPrice:1.5, dryingCost:0.5, grindingCost:0.3, transportProd:5000, yield:85 };
+let warehouses = ['โกดัง A','โกดัง B'];
+let currentLotId = '';
+let editingEntry = null; // {type, id}
+let payFilter = 'all';
+
+// ─── FORMAT HELPERS ────────────────────────────────────────────────
+const N  = (v,d=2) => v==null||isNaN(v)?'—':Number(v).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
+const N0 = v => N(v,0);
+
+// ─── DATE HELPERS ──────────────────────────────────────────────────
+function getDateStr(p) {
+  const d=(document.getElementById(p+'-d').value||'').toString().padStart(2,'0');
+  const m=document.getElementById(p+'-m').value;
+  const y=document.getElementById(p+'-y').value;
+  if(!d||!m||!y) return '';
+  return `${y}-${m}-${d}`;
+}
+function setDateParts(p,str) {
+  if(!str){['d','m','y'].forEach(x=>{const el=document.getElementById(p+'-'+x);if(el){if(x==='m')el.value='';else el.value='';}});return;}
+  const parts=str.split('-');
+  if(parts.length===3){
+    const el_y=document.getElementById(p+'-y'),el_m=document.getElementById(p+'-m'),el_d=document.getElementById(p+'-d');
+    if(el_y)el_y.value=parts[0];if(el_m)el_m.value=parts[1];if(el_d)el_d.value=parseInt(parts[2]);
+  }
+}
+function prefillToday(p) {
+  const now=new Date();
+  const bey=now.getFullYear()+543;
+  const m=String(now.getMonth()+1).padStart(2,'0');
+  const d=now.getDate();
+  const el_y=document.getElementById(p+'-y'),el_m=document.getElementById(p+'-m'),el_d=document.getElementById(p+'-d');
+  if(el_y)el_y.value=bey;if(el_m)el_m.value=m;if(el_d)el_d.value=d;
+}
+function genId() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+
+// ─── AUTH ──────────────────────────────────────────────────────────
+auth.onAuthStateChanged(async user => {
+  if(user) {
+    currentUser = user;
+    document.getElementById('auth-overlay').style.display='none';
+    document.getElementById('pending-overlay').style.display='none';
+    const uRef = db.collection('users').doc(user.uid);
+    const uDoc = await uRef.get();
+    if(!uDoc.exists) {
+      await uRef.set({email:user.email,role:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      currentRole='pending';
+    } else { currentRole=uDoc.data().role; }
+    const BOOTSTRAP_ADMIN='sittikun.t@gmail.com';
+    if(currentRole==='pending'&&user.email===BOOTSTRAP_ADMIN){
+      try{
+        const tok=await user.getIdToken();
+        await fetch(`https://firestore.googleapis.com/v1/projects/progreat-manager/databases/(default)/documents/users/${user.uid}?updateMask.fieldPaths=role`,
+          {method:'PATCH',headers:{'Authorization':`Bearer ${tok}`,'Content-Type':'application/json'},
+           body:JSON.stringify({fields:{role:{stringValue:'admin'}}})});
+        currentRole='admin';
+      }catch(e){currentRole='admin';}
+    }
+    if(currentRole==='pending'){
+      document.getElementById('pending-overlay').style.display='flex';
+      document.getElementById('pending-email').textContent=user.email;
+      return;
+    }
+    document.getElementById('user-email-label').textContent=user.email;
+    applyRoleUI();
+    await loadAllData();
+    renderAll();
+  } else {
+    currentUser=null;currentRole=null;
+    document.getElementById('auth-overlay').style.display='flex';
+    document.getElementById('pending-overlay').style.display='none';
+    document.getElementById('login-error').textContent='';
+  }
+});
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pwd=document.getElementById('login-password').value;
+  const err=document.getElementById('login-error');
+  const btn=document.getElementById('btn-login');
+  if(!email||!pwd){err.textContent='กรุณากรอก Email และรหัสผ่าน';return;}
+  err.textContent='';btn.disabled=true;btn.textContent='⏳ กำลังเข้าสู่ระบบ...';
+  try{await auth.signInWithEmailAndPassword(email,pwd);}
+  catch(e){err.textContent=authErr(e.code);btn.disabled=false;btn.textContent='🔐 เข้าสู่ระบบ';}
+}
+function doLogout(){auth.signOut();}
+function authErr(c){
+  if(c==='auth/user-not-found'||c==='auth/wrong-password'||c==='auth/invalid-credential')return'Email หรือรหัสผ่านไม่ถูกต้อง';
+  if(c==='auth/too-many-requests')return'ลองใหม่อีกครั้งในภายหลัง (พยายามมากเกินไป)';
+  return'เกิดข้อผิดพลาด: '+c;
+}
+function applyRoleUI(){
+  const isAdmin=currentRole==='admin';
+  const canAdd=isAdmin||currentRole==='client';
+  document.getElementById('tab-btn-users').style.display=isAdmin?'':'none';
+  ['btn-add-lot','btn-add-water','btn-add-cassava','btn-add-dry-in','btn-add-dry-out','btn-add-sale'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display=canAdd?'':'none';
+  });
+}
+
+// ─── FIRESTORE DATA ────────────────────────────────────────────────
+async function loadAllData(){
+  const ind=document.getElementById('save-indicator');
+  ind.textContent='☁️ กำลังโหลด...';
+  try{
+    const doc=await db.collection('pgp_data').doc('main').get();
+    if(doc.exists){
+      const d=doc.data();
+      lots=d.lots||[];water=d.water||[];cassava=d.cassava||[];
+      dryIn=d.dryIn||[];dryOut=d.dryOut||[];sales=d.sales||[];
+      warehouses=d.warehouses||['โกดัง A','โกดัง B'];
+    }
+    const sDoc=await db.collection('pgp_data').doc('settings').get();
+    if(sDoc.exists){ Object.assign(settings,sDoc.data()); applySettingsToUI(); }
+    ind.textContent='☁️ ซิงค์แล้ว';
+  }catch(e){console.error(e);ind.textContent='⚠️ โหลดไม่สำเร็จ';}
+}
+async function saveAll(){
+  const ind=document.getElementById('save-indicator');
+  ind.textContent='⏳ กำลังบันทึก...';
+  try{
+    await db.collection('pgp_data').doc('main').set({
+      lots,water,cassava,dryIn,dryOut,sales,warehouses,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy:currentUser?currentUser.email:'unknown'
+    });
+    ind.textContent='✅ บันทึกแล้ว '+new Date().toLocaleTimeString('th-TH');
+    setTimeout(()=>ind.textContent='☁️ ซิงค์แล้ว',3000);
+  }catch(e){console.error(e);ind.textContent='❌ บันทึกไม่สำเร็จ';}
+}
+async function saveSettings(){
+  settings.waterPrice=parseFloat(document.getElementById('s-water-price').value)||500;
+  settings.cassavaPrice=parseFloat(document.getElementById('s-cassava-price').value)||1.5;
+  settings.dryingCost=parseFloat(document.getElementById('s-drying-cost').value)||0.5;
+  settings.grindingCost=parseFloat(document.getElementById('s-grinding-cost').value)||0.3;
+  settings.transportProd=parseFloat(document.getElementById('s-transport-prod').value)||5000;
+  settings.yield=parseFloat(document.getElementById('s-yield').value)||85;
+  try{await db.collection('pgp_data').doc('settings').set(settings);}catch(e){console.error(e);}
+  renderProduction();
+}
+function applySettingsToUI(){
+  document.getElementById('s-water-price').value=settings.waterPrice;
+  document.getElementById('s-cassava-price').value=settings.cassavaPrice;
+  document.getElementById('s-drying-cost').value=settings.dryingCost;
+  document.getElementById('s-grinding-cost').value=settings.grindingCost;
+  document.getElementById('s-transport-prod').value=settings.transportProd;
+  document.getElementById('s-yield').value=settings.yield;
+}
+
+// ─── TABS ──────────────────────────────────────────────────────────
+function showTab(tab){
+  ['production','sales','payments','settings','users'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('active',(b.getAttribute('onclick')||'').includes(`'${tab}'`));
+  });
+  if(tab==='sales')renderSales();
+  if(tab==='payments')renderPayments();
+  if(tab==='users')loadUserList();
+}
+function renderAll(){
+  populateLotSelect();
+  populateWarehouseSelects();
+  renderProduction();
+  renderSales();
+  renderPayments();
+  renderWarehouses();
+}
+
+// ─── LOTS ──────────────────────────────────────────────────────────
+function populateLotSelect(){
+  const sel=document.getElementById('lot-select');
+  const cur=sel.value||currentLotId;
+  sel.innerHTML='<option value="">-- เลือก Lot --</option>';
+  lots.forEach(l=>{sel.innerHTML+=`<option value="${l.id}">${l.code} — ${l.desc}</option>`;});
+  if(cur)sel.value=cur;
+  // Sales lot filter
+  const sf=document.getElementById('sales-lot-filter');
+  const scur=sf.value;
+  sf.innerHTML='<option value="">-- ทุก Lot --</option>';
+  lots.forEach(l=>{sf.innerHTML+=`<option value="${l.id}">${l.code}</option>`;});
+  if(scur)sf.value=scur;
+  // Sale modal lot
+  const sl=document.getElementById('s-lot');
+  sl.innerHTML='<option value="">-- เลือก Lot --</option>';
+  lots.forEach(l=>{sl.innerHTML+=`<option value="${l.id}">${l.code} — ${l.desc}</option>`;});
+}
+function onLotChange(){
+  currentLotId=document.getElementById('lot-select').value;
+  renderProduction();
+}
+function openLotModal(){ document.getElementById('lot-code').value='';document.getElementById('lot-desc').value='';document.getElementById('modal-lot').classList.add('open'); }
+function saveLot(){
+  const code=document.getElementById('lot-code').value.trim();
+  const desc=document.getElementById('lot-desc').value.trim();
+  if(!code){alert('กรุณากรอกรหัส Lot');return;}
+  lots.push({id:genId(),code,desc,createdAt:new Date().toISOString()});
+  saveAll();closeModal('modal-lot');populateLotSelect();
+}
+
+// ─── WAREHOUSES ────────────────────────────────────────────────────
+function populateWarehouseSelects(){
+  ['di-warehouse','do-from'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML='';
+    warehouses.forEach(w=>{el.innerHTML+=`<option value="${w}">${w}</option>`;});
+  });
+  renderWarehouses();
+}
+function renderWarehouses(){
+  const el=document.getElementById('warehouse-list');if(!el)return;
+  el.innerHTML=warehouses.map((w,i)=>`<span style="background:#dbeafe;color:#1e40af;padding:4px 12px;border-radius:16px;font-size:13px;display:inline-flex;align-items:center;gap:6px">
+    ${w} <button onclick="removeWarehouse(${i})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;line-height:1">×</button>
+  </span>`).join('');
+}
+function addWarehouse(){
+  const name=document.getElementById('new-warehouse').value.trim();
+  if(!name)return;
+  if(!warehouses.includes(name))warehouses.push(name);
+  document.getElementById('new-warehouse').value='';
+  saveAll();populateWarehouseSelects();
+}
+function removeWarehouse(i){
+  if(confirm(`ลบโกดัง "${warehouses[i]}"?`)){warehouses.splice(i,1);saveAll();populateWarehouseSelects();}
+}
+
+// ─── MODAL OPEN/CLOSE ──────────────────────────────────────────────
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openModal(type, entry=null){
+  editingEntry=entry?{type,id:entry.id}:null;
+  if(type==='water'){
+    prefillToday('w');prefillToday('w-p');
+    if(entry){setDateParts('w',entry.date);document.getElementById('w-truck').value=entry.truck||'';document.getElementById('w-weight').value=entry.weightKg;document.getElementById('w-volume').value=entry.volumeKl;document.getElementById('w-price').value=entry.price;document.getElementById('w-total').value=entry.total;document.getElementById('w-paid').value=entry.paid?'yes':'no';setDateParts('w-p',entry.payDate||'');}
+    else{document.getElementById('w-truck').value='';document.getElementById('w-weight').value='';document.getElementById('w-volume').value='';document.getElementById('w-price').value=settings.waterPrice;document.getElementById('w-total').value='';document.getElementById('w-paid').value='no';setDateParts('w-p','');}
+    document.getElementById('modal-water').classList.add('open');
+  } else if(type==='cassava'){
+    prefillToday('c');
+    if(entry){setDateParts('c',entry.date);document.getElementById('c-weight').value=entry.weightKg;document.getElementById('c-price').value=entry.price;document.getElementById('c-total').value=entry.total;document.getElementById('c-paid').value=entry.paid?'yes':'no';setDateParts('c-p',entry.payDate||'');}
+    else{document.getElementById('c-weight').value='';document.getElementById('c-price').value=settings.cassavaPrice;document.getElementById('c-total').value='';document.getElementById('c-paid').value='no';setDateParts('c-p','');}
+    document.getElementById('modal-cassava').classList.add('open');
+  } else if(type==='dryIn'){
+    prefillToday('di');
+    if(entry){setDateParts('di',entry.date);document.getElementById('di-warehouse').value=entry.warehouse;document.getElementById('di-weight').value=entry.weightKg;document.getElementById('di-cost').value=entry.costPerKg;document.getElementById('di-total').value=entry.total;document.getElementById('di-paid').value=entry.paid?'yes':'no';setDateParts('di-p',entry.payDate||'');}
+    else{document.getElementById('di-weight').value='';document.getElementById('di-cost').value=settings.dryingCost;document.getElementById('di-total').value='';document.getElementById('di-paid').value='no';setDateParts('di-p','');}
+    document.getElementById('modal-dryIn').classList.add('open');
+  } else if(type==='dryOut'){
+    prefillToday('do');
+    if(entry){setDateParts('do',entry.date);document.getElementById('do-truck').value=entry.truck||'';document.getElementById('do-from').value=entry.fromWarehouse||'';document.getElementById('do-from-weight').value=entry.fromWeight;document.getElementById('do-to').value=entry.toWarehouse||'';document.getElementById('do-to-weight').value=entry.toWeight;document.getElementById('do-transport').value=entry.transport;document.getElementById('do-paid').value=entry.paid?'yes':'no';setDateParts('do-p',entry.payDate||'');}
+    else{document.getElementById('do-truck').value='';document.getElementById('do-from-weight').value='';document.getElementById('do-to').value='';document.getElementById('do-to-weight').value='';document.getElementById('do-transport').value=settings.transportProd;document.getElementById('do-paid').value='no';setDateParts('do-p','');}
+    document.getElementById('modal-dryOut').classList.add('open');
+  } else if(type==='sale'){
+    prefillToday('s');
+    document.getElementById('s-lot').value=currentLotId||'';
+    if(entry){setDateParts('s',entry.date);document.getElementById('s-lot').value=entry.lotId||'';document.getElementById('s-truck').value=entry.truck||'';document.getElementById('s-customer').value=entry.customer||'';document.getElementById('s-weight').value=entry.weightKg;document.getElementById('s-bags').value=entry.bags||'';document.getElementById('s-grind-rate').value=entry.grindRate;document.getElementById('s-grind-total').value=entry.grindTotal;document.getElementById('s-delivery').value=entry.deliveryType||'pickup';document.getElementById('s-transport').value=entry.transport||0;document.getElementById('s-paid').value=entry.paid?'yes':'no';setDateParts('s-p',entry.payDate||'');}
+    else{document.getElementById('s-truck').value='';document.getElementById('s-customer').value='';document.getElementById('s-weight').value='';document.getElementById('s-bags').value='';document.getElementById('s-grind-rate').value=settings.grindingCost;document.getElementById('s-grind-total').value='';document.getElementById('s-delivery').value='pickup';document.getElementById('s-transport').value=0;document.getElementById('s-paid').value='no';setDateParts('s-p','');}
+    document.getElementById('modal-sale').classList.add('open');
+  }
+}
+
+// ─── COST CALCULATIONS ─────────────────────────────────────────────
+function calcWaterCost(){ const v=parseFloat(document.getElementById('w-volume').value)||0,p=parseFloat(document.getElementById('w-price').value)||0;document.getElementById('w-total').value=(v*p).toFixed(2); }
+function calcCassavaCost(){ const w=parseFloat(document.getElementById('c-weight').value)||0,p=parseFloat(document.getElementById('c-price').value)||0;document.getElementById('c-total').value=(w*p).toFixed(2); }
+function calcDryInCost(){ const w=parseFloat(document.getElementById('di-weight').value)||0,p=parseFloat(document.getElementById('di-cost').value)||0;document.getElementById('di-total').value=(w*p).toFixed(2); }
+function calcSaleCost(){ const w=parseFloat(document.getElementById('s-weight').value)||0,r=parseFloat(document.getElementById('s-grind-rate').value)||0;document.getElementById('s-grind-total').value=(w*r).toFixed(2); }
+
+// ─── SAVE ENTRY ────────────────────────────────────────────────────
+function saveEntry(type){
+  if(!currentLotId && type!=='sale'){alert('กรุณาเลือก Lot ก่อน');return;}
+  let entry={id:editingEntry?editingEntry.id:genId()};
+  if(type==='water'){
+    entry={...entry,date:getDateStr('w'),lotId:currentLotId,truck:document.getElementById('w-truck').value.trim(),
+      weightKg:parseFloat(document.getElementById('w-weight').value)||0,volumeKl:parseFloat(document.getElementById('w-volume').value)||0,
+      price:parseFloat(document.getElementById('w-price').value)||0,total:parseFloat(document.getElementById('w-total').value)||0,
+      paid:document.getElementById('w-paid').value==='yes',payDate:getDateStr('w-p')};
+    if(editingEntry){const i=water.findIndex(x=>x.id===editingEntry.id);if(i>=0)water[i]=entry;else water.push(entry);}
+    else water.push(entry);
+    closeModal('modal-water');
+  } else if(type==='cassava'){
+    entry={...entry,date:getDateStr('c'),lotId:currentLotId,
+      weightKg:parseFloat(document.getElementById('c-weight').value)||0,
+      price:parseFloat(document.getElementById('c-price').value)||0,total:parseFloat(document.getElementById('c-total').value)||0,
+      paid:document.getElementById('c-paid').value==='yes',payDate:getDateStr('c-p')};
+    if(editingEntry){const i=cassava.findIndex(x=>x.id===editingEntry.id);if(i>=0)cassava[i]=entry;else cassava.push(entry);}
+    else cassava.push(entry);
+    closeModal('modal-cassava');
+  } else if(type==='dryIn'){
+    entry={...entry,date:getDateStr('di'),lotId:currentLotId,
+      warehouse:document.getElementById('di-warehouse').value,
+      weightKg:parseFloat(document.getElementById('di-weight').value)||0,
+      costPerKg:parseFloat(document.getElementById('di-cost').value)||0,total:parseFloat(document.getElementById('di-total').value)||0,
+      paid:document.getElementById('di-paid').value==='yes',payDate:getDateStr('di-p')};
+    if(editingEntry){const i=dryIn.findIndex(x=>x.id===editingEntry.id);if(i>=0)dryIn[i]=entry;else dryIn.push(entry);}
+    else dryIn.push(entry);
+    closeModal('modal-dryIn');
+  } else if(type==='dryOut'){
+    entry={...entry,date:getDateStr('do'),lotId:currentLotId,
+      truck:document.getElementById('do-truck').value.trim(),
+      fromWarehouse:document.getElementById('do-from').value,fromWeight:parseFloat(document.getElementById('do-from-weight').value)||0,
+      toWarehouse:document.getElementById('do-to').value.trim(),toWeight:parseFloat(document.getElementById('do-to-weight').value)||0,
+      transport:parseFloat(document.getElementById('do-transport').value)||0,
+      paid:document.getElementById('do-paid').value==='yes',payDate:getDateStr('do-p')};
+    if(editingEntry){const i=dryOut.findIndex(x=>x.id===editingEntry.id);if(i>=0)dryOut[i]=entry;else dryOut.push(entry);}
+    else dryOut.push(entry);
+    closeModal('modal-dryOut');
+  } else if(type==='sale'){
+    const lotId=document.getElementById('s-lot').value;
+    if(!lotId){alert('กรุณาเลือก Lot');return;}
+    entry={...entry,date:getDateStr('s'),lotId,
+      truck:document.getElementById('s-truck').value.trim(),customer:document.getElementById('s-customer').value.trim(),
+      weightKg:parseFloat(document.getElementById('s-weight').value)||0,bags:parseInt(document.getElementById('s-bags').value)||0,
+      grindRate:parseFloat(document.getElementById('s-grind-rate').value)||0,grindTotal:parseFloat(document.getElementById('s-grind-total').value)||0,
+      deliveryType:document.getElementById('s-delivery').value,transport:parseFloat(document.getElementById('s-transport').value)||0,
+      paid:document.getElementById('s-paid').value==='yes',payDate:getDateStr('s-p')};
+    entry.total=(entry.grindTotal+entry.transport);
+    if(editingEntry){const i=sales.findIndex(x=>x.id===editingEntry.id);if(i>=0)sales[i]=entry;else sales.push(entry);}
+    else sales.push(entry);
+    closeModal('modal-sale');
+  }
+  saveAll();renderAll();
+}
+
+function deleteEntry(type,id){
+  if(!confirm('ลบรายการนี้?'))return;
+  if(type==='water')water=water.filter(x=>x.id!==id);
+  else if(type==='cassava')cassava=cassava.filter(x=>x.id!==id);
+  else if(type==='dryIn')dryIn=dryIn.filter(x=>x.id!==id);
+  else if(type==='dryOut')dryOut=dryOut.filter(x=>x.id!==id);
+  else if(type==='sale')sales=sales.filter(x=>x.id!==id);
+  saveAll();renderAll();
+}
+
+function markPaid(type,id){
+  const arr=type==='water'?water:type==='cassava'?cassava:type==='dryIn'?dryIn:type==='dryOut'?dryOut:sales;
+  const entry=arr.find(x=>x.id===id);if(!entry)return;
+  const today=new Date();const bey=today.getFullYear()+543;
+  const m=String(today.getMonth()+1).padStart(2,'0');const d=String(today.getDate()).padStart(2,'0');
+  entry.paid=true;entry.payDate=`${bey}-${m}-${d}`;
+  saveAll();renderAll();
+}
+
+// ─── RENDER: PRODUCTION ────────────────────────────────────────────
+function renderProduction(){
+  const lid=currentLotId;
+  const lotWater=water.filter(x=>x.lotId===lid);
+  const lotCassava=cassava.filter(x=>x.lotId===lid);
+  const lotDryIn=dryIn.filter(x=>x.lotId===lid);
+  const lotDryOut=dryOut.filter(x=>x.lotId===lid);
+  const totalWaterKg=lotWater.reduce((s,x)=>s+(x.weightKg||0),0);
+  const totalWaterKl=lotWater.reduce((s,x)=>s+(x.volumeKl||0),0);
+  const totalCassavaKg=lotCassava.reduce((s,x)=>s+(x.weightKg||0),0);
+  const yld=settings.yield/100;
+  const wetKg=(totalCassavaKg+totalWaterKg)*yld;
+  const totalDryInKg=lotDryIn.reduce((s,x)=>s+(x.weightKg||0),0);
+  const totalDryOutKg=lotDryOut.reduce((s,x)=>s+(x.fromWeight||0),0);
+  const stock=totalDryInKg-totalDryOutKg;
+
+  document.getElementById('card-water').textContent=lid?`${N0(totalWaterKg)} / ${N(totalWaterKl,1)}`:'—';
+  document.getElementById('card-cassava').textContent=lid?N0(totalCassavaKg):'—';
+  document.getElementById('card-wet').textContent=lid?N0(wetKg):'—';
+  document.getElementById('card-dry-in').textContent=lid?N0(totalDryInKg):'—';
+  document.getElementById('card-dry-out').textContent=lid?N0(totalDryOutKg):'—';
+  document.getElementById('card-stock').textContent=lid?N0(stock):'—';
+  document.getElementById('wet-cassava-total').textContent=N0(totalCassavaKg);
+  document.getElementById('wet-water-total').textContent=N0(totalWaterKg);
+  document.getElementById('wet-yield-display').textContent=settings.yield;
+  document.getElementById('wet-result').textContent=N0(wetKg);
+
+  const paidTag=p=>`<span class="${p?'paid-tag':'unpaid-tag'}">${p?'✅ ชำระ':'❌ ค้าง'}</span>`;
+  const isAdmin=currentRole==='admin';
+  const acts=(type,e)=>isAdmin?`<div style="display:flex;gap:4px">
+    <button class="btn btn-outline btn-sm" onclick='openModal("${type}",${JSON.stringify(e)})'>✏️</button>
+    ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:''}
+    <button class="btn btn-red btn-sm" onclick="deleteEntry('${type}','${e.id}')">🗑️</button>
+  </div>`:!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:'';
+
+  // Water table
+  document.getElementById('water-body').innerHTML=!lid?'<tr><td colspan="8" class="empty">เลือก Lot ก่อน</td></tr>':
+    lotWater.length===0?'<tr><td colspan="8" class="empty">ยังไม่มีรายการ</td></tr>':
+    lotWater.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.truck||'—'}</td><td class="num">${N0(e.weightKg)}</td><td class="num">${N(e.volumeKl,1)}</td><td class="num">${N(e.price,0)}</td><td class="num">${N0(e.total)}</td><td>${paidTag(e.paid)}</td><td>${acts('water',e)}</td></tr>`).join('');
+
+  // Cassava table
+  document.getElementById('cassava-body').innerHTML=!lid?'<tr><td colspan="6" class="empty">เลือก Lot ก่อน</td></tr>':
+    lotCassava.length===0?'<tr><td colspan="6" class="empty">ยังไม่มีรายการ</td></tr>':
+    lotCassava.map(e=>`<tr><td>${e.date||'—'}</td><td class="num">${N0(e.weightKg)}</td><td class="num">${N(e.price,2)}</td><td class="num">${N0(e.total)}</td><td>${paidTag(e.paid)}</td><td>${acts('cassava',e)}</td></tr>`).join('');
+
+  // Dry-in table
+  document.getElementById('dry-in-body').innerHTML=!lid?'<tr><td colspan="7" class="empty">เลือก Lot ก่อน</td></tr>':
+    lotDryIn.length===0?'<tr><td colspan="7" class="empty">ยังไม่มีรายการ</td></tr>':
+    lotDryIn.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.warehouse||'—'}</td><td class="num">${N0(e.weightKg)}</td><td class="num">${N(e.costPerKg,2)}</td><td class="num">${N0(e.total)}</td><td>${paidTag(e.paid)}</td><td>${acts('dryIn',e)}</td></tr>`).join('');
+
+  // Dry-out table
+  document.getElementById('dry-out-body').innerHTML=!lid?'<tr><td colspan="9" class="empty">เลือก Lot ก่อน</td></tr>':
+    lotDryOut.length===0?'<tr><td colspan="9" class="empty">ยังไม่มีรายการ</td></tr>':
+    lotDryOut.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.truck||'—'}</td><td>${e.fromWarehouse||'—'}</td><td class="num">${N0(e.fromWeight)}</td><td>${e.toWarehouse||'—'}</td><td class="num">${N0(e.toWeight)}</td><td class="num">${N0(e.transport)}</td><td>${paidTag(e.paid)}</td><td>${acts('dryOut',e)}</td></tr>`).join('');
+}
+
+// ─── RENDER: SALES ──────────────────────────────────────────────────
+function renderSales(){
+  const filterLot=document.getElementById('sales-lot-filter')?.value||'';
+  let rows=sales.filter(x=>!filterLot||x.lotId===filterLot);
+  rows.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const total=rows.reduce((s,x)=>s+(x.total||0),0);
+  const wt=rows.reduce((s,x)=>s+(x.weightKg||0),0);
+  const unpaid=rows.filter(x=>!x.paid).reduce((s,x)=>s+(x.total||0),0);
+  document.getElementById('sale-card-total').textContent=N0(total)+' บาท';
+  document.getElementById('sale-card-weight').textContent=N0(wt)+' กก.';
+  document.getElementById('sale-card-unpaid').textContent=N0(unpaid)+' บาท';
+  const getLotCode=id=>{ const l=lots.find(x=>x.id===id);return l?l.code:id||'—'; };
+  const isAdmin=currentRole==='admin';
+  document.getElementById('sales-body').innerHTML=rows.length===0?'<tr><td colspan="12" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr>':
+    rows.map(e=>`<tr>
+      <td>${e.date||'—'}</td>
+      <td><span class="lot-badge">${getLotCode(e.lotId)}</span></td>
+      <td style="font-weight:600">${e.customer||'—'}</td>
+      <td>${e.truck||'—'}</td>
+      <td class="num">${N0(e.weightKg)}</td>
+      <td class="num">${e.bags||'—'}</td>
+      <td><span class="badge ${e.deliveryType==='delivered'?'badge-blue':'badge-gray'}">${e.deliveryType==='delivered'?'🚛 ส่งถึง':'🚗 รับเอง'}</span></td>
+      <td class="num">${N0(e.grindTotal)}</td>
+      <td class="num">${e.transport?N0(e.transport):'—'}</td>
+      <td class="num" style="font-weight:700">${N0(e.total)}</td>
+      <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ '+e.payDate:'❌ ค้าง'}</span></td>
+      <td><div style="display:flex;gap:4px">
+        ${isAdmin?`<button class="btn btn-outline btn-sm" onclick='openModal("sale",${JSON.stringify(e)})'>✏️</button>`:''}
+        ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('sale','${e.id}')">💰</button>`:''}
+        ${isAdmin?`<button class="btn btn-red btn-sm" onclick="deleteEntry('sale','${e.id}')">🗑️</button>`:''}
+      </div></td>
+    </tr>`).join('');
+}
+
+// ─── RENDER: PAYMENTS ──────────────────────────────────────────────
+function setPayFilter(f,btn){
+  payFilter=f;
+  document.querySelectorAll('.pay-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPayments();
+}
+function renderPayments(){
+  const all=[
+    ...water.map(x=>({...x,type:'water',typeLabel:'💧 น้ำ A-teins',amount:x.total})),
+    ...cassava.map(x=>({...x,type:'cassava',typeLabel:'🌾 กากมัน',amount:x.total})),
+    ...dryIn.map(x=>({...x,type:'dryIn',typeLabel:'🏚️ ค่าตาก+เก็บ',amount:x.total})),
+    ...dryOut.map(x=>({...x,type:'dryOut',typeLabel:'🚛 ขนส่งผลิต',amount:x.transport})),
+    ...sales.map(x=>({...x,type:'sale',typeLabel:'🛒 ค่าโม่บด+ขนส่งขาย',amount:x.total}))
+  ].filter(x=>payFilter==='all'||x.type===payFilter)
+   .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const totalUnpaid=all.filter(x=>!x.paid).reduce((s,x)=>s+(x.amount||0),0);
+  const totalPaid=all.filter(x=>x.paid).reduce((s,x)=>s+(x.amount||0),0);
+  const getLotCode=id=>{ const l=lots.find(x=>x.id===id);return l?l.code:'—'; };
+  document.getElementById('payments-body').innerHTML=`
+    <div class="cards" style="margin-bottom:12px">
+      <div class="card red"><label>ยังไม่ชำระ</label><div class="val">${N0(totalUnpaid)}</div><div class="sub">บาท</div></div>
+      <div class="card green"><label>ชำระแล้ว</label><div class="val">${N0(totalPaid)}</div><div class="sub">บาท</div></div>
+    </div>
+    <div class="table-wrap"><table><thead><tr>
+      <th>วันที่</th><th>ประเภท</th><th>Lot</th><th>รายละเอียด</th><th class="num">จำนวน (บาท)</th><th>สถานะ</th><th>วันที่ชำระ</th><th></th>
+    </tr></thead><tbody>${all.length===0?'<tr><td colspan="8" class="empty">ไม่มีรายการ</td></tr>':
+    all.map(e=>`<tr>
+      <td>${e.date||'—'}</td>
+      <td>${e.typeLabel}</td>
+      <td><span class="lot-badge">${getLotCode(e.lotId)}</span></td>
+      <td style="font-size:12px">${e.truck||e.warehouse||e.customer||e.fromWarehouse||'—'}</td>
+      <td class="num" style="font-weight:700">${N0(e.amount)}</td>
+      <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ ชำระแล้ว':'❌ ค้างชำระ'}</span></td>
+      <td style="font-size:12px;color:#6b7280">${e.payDate||'—'}</td>
+      <td>${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${e.type}','${e.id}')">💰 ชำระ</button>`:''}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+// ─── USER MANAGEMENT ───────────────────────────────────────────────
+async function loadUserList(){
+  const container=document.getElementById('user-mgmt-list');
+  container.innerHTML='<div class="empty">กำลังโหลด...</div>';
+  try{
+    const snap=await db.collection('users').get();
+    if(snap.empty){container.innerHTML='<div class="empty">ยังไม่มีผู้ใช้</div>';return;}
+    let html='';
+    snap.forEach(doc=>{
+      const u=doc.data(),uid=doc.id;
+      html+=`<div class="user-row">
+        <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${u.email||uid}</div></div>
+        <span class="user-role-badge ${u.role}">${u.role==='admin'?'Admin':u.role==='client'?'Client':'รอการอนุมัติ'}</span>
+        <div style="display:flex;gap:6px">
+          ${u.role!=='admin'?`<button class="btn btn-green btn-sm" onclick="setUserRole('${uid}','admin')">Admin</button>`:''}
+          ${u.role!=='client'?`<button class="btn btn-blue btn-sm" onclick="setUserRole('${uid}','client')">Client</button>`:''}
+          ${u.role!=='pending'?`<button class="btn btn-red btn-sm" onclick="setUserRole('${uid}','pending')">ระงับ</button>`:''}
+        </div>
+      </div>`;
+    });
+    container.innerHTML=html;
+  }catch(e){container.innerHTML=`<div class="empty" style="color:#ef4444">ข้อผิดพลาด: ${e.message}</div>`;}
+}
+async function setUserRole(uid,role){
+  try{await db.collection('users').doc(uid).update({role});await loadUserList();}
+  catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
+}
+
+// ─── CLOSE MODAL ON OVERLAY CLICK ──────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});
+});
+
+// ─── INIT ──────────────────────────────────────────────────────────
+// Driven by auth.onAuthStateChanged above
+</script>
+</body>
+</html>
