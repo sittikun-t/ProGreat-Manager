@@ -200,21 +200,75 @@ tr:hover td{background:#f8faff}
 <!-- ===== TAB: DASHBOARD ===== -->
 <div id="tab-dashboard" style="display:none">
   <div id="content">
+
+    <!-- Dashboard Filter Panel -->
+    <div class="panel" style="margin-bottom:14px;padding:14px 18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:13px;font-weight:600;color:#1a4f7a;margin-right:2px">🔍 แสดงข้อมูล:</span>
+        <button class="btn btn-blue btn-sm" id="db-btn-all" onclick="setDbFilter('all',this)">ทั้งหมด</button>
+        <button class="btn btn-outline btn-sm" id="db-btn-lot" onclick="setDbFilter('lot',this)">เลือก Lot</button>
+        <button class="btn btn-outline btn-sm" id="db-btn-date" onclick="setDbFilter('date',this)">ช่วงวันที่</button>
+        <span id="db-filter-badge" style="font-size:11px;color:#6b7280;margin-left:4px"></span>
+      </div>
+      <!-- Lot multi-selector -->
+      <div id="db-lot-selector" style="display:none">
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <button class="btn btn-outline btn-sm" onclick="dbSelectAllLots(true)">เลือกทั้งหมด</button>
+          <button class="btn btn-outline btn-sm" onclick="dbSelectAllLots(false)">ล้างการเลือก</button>
+        </div>
+        <div id="db-lot-checks" style="display:flex;flex-wrap:wrap;gap:6px;max-height:130px;overflow-y:auto;padding:2px"></div>
+      </div>
+      <!-- Date range selector -->
+      <div id="db-date-selector" style="display:none">
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:13px;font-weight:500;white-space:nowrap">ตั้งแต่:</label>
+            <div class="date-parts">
+              <input type="number" id="db-from-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+              <select id="db-from-m" class="date-part-m"><option value="">— เดือน —</option>
+                <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+                <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+                <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+              </select>
+              <input type="number" id="db-from-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:13px;font-weight:500;white-space:nowrap">ถึง:</label>
+            <div class="date-parts">
+              <input type="number" id="db-to-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+              <select id="db-to-m" class="date-part-m"><option value="">— เดือน —</option>
+                <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+                <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+                <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+              </select>
+              <input type="number" id="db-to-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+            </div>
+          </div>
+          <button class="btn btn-blue btn-sm" onclick="applyDateFilter()">🔍 ประมวลผล</button>
+          <button class="btn btn-outline btn-sm" onclick="clearDateFilter()">✕ ล้าง</button>
+        </div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:6px">กรองตามวันที่ของรายการ: น้ำ A-teins / กากมัน / รับเข้าโกดัง</div>
+      </div>
+    </div>
+
     <!-- Overall Summary Cards -->
     <div class="cards">
-      <div class="card"><label>จำนวน Lot ทั้งหมด</label><div class="val" id="db-lots">—</div><div class="sub">Lot</div></div>
-      <div class="card orange"><label>กากมัน รวมทุก Lot</label><div class="val" id="db-cassava">—</div><div class="sub">กิโลกรัม</div></div>
-      <div class="card"><label>น้ำ A-teins รวมทุก Lot</label><div class="val" id="db-water">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card"><label id="db-lots-label">จำนวน Lot</label><div class="val" id="db-lots">—</div><div class="sub">Lot</div></div>
+      <div class="card orange"><label>กากมัน รวม</label><div class="val" id="db-cassava">—</div><div class="sub">กิโลกรัม</div></div>
+      <div class="card"><label>น้ำ A-teins รวม</label><div class="val" id="db-water">—</div><div class="sub">กิโลกรัม</div></div>
       <div class="card teal"><label>ProGreat เปียก รวม</label><div class="val" id="db-wet">—</div><div class="sub">กิโลกรัม</div></div>
       <div class="card purple"><label>ProGreat แห้ง Forecast</label><div class="val" id="db-forecast">—</div><div class="sub">กิโลกรัม</div></div>
       <div class="card green"><label>ProGreat แห้ง รับจริง</label><div class="val" id="db-actual">—</div><div class="sub">กิโลกรัม</div></div>
       <div class="card red"><label>ผลต่าง (จริง − Forecast)</label><div class="val" id="db-diff">—</div><div class="sub">กิโลกรัม</div></div>
-      <div class="card green"><label>ยอดขายรวม</label><div class="val" id="db-sales">—</div><div class="sub">บาท</div></div>
     </div>
 
     <!-- Per-Lot Table -->
     <div class="panel">
-      <div class="panel-title">📊 สรุปการผลิตรายล็อต</div>
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>📊 สรุปการผลิตรายล็อต</span>
+        <span id="db-table-badge" style="font-size:11px;color:#6b7280;font-weight:400"></span>
+      </div>
       <div class="table-wrap">
         <table>
           <thead><tr>
@@ -227,10 +281,9 @@ tr:hover td{background:#f8faff}
             <th class="num">ผลต่าง<br><span style="font-weight:400;font-size:11px">จริง − Forecast</span></th>
             <th class="num">Yield จริง<br><span style="font-weight:400;font-size:11px">%</span></th>
             <th class="num">ค่าตาก+เก็บ<br><span style="font-weight:400;font-size:11px">บาท</span></th>
-            <th class="num">ยอดขาย<br><span style="font-weight:400;font-size:11px">บาท</span></th>
           </tr></thead>
           <tbody id="dashboard-body">
-            <tr><td colspan="10" class="empty"><div class="icon">📊</div>ยังไม่มีข้อมูล Lot</td></tr>
+            <tr><td colspan="9" class="empty"><div class="icon">📊</div>ยังไม่มีข้อมูล Lot</td></tr>
           </tbody>
         </table>
       </div>
@@ -906,6 +959,7 @@ let currentLotId = '';
 let editingEntry = null; // {type, id}
 let payFilter = 'all';
 let payModalItems = []; // [{type,id}] for payment modal
+let dbFilter = { mode:'all', lotIds:[], dateFrom:'', dateTo:'' };
 
 // ─── FORMAT HELPERS ────────────────────────────────────────────────
 const N  = (v,d=2) => v==null||isNaN(v)?'—':Number(v).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -1427,23 +1481,84 @@ function renderProduction(){
     lotDryOut.map(e=>`<tr><td>${e.date||'—'}</td><td>${e.truck||'—'}</td><td>${e.fromWarehouse||'—'}</td><td class="num">${N0(e.fromWeight)}</td><td>${e.toWarehouse||'—'}</td><td class="num">${N0(e.toWeight)}</td><td class="num">${N0(e.transport)}${e.transportRate?' <span style="font-size:11px;color:#9ca3af">('+N(e.transportRate,2)+' บ/กก.)</span>':''}</td><td>${paidTag(e.paid)}</td><td>${acts('dryOut',e)}</td></tr>`).join('');
 }
 
+// ─── DASHBOARD FILTER ───────────────────────────────────────────────
+function setDbFilter(mode, btn){
+  dbFilter.mode=mode;
+  ['db-btn-all','db-btn-lot','db-btn-date'].forEach(id=>{
+    const b=document.getElementById(id);if(!b)return;
+    const active=b.id==='db-btn-'+mode;
+    b.className='btn btn-sm '+(active?'btn-blue':'btn-outline');
+  });
+  document.getElementById('db-lot-selector').style.display=mode==='lot'?'':'none';
+  document.getElementById('db-date-selector').style.display=mode==='date'?'':'none';
+  if(mode==='lot') renderDbLotChecks();
+  renderDashboard();
+}
+function renderDbLotChecks(){
+  if(dbFilter.lotIds.length===0) dbFilter.lotIds=lots.map(l=>l.id);
+  const el=document.getElementById('db-lot-checks');if(!el)return;
+  el.innerHTML=lots.map(l=>
+    `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:5px 10px;font-size:13px;user-select:none">
+      <input type="checkbox" class="db-lot-check pay-check" value="${l.id}" ${dbFilter.lotIds.includes(l.id)?'checked':''}
+        onchange="dbFilter.lotIds=[...document.querySelectorAll('.db-lot-check:checked')].map(c=>c.value);renderDashboard()">
+      <span class="lot-badge" style="font-size:11px">${l.code}</span>${l.desc?'<span style="color:#6b7280;font-size:11px">'+l.desc+'</span>':''}
+    </label>`
+  ).join('');
+}
+function dbSelectAllLots(sel){
+  dbFilter.lotIds=sel?lots.map(l=>l.id):[];
+  document.querySelectorAll('.db-lot-check').forEach(c=>c.checked=sel);
+  renderDashboard();
+}
+function applyDateFilter(){
+  dbFilter.dateFrom=getDateStr('db-from');
+  dbFilter.dateTo=getDateStr('db-to');
+  renderDashboard();
+}
+function clearDateFilter(){
+  dbFilter.dateFrom=''; dbFilter.dateTo='';
+  setDateParts('db-from',''); setDateParts('db-to','');
+  renderDashboard();
+}
+
 // ─── RENDER: DASHBOARD ─────────────────────────────────────────────
 function renderDashboard(){
   const yld=settings.yield/100;
-  let totalCassava=0,totalWater=0,totalWet=0,totalForecast=0,totalActual=0,totalSalesAmt=0;
-  const rows=lots.map(lot=>{
+
+  // Determine filtered lots
+  let filtLots;
+  if(dbFilter.mode==='lot'){
+    filtLots=lots.filter(l=>dbFilter.lotIds.includes(l.id));
+  } else {
+    filtLots=lots;
+  }
+
+  // Determine filtered entries (for date mode)
+  const inRange=date=>{
+    if(!date)return true;
+    if(dbFilter.mode==='date'){
+      if(dbFilter.dateFrom&&date<dbFilter.dateFrom)return false;
+      if(dbFilter.dateTo&&date>dbFilter.dateTo)return false;
+    }
+    return true;
+  };
+  const fWater   = dbFilter.mode==='date' ? water.filter(x=>inRange(x.date))   : water;
+  const fCassava = dbFilter.mode==='date' ? cassava.filter(x=>inRange(x.date)) : cassava;
+  const fDryIn   = dbFilter.mode==='date' ? dryIn.filter(x=>inRange(x.date))   : dryIn;
+
+  let totalCassava=0,totalWater=0,totalWet=0,totalForecast=0,totalActual=0;
+  const rows=filtLots.map(lot=>{
     const lid=lot.id;
-    const lotWaterKg=water.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
-    const lotCassavaKg=cassava.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
+    const lotWaterKg=fWater.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
+    const lotCassavaKg=fCassava.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
     const lotWetKg=lotCassavaKg+lotWaterKg;
     const lotForecastKg=lotWetKg*yld;
-    const lotDryInKg=dryIn.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
-    const lotDryInCost=dryIn.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.total||0),0);
-    const lotSalesAmt=sales.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.total||0),0);
+    const lotDryInKg=fDryIn.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.weightKg||0),0);
+    const lotDryInCost=fDryIn.filter(x=>x.lotId===lid).reduce((s,x)=>s+(x.total||0),0);
     const diff=lotDryInKg-lotForecastKg;
     const actualYield=lotWetKg>0?(lotDryInKg/lotWetKg*100):0;
-    totalCassava+=lotCassavaKg;totalWater+=lotWaterKg;totalWet+=lotWetKg;
-    totalForecast+=lotForecastKg;totalActual+=lotDryInKg;totalSalesAmt+=lotSalesAmt;
+    totalCassava+=lotCassavaKg; totalWater+=lotWaterKg; totalWet+=lotWetKg;
+    totalForecast+=lotForecastKg; totalActual+=lotDryInKg;
     const diffColor=diff>=0?'#16a34a':'#dc2626';
     return `<tr>
       <td><span class="lot-badge">${lot.code}</span><div style="font-size:11px;color:#6b7280;margin-top:2px">${lot.desc||''}</div></td>
@@ -1455,30 +1570,45 @@ function renderDashboard(){
       <td class="num" style="color:${diffColor};font-weight:700">${lotDryInKg>0||lotForecastKg>0?N0(diff):'—'}</td>
       <td class="num" style="color:${diffColor}">${lotWetKg>0&&lotDryInKg>0?N(actualYield,1)+'%':'—'}</td>
       <td class="num">${lotDryInCost>0?N0(lotDryInCost):'—'}</td>
-      <td class="num" style="font-weight:${lotSalesAmt>0?'700':'400'}">${lotSalesAmt>0?N0(lotSalesAmt):'—'}</td>
     </tr>`;
   });
-  // Overall totals
+
+  // Totals row
   const totDiff=totalActual-totalForecast;
   const totActualYield=totalWet>0?(totalActual/totalWet*100):0;
   const totColor=totDiff>=0?'#16a34a':'#dc2626';
   if(rows.length>0){
     rows.push(`<tr style="background:#f0f7ff;font-weight:700;border-top:2px solid #bfdbfe">
-      <td>รวมทั้งหมด</td>
-      <td class="num">${N0(totalWater)}</td>
-      <td class="num">${N0(totalCassava)}</td>
+      <td>${dbFilter.mode==='lot'?'รวมที่เลือก ('+filtLots.length+' Lot)':'รวมทั้งหมด'}</td>
+      <td class="num">${N0(totalWater)}</td><td class="num">${N0(totalCassava)}</td>
       <td class="num" style="color:#0369a1">${N0(totalWet)}</td>
       <td class="num" style="color:#92400e">${N0(totalForecast)}</td>
       <td class="num" style="color:#166534">${N0(totalActual)}</td>
       <td class="num" style="color:${totColor}">${N0(totDiff)}</td>
       <td class="num" style="color:${totColor}">${totalWet>0?N(totActualYield,1)+'%':'—'}</td>
       <td class="num">—</td>
-      <td class="num">${N0(totalSalesAmt)}</td>
     </tr>`);
   }
-  document.getElementById('dashboard-body').innerHTML=rows.length===0?'<tr><td colspan="10" class="empty"><div class="icon">📊</div>ยังไม่มีข้อมูล Lot</td></tr>':rows.join('');
+  document.getElementById('dashboard-body').innerHTML=rows.length===0
+    ?'<tr><td colspan="9" class="empty"><div class="icon">📊</div>ยังไม่มีข้อมูล Lot ที่ตรงกับเงื่อนไข</td></tr>'
+    :rows.join('');
+
+  // Filter badge
+  let badge='';
+  if(dbFilter.mode==='lot') badge=`แสดง ${filtLots.length} จาก ${lots.length} Lot`;
+  else if(dbFilter.mode==='date'){
+    const from=dbFilter.dateFrom||'—'; const to=dbFilter.dateTo||'—';
+    badge=`ช่วง ${from} ถึง ${to}`;
+  }
+  const badgeEl=document.getElementById('db-filter-badge');
+  if(badgeEl) badgeEl.textContent=badge;
+  const tblBadge=document.getElementById('db-table-badge');
+  if(tblBadge) tblBadge.textContent=badge;
+
   // Summary cards
-  document.getElementById('db-lots').textContent=lots.length||'0';
+  const lotsLabel=document.getElementById('db-lots-label');
+  if(lotsLabel) lotsLabel.textContent=dbFilter.mode==='lot'?'Lot ที่เลือก':'จำนวน Lot';
+  document.getElementById('db-lots').textContent=filtLots.length||'0';
   document.getElementById('db-cassava').textContent=N0(totalCassava);
   document.getElementById('db-water').textContent=N0(totalWater);
   document.getElementById('db-wet').textContent=N0(totalWet);
@@ -1486,7 +1616,6 @@ function renderDashboard(){
   document.getElementById('db-actual').textContent=N0(totalActual);
   const dbDiff=document.getElementById('db-diff');
   dbDiff.textContent=N0(totDiff);dbDiff.style.color=totDiff>=0?'#16a34a':'#dc2626';
-  document.getElementById('db-sales').textContent=N0(totalSalesAmt);
 }
 
 // ─── RENDER: SALES ──────────────────────────────────────────────────
