@@ -87,6 +87,10 @@ tr:hover td{background:#f8faff}
 /* PAID */
 .paid-tag{background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
 .unpaid-tag{background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+/* BULK PAY */
+.pay-check{width:15px;height:15px;cursor:pointer;accent-color:#2d7ab8;vertical-align:middle}
+#pay-bulk-bar{background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:10px 16px;margin-bottom:10px;align-items:center;gap:10px}
+.bank-badge{background:#f0f9ff;color:#0369a1;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
 
 /* LOT selector */
 #lot-select-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;background:#f0f7ff;padding:10px 14px;border-radius:8px;border:1px solid #bfdbfe}
@@ -388,13 +392,16 @@ tr:hover td{background:#f8faff}
   <div id="content">
     <div class="panel">
       <div class="section-title" style="margin-bottom:14px">💰 ติดตามการชำระเงิน</div>
-      <div class="pay-filter" id="pay-filter">
-        <button class="pay-filter-btn active" onclick="setPayFilter('all',this)">ทั้งหมด</button>
-        <button class="pay-filter-btn" onclick="setPayFilter('water',this)">💧 น้ำ A-teins</button>
-        <button class="pay-filter-btn" onclick="setPayFilter('cassava',this)">🌾 กากมัน</button>
-        <button class="pay-filter-btn" onclick="setPayFilter('dryIn',this)">🏚️ ค่าตาก+เก็บ</button>
-        <button class="pay-filter-btn" onclick="setPayFilter('dryOut',this)">🚛 ขนส่งผลิต</button>
-        <button class="pay-filter-btn" onclick="setPayFilter('sale',this)">🛒 ค่าโม่บด+ขนส่งขาย</button>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <div class="pay-filter" id="pay-filter" style="margin-bottom:0">
+          <button class="pay-filter-btn active" onclick="setPayFilter('all',this)">ทั้งหมด</button>
+          <button class="pay-filter-btn" onclick="setPayFilter('water',this)">💧 น้ำ A-teins</button>
+          <button class="pay-filter-btn" onclick="setPayFilter('cassava',this)">🌾 กากมัน</button>
+          <button class="pay-filter-btn" onclick="setPayFilter('dryIn',this)">🏚️ ค่าตาก+เก็บ</button>
+          <button class="pay-filter-btn" onclick="setPayFilter('dryOut',this)">🚛 ขนส่งผลิต</button>
+          <button class="pay-filter-btn" onclick="setPayFilter('sale',this)">🛒 ค่าโม่บด+ขนส่งขาย</button>
+        </div>
+        <span style="font-size:12px;color:#9ca3af">💡 ติ๊กเลือกหลายรายการเพื่อชำระพร้อมกัน</span>
       </div>
       <div id="payments-body"></div>
     </div>
@@ -826,6 +833,55 @@ tr:hover td{background:#f8faff}
   </div>
 </div>
 
+<!-- ===== MODAL: PAYMENT ===== -->
+<div class="modal-overlay" id="modal-payment">
+  <div class="modal" style="max-width:460px">
+    <h2>💰 บันทึกการชำระเงิน</h2>
+    <div id="pay-modal-summary" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#065f46;line-height:1.7"></div>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>วันที่ชำระ</label>
+        <div class="date-parts">
+          <input type="number" id="pm-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+          <select id="pm-m" class="date-part-m"><option value="">— เดือน —</option>
+            <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option>
+            <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+            <option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+          <input type="number" id="pm-y" class="date-part-y" placeholder="ปี พ.ศ." min="2500" max="2600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>จำนวนเงิน (บาท)</label>
+        <input type="number" id="pm-amount" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label>ธนาคารที่ใช้โอน</label>
+        <select id="pm-bank">
+          <option value="">— ไม่ระบุ —</option>
+          <option value="กสิกรไทย">🟢 กสิกรไทย (KBank)</option>
+          <option value="ไทยพาณิชย์">💜 ไทยพาณิชย์ (SCB)</option>
+          <option value="กรุงเทพ">💙 กรุงเทพ (BBL)</option>
+          <option value="กรุงไทย">🔵 กรุงไทย (KTB)</option>
+          <option value="กรุงศรี">🟡 กรุงศรี (BAY)</option>
+          <option value="ออมสิน">💚 ออมสิน (GSB)</option>
+          <option value="ทหารไทยธนชาต">🟠 ทหารไทยธนชาต (TTB)</option>
+          <option value="UOB">🔴 UOB</option>
+          <option value="CIMB">🔴 CIMB</option>
+          <option value="เกียรตินาคินภัทร">🟤 เกียรตินาคินภัทร (KKP)</option>
+          <option value="แลนด์แอนด์เฮ้าส์">🟤 แลนด์แอนด์เฮ้าส์ (LH)</option>
+          <option value="ทิสโก้">🟡 ทิสโก้ (TISCO)</option>
+          <option value="เงินสด">💵 เงินสด</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-payment')">ยกเลิก</button>
+      <button class="btn btn-green" onclick="savePayment()">💾 บันทึกการชำระ</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── FIREBASE CONFIG ───────────────────────────────────────────────
 const firebaseConfig = {
@@ -849,6 +905,7 @@ let destWarehouses = ['โกดัง RBM'];
 let currentLotId = '';
 let editingEntry = null; // {type, id}
 let payFilter = 'all';
+let payModalItems = []; // [{type,id}] for payment modal
 
 // ─── FORMAT HELPERS ────────────────────────────────────────────────
 const N  = (v,d=2) => v==null||isNaN(v)?'—':Number(v).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -1232,13 +1289,71 @@ function deleteEntry(type,id){
   saveAll();renderAll();
 }
 
-function markPaid(type,id){
-  const arr=type==='water'?water:type==='cassava'?cassava:type==='dryIn'?dryIn:type==='dryOut'?dryOut:sales;
+function getArr(type){return type==='water'?water:type==='cassava'?cassava:type==='dryIn'?dryIn:type==='dryOut'?dryOut:sales;}
+function getEntryAmount(type,entry){return type==='dryOut'?(entry.transport||0):(entry.total||0);}
+function markPaid(type,id){ openPayModal(type,id); }
+
+function openPayModal(type,id){
+  const arr=getArr(type);
   const entry=arr.find(x=>x.id===id);if(!entry)return;
-  const today=new Date();const bey=today.getFullYear()+543;
-  const m=String(today.getMonth()+1).padStart(2,'0');const d=String(today.getDate()).padStart(2,'0');
-  entry.paid=true;entry.payDate=`${bey}-${m}-${d}`;
+  payModalItems=[{type,id}];
+  const amt=getEntryAmount(type,entry);
+  prefillToday('pm');
+  document.getElementById('pm-amount').value=amt.toFixed(2);
+  document.getElementById('pm-bank').value=entry.payBank||'';
+  const detail=entry.truck||entry.warehouse||entry.customer||entry.fromWarehouse||'';
+  document.getElementById('pay-modal-summary').innerHTML=
+    `ประเภท: <strong>${entry.typeLabel||type}</strong>${detail?' · '+detail:''}<br>ยอดชำระ: <strong style="font-size:15px">${N0(amt)} บาท</strong>`;
+  document.getElementById('modal-payment').classList.add('open');
+}
+
+function openPayModalBulk(){
+  const checked=[...document.querySelectorAll('.pay-check:checked')];
+  if(checked.length===0){alert('กรุณาเลือกรายการที่ต้องการชำระ');return;}
+  payModalItems=checked.map(c=>({type:c.dataset.type,id:c.dataset.id}));
+  const total=payModalItems.reduce((s,item)=>{
+    const e=getArr(item.type).find(x=>x.id===item.id);
+    return s+(e?getEntryAmount(item.type,e):0);
+  },0);
+  prefillToday('pm');
+  document.getElementById('pm-amount').value=total.toFixed(2);
+  document.getElementById('pm-bank').value='';
+  document.getElementById('pay-modal-summary').innerHTML=
+    `ชำระพร้อมกัน <strong>${payModalItems.length} รายการ</strong><br>ยอดรวม: <strong style="font-size:15px">${N0(total)} บาท</strong>`;
+  document.getElementById('modal-payment').classList.add('open');
+}
+
+function savePayment(){
+  const payDate=getDateStr('pm');
+  const payBank=document.getElementById('pm-bank').value;
+  if(!payDate){alert('กรุณาเลือกวันที่ชำระ');return;}
+  const isSingle=payModalItems.length===1;
+  const manualAmount=isSingle?parseFloat(document.getElementById('pm-amount').value)||0:null;
+  payModalItems.forEach(item=>{
+    const arr=getArr(item.type);
+    const entry=arr.find(x=>x.id===item.id);if(!entry)return;
+    entry.paid=true;entry.payDate=payDate;entry.payBank=payBank;
+    if(isSingle)entry.payAmount=manualAmount;
+    else entry.payAmount=getEntryAmount(item.type,entry);
+  });
+  closeModal('modal-payment');
   saveAll();renderAll();
+}
+
+function updateBulkBar(){
+  const n=document.querySelectorAll('.pay-check:checked').length;
+  const bar=document.getElementById('pay-bulk-bar');if(!bar)return;
+  const cnt=document.getElementById('pay-bulk-count');
+  if(n>0){bar.style.display='flex';if(cnt)cnt.textContent=`เลือก ${n} รายการ`;}
+  else bar.style.display='none';
+}
+function clearPayChecks(){
+  document.querySelectorAll('.pay-check').forEach(c=>c.checked=false);
+  updateBulkBar();
+}
+function toggleSelectAllPay(cb){
+  document.querySelectorAll('.pay-check').forEach(c=>c.checked=cb.checked);
+  updateBulkBar();
 }
 
 // ─── RENDER: PRODUCTION ────────────────────────────────────────────
@@ -1424,24 +1539,33 @@ function renderPayments(){
    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const totalUnpaid=all.filter(x=>!x.paid).reduce((s,x)=>s+(x.amount||0),0);
   const totalPaid=all.filter(x=>x.paid).reduce((s,x)=>s+(x.amount||0),0);
+  const hasUnpaid=all.some(x=>!x.paid);
   const getLotCode=id=>{ const l=lots.find(x=>x.id===id);return l?l.code:'—'; };
   document.getElementById('payments-body').innerHTML=`
     <div class="cards" style="margin-bottom:12px">
       <div class="card red"><label>ยังไม่ชำระ</label><div class="val">${N0(totalUnpaid)}</div><div class="sub">บาท</div></div>
       <div class="card green"><label>ชำระแล้ว</label><div class="val">${N0(totalPaid)}</div><div class="sub">บาท</div></div>
     </div>
+    <div id="pay-bulk-bar" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:10px 16px;margin-bottom:10px;align-items:center;gap:10px">
+      <span id="pay-bulk-count" style="font-weight:600;color:#1d4ed8;flex:1"></span>
+      <button class="btn btn-green btn-sm" onclick="openPayModalBulk()">💰 ชำระที่เลือก</button>
+      <button class="btn btn-outline btn-sm" onclick="clearPayChecks()">✕ ล้างการเลือก</button>
+    </div>
     <div class="table-wrap"><table><thead><tr>
-      <th>วันที่</th><th>ประเภท</th><th>Lot</th><th>รายละเอียด</th><th class="num">จำนวน (บาท)</th><th>สถานะ</th><th>วันที่ชำระ</th><th></th>
-    </tr></thead><tbody>${all.length===0?'<tr><td colspan="8" class="empty">ไม่มีรายการ</td></tr>':
-    all.map(e=>`<tr>
-      <td>${e.date||'—'}</td>
-      <td>${e.typeLabel}</td>
+      ${hasUnpaid?'<th style="width:32px"><input type="checkbox" class="pay-check" style="width:15px;height:15px;accent-color:#2d7ab8" onchange="toggleSelectAllPay(this)" title="เลือกทั้งหมด"></th>':'<th></th>'}
+      <th>วันที่</th><th>ประเภท</th><th>Lot</th><th>รายละเอียด</th><th class="num">จำนวน (บาท)</th><th>สถานะ</th><th>วันที่ชำระ</th><th>ธนาคาร</th><th></th>
+    </tr></thead><tbody>${all.length===0?'<tr><td colspan="10" class="empty">ไม่มีรายการ</td></tr>':
+    all.map(e=>`<tr${!e.paid?' style="background:#fffbeb"':''}>
+      <td>${!e.paid?`<input type="checkbox" class="pay-check" data-type="${e.type}" data-id="${e.id}" style="width:15px;height:15px;accent-color:#2d7ab8" onchange="updateBulkBar()">`:''}</td>
+      <td style="font-size:12px">${e.date||'—'}</td>
+      <td style="font-size:12px">${e.typeLabel}</td>
       <td><span class="lot-badge">${getLotCode(e.lotId)}</span></td>
       <td style="font-size:12px">${e.truck||e.warehouse||e.customer||e.fromWarehouse||'—'}</td>
       <td class="num" style="font-weight:700">${N0(e.amount)}</td>
       <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ ชำระแล้ว':'❌ ค้างชำระ'}</span></td>
       <td style="font-size:12px;color:#6b7280">${e.payDate||'—'}</td>
-      <td>${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${e.type}','${e.id}')">💰 ชำระ</button>`:''}</td>
+      <td>${e.payBank?`<span class="bank-badge">${e.payBank}</span>`:'<span style="color:#d1d5db;font-size:12px">—</span>'}</td>
+      <td>${!e.paid?`<button class="btn btn-green btn-sm" onclick="openPayModal('${e.type}','${e.id}')">💰 ชำระ</button>`:`<button class="btn btn-outline btn-sm" onclick="openPayModal('${e.type}','${e.id}')">✏️</button>`}</td>
     </tr>`).join('')}</tbody></table></div>`;
 }
 
