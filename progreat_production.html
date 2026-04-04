@@ -365,12 +365,7 @@ tr:hover td{background:#f8faff}
     <div class="panel">
       <div class="section-header">
         <div class="section-title">🛒 รายการขาย</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="sales-lot-filter" onchange="renderSales()" style="padding:6px 10px;border:1.5px solid #d1d5db;border-radius:6px;font-size:13px;outline:none">
-            <option value="">-- ทุก Lot --</option>
-          </select>
-          <button class="btn btn-green btn-sm" id="btn-add-sale" onclick="openModal('sale')">+ เพิ่มการขาย</button>
-        </div>
+        <button class="btn btn-green btn-sm" id="btn-add-sale" onclick="openModal('sale')">+ เพิ่มการขาย</button>
       </div>
       <div class="cards" style="margin-bottom:12px">
         <div class="card green"><label>ยอดขายรวม</label><div class="val" id="sale-card-total">—</div><div class="sub">บาท</div></div>
@@ -379,7 +374,7 @@ tr:hover td{background:#f8faff}
       </div>
       <div class="table-wrap">
         <table><thead><tr>
-          <th>วันที่</th><th>Lot</th><th>ลูกค้า/สถานที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">จำนวนถุง</th><th>การจัดส่ง</th><th class="num">ค่าโม่บด</th><th class="num">ค่าขนส่ง</th><th class="num">รวม (บาท)</th><th>ชำระ</th><th></th>
+          <th>วันที่</th><th>ลูกค้า/สถานที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">จำนวนถุง</th><th>การจัดส่ง</th><th class="num">ค่าโม่บด</th><th class="num">ค่าขนส่ง</th><th class="num">รวม (บาท)</th><th>ชำระ</th><th>หมายเหตุ</th><th></th>
         </tr></thead>
         <tbody id="sales-body"><tr><td colspan="12" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr></tbody>
         </table>
@@ -436,6 +431,11 @@ tr:hover td{background:#f8faff}
           <label>🚛 ค่าขนส่ง ProGreat (บาท/เที่ยว)</label>
           <input type="number" id="s-transport-prod" value="5000" step="500" oninput="saveSettings()">
           <div class="unit">ค่าขนส่งเฉลี่ยต่อเที่ยว (ปรับได้ทีหลัง)</div>
+        </div>
+        <div class="setting-item">
+          <label>🚚 ค่าขนส่งการขาย (บาท/กก.)</label>
+          <input type="number" id="s-transport-sale" value="0.4" step="0.05" oninput="saveSettings()">
+          <div class="unit">ราคากลางต่อกิโลกรัม (ใช้เป็น default)</div>
         </div>
         <div class="setting-item">
           <label>📦 Yield ProGreat แห้ง (%)</label>
@@ -756,10 +756,6 @@ tr:hover td{background:#f8faff}
         </div>
       </div>
       <div class="form-group">
-        <label>Lot การผลิต</label>
-        <select id="s-lot" style="border:1.5px solid #d1d5db;border-radius:7px;padding:8px 10px;font-size:13px;outline:none;background:#fff"></select>
-      </div>
-      <div class="form-group">
         <label>ทะเบียนรถรับสินค้า</label>
         <input type="text" id="s-truck" placeholder="กข 5678">
       </div>
@@ -790,9 +786,17 @@ tr:hover td{background:#f8faff}
           <option value="delivered">🚛 ส่งถึง</option>
         </select>
       </div>
-      <div class="form-group" id="s-transport-group">
-        <label>ค่าขนส่ง (บาท)</label>
-        <input type="number" id="s-transport" step="100" value="0" oninput="calcSaleCost()">
+      <div class="form-group" id="s-transport-group" style="display:none">
+        <label>ค่าขนส่ง/กก. (บาท)</label>
+        <input type="number" id="s-transport-rate" step="0.05" value="0.4" oninput="calcSaleCost()">
+      </div>
+      <div class="form-group" id="s-transport-total-group" style="display:none">
+        <label>ค่าขนส่ง รวม (บาท)</label>
+        <input type="number" id="s-transport" readonly style="background:#f3f4f6">
+      </div>
+      <div class="form-group">
+        <label>หมายเหตุ</label>
+        <input type="text" id="s-notes" placeholder="บันทึกเพิ่มเติม (ถ้ามี)">
       </div>
       <div class="form-group">
         <label>ชำระเงินแล้ว?</label>
@@ -835,7 +839,7 @@ const db   = firebase.firestore();
 // ─── STATE ─────────────────────────────────────────────────────────
 let currentUser = null, currentRole = null;
 let lots = [], water = [], cassava = [], dryIn = [], dryOut = [], sales = [];
-let settings = { waterPrice:500, cassavaPrice:1.5, dryingCost:0.5, grindingCost:0.3, transportProd:5000, yield:50 };
+let settings = { waterPrice:500, cassavaPrice:1.5, dryingCost:0.5, grindingCost:0.3, transportProd:5000, transportSale:0.4, yield:50 };
 let warehouses = ['โกดัง A','โกดัง B'];
 let destWarehouses = ['โกดัง RBM'];
 let currentLotId = '';
@@ -974,6 +978,7 @@ async function saveSettings(){
   settings.dryingCost=parseFloat(document.getElementById('s-drying-cost').value)||0.5;
   settings.grindingCost=parseFloat(document.getElementById('s-grinding-cost').value)||0.3;
   settings.transportProd=parseFloat(document.getElementById('s-transport-prod').value)||5000;
+  settings.transportSale=parseFloat(document.getElementById('s-transport-sale').value)||0.4;
   settings.yield=parseFloat(document.getElementById('s-yield').value)||85;
   try{await db.collection('pgp_data').doc('settings').set(settings);}catch(e){console.error(e);}
   renderProduction();
@@ -984,6 +989,7 @@ function applySettingsToUI(){
   document.getElementById('s-drying-cost').value=settings.dryingCost;
   document.getElementById('s-grinding-cost').value=settings.grindingCost;
   document.getElementById('s-transport-prod').value=settings.transportProd;
+  document.getElementById('s-transport-sale').value=settings.transportSale||0.4;
   document.getElementById('s-yield').value=settings.yield;
 }
 
@@ -1018,16 +1024,6 @@ function populateLotSelect(){
   sel.innerHTML='<option value="">-- เลือก Lot --</option>';
   lots.forEach(l=>{sel.innerHTML+=`<option value="${l.id}">${l.code} — ${l.desc}</option>`;});
   if(cur)sel.value=cur;
-  // Sales lot filter
-  const sf=document.getElementById('sales-lot-filter');
-  const scur=sf.value;
-  sf.innerHTML='<option value="">-- ทุก Lot --</option>';
-  lots.forEach(l=>{sf.innerHTML+=`<option value="${l.id}">${l.code}</option>`;});
-  if(scur)sf.value=scur;
-  // Sale modal lot
-  const sl=document.getElementById('s-lot');
-  sl.innerHTML='<option value="">-- เลือก Lot --</option>';
-  lots.forEach(l=>{sl.innerHTML+=`<option value="${l.id}">${l.code} — ${l.desc}</option>`;});
 }
 function onLotChange(){
   currentLotId=document.getElementById('lot-select').value;
@@ -1133,10 +1129,10 @@ function openModal(type, entry=null){
     document.getElementById('modal-dryOut').classList.add('open');
   } else if(type==='sale'){
     prefillToday('s');
-    document.getElementById('s-lot').value=currentLotId||'';
-    if(entry){setDateParts('s',entry.date);document.getElementById('s-lot').value=entry.lotId||'';document.getElementById('s-truck').value=entry.truck||'';document.getElementById('s-customer').value=entry.customer||'';document.getElementById('s-weight').value=entry.weightKg;document.getElementById('s-bags').value=entry.bags||'';document.getElementById('s-grind-rate').value=entry.grindRate;document.getElementById('s-grind-total').value=entry.grindTotal;document.getElementById('s-delivery').value=entry.deliveryType||'pickup';document.getElementById('s-transport').value=entry.transport||0;document.getElementById('s-paid').value=entry.paid?'yes':'no';setDateParts('s-p',entry.payDate||'');}
-    else{document.getElementById('s-truck').value='';document.getElementById('s-customer').value='';document.getElementById('s-weight').value='';document.getElementById('s-bags').value='';document.getElementById('s-grind-rate').value=settings.grindingCost;document.getElementById('s-grind-total').value='';document.getElementById('s-delivery').value='pickup';document.getElementById('s-transport').value=0;document.getElementById('s-paid').value='no';setDateParts('s-p','');}
+    if(entry){setDateParts('s',entry.date);document.getElementById('s-truck').value=entry.truck||'';document.getElementById('s-customer').value=entry.customer||'';document.getElementById('s-weight').value=entry.weightKg;document.getElementById('s-bags').value=entry.bags||'';document.getElementById('s-grind-rate').value=entry.grindRate;document.getElementById('s-grind-total').value=entry.grindTotal;document.getElementById('s-delivery').value=entry.deliveryType||'pickup';document.getElementById('s-transport-rate').value=entry.transportRate!==undefined?entry.transportRate:settings.transportSale;document.getElementById('s-transport').value=entry.transport||0;document.getElementById('s-notes').value=entry.notes||'';document.getElementById('s-paid').value=entry.paid?'yes':'no';setDateParts('s-p',entry.payDate||'');}
+    else{document.getElementById('s-truck').value='';document.getElementById('s-customer').value='';document.getElementById('s-weight').value='';document.getElementById('s-bags').value='';document.getElementById('s-grind-rate').value=settings.grindingCost;document.getElementById('s-grind-total').value='';document.getElementById('s-delivery').value='pickup';document.getElementById('s-transport-rate').value=settings.transportSale||0.4;document.getElementById('s-transport').value=0;document.getElementById('s-notes').value='';document.getElementById('s-paid').value='no';setDateParts('s-p','');}
     document.getElementById('modal-sale').classList.add('open');
+    calcSaleCost();
   }
 }
 
@@ -1144,7 +1140,24 @@ function openModal(type, entry=null){
 function calcWaterCost(){ const v=parseFloat(document.getElementById('w-volume').value)||0,p=parseFloat(document.getElementById('w-price').value)||0;document.getElementById('w-total').value=(v*p).toFixed(2); }
 function calcCassavaCost(){ const w=parseFloat(document.getElementById('c-weight').value)||0,p=parseFloat(document.getElementById('c-price').value)||0;document.getElementById('c-total').value=(w*p).toFixed(2); }
 function calcDryInCost(){ const w=parseFloat(document.getElementById('di-weight').value)||0,p=parseFloat(document.getElementById('di-cost').value)||0;document.getElementById('di-total').value=(w*p).toFixed(2); }
-function calcSaleCost(){ const w=parseFloat(document.getElementById('s-weight').value)||0,r=parseFloat(document.getElementById('s-grind-rate').value)||0;document.getElementById('s-grind-total').value=(w*r).toFixed(2); }
+function calcSaleCost(){
+  const w=parseFloat(document.getElementById('s-weight').value)||0;
+  const r=parseFloat(document.getElementById('s-grind-rate').value)||0;
+  document.getElementById('s-grind-total').value=(w*r).toFixed(2);
+  const delivery=document.getElementById('s-delivery').value;
+  const tGrp=document.getElementById('s-transport-group');
+  const tTGrp=document.getElementById('s-transport-total-group');
+  if(delivery==='pickup'){
+    if(tGrp)tGrp.style.display='none';
+    if(tTGrp)tTGrp.style.display='none';
+    document.getElementById('s-transport').value=0;
+  } else {
+    if(tGrp)tGrp.style.display='';
+    if(tTGrp)tTGrp.style.display='';
+    const tr=parseFloat(document.getElementById('s-transport-rate').value)||0;
+    document.getElementById('s-transport').value=(w*tr).toFixed(2);
+  }
+}
 
 // ─── SAVE ENTRY ────────────────────────────────────────────────────
 function saveEntry(type){
@@ -1186,13 +1199,14 @@ function saveEntry(type){
     else dryOut.push(entry);
     closeModal('modal-dryOut');
   } else if(type==='sale'){
-    const lotId=document.getElementById('s-lot').value;
-    if(!lotId){alert('กรุณาเลือก Lot');return;}
-    entry={...entry,date:getDateStr('s'),lotId,
+    const deliveryType=document.getElementById('s-delivery').value;
+    const transportRate=deliveryType==='delivered'?parseFloat(document.getElementById('s-transport-rate').value)||0:0;
+    const transport=deliveryType==='delivered'?parseFloat(document.getElementById('s-transport').value)||0:0;
+    entry={...entry,date:getDateStr('s'),
       truck:document.getElementById('s-truck').value.trim(),customer:document.getElementById('s-customer').value.trim(),
       weightKg:parseFloat(document.getElementById('s-weight').value)||0,bags:parseInt(document.getElementById('s-bags').value)||0,
       grindRate:parseFloat(document.getElementById('s-grind-rate').value)||0,grindTotal:parseFloat(document.getElementById('s-grind-total').value)||0,
-      deliveryType:document.getElementById('s-delivery').value,transport:parseFloat(document.getElementById('s-transport').value)||0,
+      deliveryType,transportRate,transport,notes:document.getElementById('s-notes').value.trim(),
       paid:document.getElementById('s-paid').value==='yes',payDate:getDateStr('s-p')};
     entry.total=(entry.grindTotal+entry.transport);
     if(editingEntry){const i=sales.findIndex(x=>x.id===editingEntry.id);if(i>=0)sales[i]=entry;else sales.push(entry);}
@@ -1356,8 +1370,7 @@ function renderDashboard(){
 
 // ─── RENDER: SALES ──────────────────────────────────────────────────
 function renderSales(){
-  const filterLot=document.getElementById('sales-lot-filter')?.value||'';
-  let rows=sales.filter(x=>!filterLot||x.lotId===filterLot);
+  let rows=[...sales];
   rows.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const total=rows.reduce((s,x)=>s+(x.total||0),0);
   const wt=rows.reduce((s,x)=>s+(x.weightKg||0),0);
@@ -1365,21 +1378,20 @@ function renderSales(){
   document.getElementById('sale-card-total').textContent=N0(total)+' บาท';
   document.getElementById('sale-card-weight').textContent=N0(wt)+' กก.';
   document.getElementById('sale-card-unpaid').textContent=N0(unpaid)+' บาท';
-  const getLotCode=id=>{ const l=lots.find(x=>x.id===id);return l?l.code:id||'—'; };
   const isAdmin=currentRole==='admin';
   document.getElementById('sales-body').innerHTML=rows.length===0?'<tr><td colspan="12" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr>':
     rows.map(e=>`<tr>
       <td>${e.date||'—'}</td>
-      <td><span class="lot-badge">${getLotCode(e.lotId)}</span></td>
       <td style="font-weight:600">${e.customer||'—'}</td>
       <td>${e.truck||'—'}</td>
       <td class="num">${N0(e.weightKg)}</td>
       <td class="num">${e.bags||'—'}</td>
       <td><span class="badge ${e.deliveryType==='delivered'?'badge-blue':'badge-gray'}">${e.deliveryType==='delivered'?'🚛 ส่งถึง':'🚗 รับเอง'}</span></td>
       <td class="num">${N0(e.grindTotal)}</td>
-      <td class="num">${e.transport?N0(e.transport):'—'}</td>
+      <td class="num">${e.transport?N0(e.transport)+(e.transportRate?' ('+e.transportRate+' บ/กก.)':''):'—'}</td>
       <td class="num" style="font-weight:700">${N0(e.total)}</td>
       <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ '+e.payDate:'❌ ค้าง'}</span></td>
+      <td style="font-size:12px;color:#6b7280">${e.notes||'—'}</td>
       <td><div style="display:flex;gap:4px">
         ${isAdmin?`<button class="btn btn-outline btn-sm" onclick='openModal("sale",${JSON.stringify(e)})'>✏️</button>`:''}
         ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('sale','${e.id}')">💰</button>`:''}
