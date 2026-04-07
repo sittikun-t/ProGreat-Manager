@@ -369,16 +369,6 @@ tr:hover td{background:#f8faff}
           <div style="font-weight:700;color:#92400e;font-size:15px">Forecast = <span id="forecast-result">0</span> กก.</div>
         </div>
       </div>
-      <!-- Step 3: เปรียบเทียบ -->
-      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 14px;font-size:13px;color:#374151">
-        <div style="font-weight:700;color:#166534;margin-bottom:6px">③ เปรียบเทียบ Forecast vs รับเข้าจริง</div>
-        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
-          <div>แห้ง Forecast: <strong id="cmp-forecast">0</strong> กก.</div>
-          <div>แห้ง รับจริง: <strong id="cmp-actual">0</strong> กก.</div>
-          <div>ผลต่าง: <strong id="cmp-diff" style="font-size:15px">0</strong> กก.</div>
-          <div>Yield จริง: <strong id="cmp-yield-actual">—</strong></div>
-        </div>
-      </div>
     </div>
 
   </div>
@@ -406,21 +396,100 @@ tr:hover td{background:#f8faff}
     </div>
 
     <!-- Forecast vs จริง comparison panel (all lots) -->
-    <div class="panel">
-      <div class="section-title" style="margin-bottom:12px">📊 Forecast vs รับเข้าจริง <span class="hint" style="font-size:12px;font-weight:400;color:#6b7280">(ทุก Lot รวมกัน)</span></div>
-      <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:14px 16px;font-size:13px;color:#374151;margin-bottom:10px">
-        <div style="font-weight:700;color:#92400e;margin-bottom:8px">① ProGreat แห้ง Forecast รวมทุก Lot</div>
-        <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
-          <div>Yield: <strong><span id="wh-yield-display">—</span>%</strong></div>
-          <div style="color:#6b7280">→</div>
-          <div style="font-weight:700;color:#92400e;font-size:16px">Forecast รวม = <span id="wh-forecast-total">0</span> กก.</div>
+    <div class="panel" id="wh-cmp-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin-bottom:0">📊 Forecast vs รับเข้าจริง</div>
+        <span id="wh-cmp-badge" style="font-size:11px;color:#6b7280;background:#f3f4f6;padding:3px 10px;border-radius:10px"></span>
+      </div>
+
+      <!-- Date range filter (admin/manager only) -->
+      <div id="wh-cmp-filter-row" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px">🗓️ เลือกช่วงวันที่ <span style="font-size:11px;font-weight:400;color:#9ca3af">(Admin / Manager เท่านั้น)</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+
+          <!-- Production date range -->
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:12px;color:#0369a1;font-weight:600;min-width:220px">🫧 วันที่ผลิต (น้ำ+กากมัน → Forecast):</span>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:12px;color:#6b7280">ตั้งแต่</span>
+              <div class="date-parts">
+                <input type="number" id="wcp-pf-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+                <select id="wcp-pf-m" class="date-part-m">
+                  <option value="">— เดือน —</option>
+                  <option value="01">ม.ค.</option><option value="02">ก.พ.</option><option value="03">มี.ค.</option><option value="04">เม.ย.</option>
+                  <option value="05">พ.ค.</option><option value="06">มิ.ย.</option><option value="07">ก.ค.</option><option value="08">ส.ค.</option>
+                  <option value="09">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+                </select>
+                <input type="number" id="wcp-pf-y" class="date-part-y" placeholder="ปี พ.ศ." min="2560" max="2599">
+              </div>
+              <span style="font-size:12px;color:#6b7280">ถึง</span>
+              <div class="date-parts">
+                <input type="number" id="wcp-pt-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+                <select id="wcp-pt-m" class="date-part-m">
+                  <option value="">— เดือน —</option>
+                  <option value="01">ม.ค.</option><option value="02">ก.พ.</option><option value="03">มี.ค.</option><option value="04">เม.ย.</option>
+                  <option value="05">พ.ค.</option><option value="06">มิ.ย.</option><option value="07">ก.ค.</option><option value="08">ส.ค.</option>
+                  <option value="09">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+                </select>
+                <input type="number" id="wcp-pt-y" class="date-part-y" placeholder="ปี พ.ศ." min="2560" max="2599">
+              </div>
+            </div>
+          </div>
+
+          <!-- DryIn date range -->
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:12px;color:#065f46;font-weight:600;min-width:220px">🏚️ วันที่รับเข้าโกดัง (ProGreat แห้ง):</span>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:12px;color:#6b7280">ตั้งแต่</span>
+              <div class="date-parts">
+                <input type="number" id="wcp-df-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+                <select id="wcp-df-m" class="date-part-m">
+                  <option value="">— เดือน —</option>
+                  <option value="01">ม.ค.</option><option value="02">ก.พ.</option><option value="03">มี.ค.</option><option value="04">เม.ย.</option>
+                  <option value="05">พ.ค.</option><option value="06">มิ.ย.</option><option value="07">ก.ค.</option><option value="08">ส.ค.</option>
+                  <option value="09">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+                </select>
+                <input type="number" id="wcp-df-y" class="date-part-y" placeholder="ปี พ.ศ." min="2560" max="2599">
+              </div>
+              <span style="font-size:12px;color:#6b7280">ถึง</span>
+              <div class="date-parts">
+                <input type="number" id="wcp-dt-d" class="date-part-d" placeholder="วัน" min="1" max="31">
+                <select id="wcp-dt-m" class="date-part-m">
+                  <option value="">— เดือน —</option>
+                  <option value="01">ม.ค.</option><option value="02">ก.พ.</option><option value="03">มี.ค.</option><option value="04">เม.ย.</option>
+                  <option value="05">พ.ค.</option><option value="06">มิ.ย.</option><option value="07">ก.ค.</option><option value="08">ส.ค.</option>
+                  <option value="09">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+                </select>
+                <input type="number" id="wcp-dt-y" class="date-part-y" placeholder="ปี พ.ศ." min="2560" max="2599">
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-blue btn-sm" onclick="applyWhCmpFilter()">🔍 คำนวน</button>
+          <button class="btn btn-outline btn-sm" onclick="clearWhCmpFilter()">✕ ล้างตัวกรอง (แสดงทั้งหมด)</button>
         </div>
       </div>
+
+      <!-- ① Forecast from production range -->
+      <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:14px 16px;font-size:13px;color:#374151;margin-bottom:10px">
+        <div style="font-weight:700;color:#92400e;margin-bottom:8px">① ProGreat แห้ง Forecast <span id="wh-cmp-prod-range-lbl" style="font-size:11px;font-weight:400;color:#b45309">(จากวันที่ผลิตที่เลือก)</span></div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+          <div>เปียก (กากมัน+น้ำ): <strong id="wh-cmp-wet">0</strong> กก.</div>
+          <div style="color:#6b7280">×</div>
+          <div>Yield <strong><span id="wh-yield-display">—</span>%</strong></div>
+          <div style="color:#6b7280">=</div>
+          <div style="font-weight:700;color:#92400e;font-size:16px">Forecast = <span id="wh-forecast-total">0</span> กก.</div>
+        </div>
+      </div>
+
+      <!-- ② Comparison -->
       <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:14px 16px;font-size:13px;color:#374151">
-        <div style="font-weight:700;color:#166534;margin-bottom:8px">② เปรียบเทียบ Forecast vs รับเข้าจริง (ทุก Lot)</div>
+        <div style="font-weight:700;color:#166534;margin-bottom:8px">② เปรียบเทียบ Forecast vs รับเข้าจริง <span id="wh-cmp-dryin-range-lbl" style="font-size:11px;font-weight:400;color:#166534">(จากวันที่รับเข้าที่เลือก)</span></div>
         <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:center">
-          <div>แห้ง Forecast รวม: <strong id="wh-cmp-forecast">0</strong> กก.</div>
-          <div>แห้ง รับจริง รวม: <strong id="wh-cmp-actual">0</strong> กก.</div>
+          <div>แห้ง Forecast: <strong id="wh-cmp-forecast">0</strong> กก.</div>
+          <div>แห้ง รับจริง: <strong id="wh-cmp-actual">0</strong> กก.</div>
           <div>ผลต่าง: <strong id="wh-cmp-diff" style="font-size:15px">0</strong> กก.</div>
           <div>Yield จริงเฉลี่ย: <strong id="wh-cmp-yield-actual">—</strong></div>
         </div>
@@ -1109,6 +1178,7 @@ let editingEntry = null; // {type, id}
 let payFilter = 'all';
 let payModalItems = []; // [{type,id}] for payment modal
 let dbFilter = { mode:'all', lotIds:[], dateFrom:'', dateTo:'' };
+let whCmpFilter = { prodFrom:'', prodTo:'', dryFrom:'', dryTo:'' };
 
 // ─── FORMAT HELPERS ────────────────────────────────────────────────
 const N  = (v,d=2) => v==null||isNaN(v)?'—':Number(v).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -1765,11 +1835,6 @@ function renderProduction(){
   document.getElementById('wet-yield-display').textContent=settings.yield;
   document.getElementById('forecast-wet-ref').textContent=N0(wetKg);
   document.getElementById('forecast-result').textContent=N0(forecastDryKg);
-  document.getElementById('cmp-forecast').textContent=N0(forecastDryKg);
-  document.getElementById('cmp-actual').textContent=N0(totalDryInKg);
-  const cmpDiff=document.getElementById('cmp-diff');
-  cmpDiff.textContent=N0(diffKg);cmpDiff.style.color=diffKg>=0?'#16a34a':'#dc2626';
-  document.getElementById('cmp-yield-actual').textContent=lid&&wetKg>0?N(actualYield,1)+'%':'—';
 
   const isAdmin=currentRole==='admin';
   const isManager=currentRole==='manager';
@@ -1796,42 +1861,80 @@ function renderProduction(){
 // ─── RENDER: WAREHOUSE ─────────────────────────────────────────────
 function renderWarehouse(){
   const yld=settings.yield/100;
+  const isAdmin=currentRole==='admin';
+  const isManager=currentRole==='manager';
 
-  // All-lots totals for forecast (sum across all lots)
+  // ── Summary cards: always use ALL data (unfiltered) ──
+  const totalDryIn=dryIn.reduce((s,x)=>s+(x.weightKg||0),0);
+  const totalDryOut=dryOut.reduce((s,x)=>s+(x.fromWeight||0),0);
+  const stock=totalDryIn-totalDryOut;
   let totalAllWetKg=0;
   lots.forEach(l=>{
     const lWater=water.filter(x=>x.lotId===l.id).reduce((s,x)=>s+(x.weightKg||0),0);
     const lCassava=cassava.filter(x=>x.lotId===l.id).reduce((s,x)=>s+(x.weightKg||0),0);
     totalAllWetKg+=(lCassava+lWater);
   });
-  const totalForecast=totalAllWetKg*yld;
-  const totalDryIn=dryIn.reduce((s,x)=>s+(x.weightKg||0),0);
-  const totalDryOut=dryOut.reduce((s,x)=>s+(x.fromWeight||0),0);
-  const stock=totalDryIn-totalDryOut;
-  const diffKg=totalDryIn-totalForecast;
-  const actualYield=totalAllWetKg>0?(totalDryIn/totalAllWetKg*100):0;
+  const totalForecastAll=totalAllWetKg*yld;
+  const diffKgAll=totalDryIn-totalForecastAll;
 
-  // Update summary cards
-  const fc=document.getElementById('wh-card-forecast');if(fc)fc.textContent=N0(totalForecast);
+  const fc=document.getElementById('wh-card-forecast');if(fc)fc.textContent=N0(totalForecastAll);
   const di=document.getElementById('wh-card-dry-in');if(di)di.textContent=N0(totalDryIn);
   const diffEl=document.getElementById('wh-card-diff');
-  if(diffEl){diffEl.textContent=N0(diffKg);diffEl.style.color=diffKg>=0?'#16a34a':'#dc2626';}
+  if(diffEl){diffEl.textContent=N0(diffKgAll);diffEl.style.color=diffKgAll>=0?'#16a34a':'#dc2626';}
   const doEl=document.getElementById('wh-card-dry-out');if(doEl)doEl.textContent=N0(totalDryOut);
   const stEl=document.getElementById('wh-card-stock');if(stEl)stEl.textContent=N0(stock);
 
-  // Update comparison panel
+  // ── Comparison panel: use whCmpFilter date ranges ──
+  // Show/hide filter row based on role
+  const filterRow=document.getElementById('wh-cmp-filter-row');
+  if(filterRow) filterRow.style.display=(isAdmin||isManager)?'':'none';
+
+  // Helper: check if a date falls in a range
+  const inProdRange=d=>(!whCmpFilter.prodFrom||d>=whCmpFilter.prodFrom)&&(!whCmpFilter.prodTo||d<=whCmpFilter.prodTo);
+  const inDryRange=d=>(!whCmpFilter.dryFrom||d>=whCmpFilter.dryFrom)&&(!whCmpFilter.dryTo||d<=whCmpFilter.dryTo);
+
+  // Filtered production entries (water + cassava by production date)
+  const fWater=water.filter(x=>inProdRange(x.date||''));
+  const fCassava=cassava.filter(x=>inProdRange(x.date||''));
+  const fDryIn=dryIn.filter(x=>inDryRange(x.date||''));
+
+  // Calculate wet and forecast from filtered production
+  const filtWetKg=fWater.reduce((s,x)=>s+(x.weightKg||0),0)+fCassava.reduce((s,x)=>s+(x.weightKg||0),0);
+  const filtForecast=filtWetKg*yld;
+  const filtDryInKg=fDryIn.reduce((s,x)=>s+(x.weightKg||0),0);
+  const filtDiff=filtDryInKg-filtForecast;
+  const filtYield=filtWetKg>0?(filtDryInKg/filtWetKg*100):0;
+
+  // Render range labels and badge
+  const fmtRange=(from,to)=>{
+    if(!from&&!to)return'ทั้งหมด';
+    if(from&&to)return from+' ถึง '+to;
+    if(from)return'ตั้งแต่ '+from;
+    return'ถึง '+to;
+  };
+  const prodRangeLbl=document.getElementById('wh-cmp-prod-range-lbl');
+  if(prodRangeLbl){const r=fmtRange(whCmpFilter.prodFrom,whCmpFilter.prodTo);prodRangeLbl.textContent='(วันที่ผลิต: '+r+')';}
+  const dryRangeLbl=document.getElementById('wh-cmp-dryin-range-lbl');
+  if(dryRangeLbl){const r=fmtRange(whCmpFilter.dryFrom,whCmpFilter.dryTo);dryRangeLbl.textContent='(วันที่รับเข้า: '+r+')';}
+  const badge=document.getElementById('wh-cmp-badge');
+  if(badge){
+    const hasFilter=whCmpFilter.prodFrom||whCmpFilter.prodTo||whCmpFilter.dryFrom||whCmpFilter.dryTo;
+    badge.textContent=hasFilter?'🗓️ กรองตามช่วงวันที่':'แสดงข้อมูลทั้งหมด';
+    badge.style.background=hasFilter?'#dbeafe':'#f3f4f6';
+    badge.style.color=hasFilter?'#1e40af':'#6b7280';
+  }
+
   const yd=document.getElementById('wh-yield-display');if(yd)yd.textContent=settings.yield;
-  const ft=document.getElementById('wh-forecast-total');if(ft)ft.textContent=N0(totalForecast);
-  const cf=document.getElementById('wh-cmp-forecast');if(cf)cf.textContent=N0(totalForecast);
-  const ca=document.getElementById('wh-cmp-actual');if(ca)ca.textContent=N0(totalDryIn);
+  const wetEl=document.getElementById('wh-cmp-wet');if(wetEl)wetEl.textContent=N0(filtWetKg);
+  const ft=document.getElementById('wh-forecast-total');if(ft)ft.textContent=N0(filtForecast);
+  const cf=document.getElementById('wh-cmp-forecast');if(cf)cf.textContent=N0(filtForecast);
+  const ca=document.getElementById('wh-cmp-actual');if(ca)ca.textContent=N0(filtDryInKg);
   const cd=document.getElementById('wh-cmp-diff');
-  if(cd){cd.textContent=N0(diffKg);cd.style.color=diffKg>=0?'#16a34a':'#dc2626';}
+  if(cd){cd.textContent=N0(filtDiff);cd.style.color=filtDiff>=0?'#16a34a':'#dc2626';}
   const cy=document.getElementById('wh-cmp-yield-actual');
-  if(cy)cy.textContent=totalAllWetKg>0?N(actualYield,1)+'%':'—';
+  if(cy)cy.textContent=filtWetKg>0?N(filtYield,1)+'%':'—';
 
   // Warehouse tab: edit (admin/manager) + delete (admin only). No payment — handled in การชำระเงิน tab.
-  const isAdmin=currentRole==='admin';
-  const isManager=currentRole==='manager';
   const acts=(type,e)=>{
     const editBtn=`<button class="btn btn-outline btn-sm" onclick='openModal("${type}",${JSON.stringify(e)})'>✏️</button>`;
     const delBtn=`<button class="btn btn-red btn-sm" onclick="deleteEntry('${type}','${e.id}')">🗑️</button>`;
@@ -1918,6 +2021,24 @@ function renderWarehouse(){
 
   // Render adjustment history
   renderStockAdjustHistory();
+}
+
+// ─── WAREHOUSE COMPARISON FILTER ────────────────────────────────────
+function applyWhCmpFilter(){
+  const canEdit=['admin','manager'].includes(currentRole);
+  if(!canEdit){alert('เฉพาะ Admin และ Manager เท่านั้นที่ปรับตัวกรองได้');return;}
+  whCmpFilter.prodFrom=getDateStr('wcp-pf');
+  whCmpFilter.prodTo=getDateStr('wcp-pt');
+  whCmpFilter.dryFrom=getDateStr('wcp-df');
+  whCmpFilter.dryTo=getDateStr('wcp-dt');
+  renderWarehouse();
+}
+function clearWhCmpFilter(){
+  const canEdit=['admin','manager'].includes(currentRole);
+  if(!canEdit)return;
+  whCmpFilter={prodFrom:'',prodTo:'',dryFrom:'',dryTo:''};
+  ['wcp-pf','wcp-pt','wcp-df','wcp-dt'].forEach(p=>setDateParts(p,''));
+  renderWarehouse();
 }
 
 // ─── DASHBOARD FILTER ───────────────────────────────────────────────
