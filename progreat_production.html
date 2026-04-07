@@ -188,7 +188,7 @@ tr:hover td{background:#f8faff}
     <button class="tab-btn" onclick="showTab('warehouse')">📦 คลังสินค้า</button>
     <button class="tab-btn" onclick="showTab('sales')">🛒 การขาย</button>
     <button class="tab-btn" onclick="showTab('payments')">💰 การชำระเงิน</button>
-    <button class="tab-btn" onclick="showTab('settings')">⚙️ ตั้งค่า</button>
+    <button class="tab-btn" id="tab-btn-settings" onclick="showTab('settings')">⚙️ ตั้งค่า</button>
     <button class="tab-btn" id="tab-btn-users" onclick="showTab('users')" style="display:none">👥 ผู้ใช้</button>
   </div>
   <div id="user-info">
@@ -427,10 +427,16 @@ tr:hover td{background:#f8faff}
       </div>
     </div>
 
+    <!-- Per-warehouse stock breakdown -->
+    <div class="panel">
+      <div class="section-title" style="margin-bottom:12px">🏭 สต็อกสินค้าแยกตามโกดัง</div>
+      <div id="wh-stock-breakdown" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:4px"></div>
+    </div>
+
     <!-- ProGreat แห้ง รับเข้าโกดัง (all lots) -->
     <div class="panel">
       <div class="section-header">
-        <div class="section-title">🏚️ ProGreat แห้ง — รับเข้าโกดัง (ทุก Lot)</div>
+        <div class="section-title">🏚️ ProGreat แห้ง — รับเข้าโกดังต้นทาง (ทุก Lot)</div>
         <button class="btn btn-green btn-sm" id="btn-add-dry-in" onclick="openModal('dryIn')">+ เพิ่มรายการ</button>
       </div>
       <div class="table-wrap">
@@ -475,9 +481,9 @@ tr:hover td{background:#f8faff}
       </div>
       <div class="table-wrap">
         <table><thead><tr>
-          <th>วันที่</th><th>ลูกค้า/สถานที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">จำนวนถุง</th><th>การจัดส่ง</th><th class="num">ค่าโม่บด</th><th class="num">ค่าขนส่ง</th><th class="num">รวม (บาท)</th><th>ชำระ</th><th>หมายเหตุ</th><th></th>
+          <th>วันที่</th><th>ลูกค้า/สถานที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">จำนวนถุง</th><th>การจัดส่ง</th><th class="num">ค่าโม่บด</th><th class="num">ค่าขนส่ง</th><th class="num">รวม (บาท)</th><th>ชำระ</th><th>หมายเหตุ</th><th>โกดัง</th><th></th>
         </tr></thead>
-        <tbody id="sales-body"><tr><td colspan="12" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr></tbody>
+        <tbody id="sales-body"><tr><td colspan="13" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -903,6 +909,12 @@ tr:hover td{background:#f8faff}
         <input type="number" id="s-transport" readonly style="background:#f3f4f6">
       </div>
       <div class="form-group">
+        <label>ขายจากโกดัง</label>
+        <select id="s-warehouse">
+          <option value="">— ไม่ระบุ —</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>หมายเหตุ</label>
         <input type="text" id="s-notes" placeholder="บันทึกเพิ่มเติม (ถ้ามี)">
       </div>
@@ -1091,8 +1103,12 @@ function authErr(c){
 }
 function applyRoleUI(){
   const isAdmin=currentRole==='admin';
-  const canAdd=isAdmin||currentRole==='client';
+  const isManager=currentRole==='manager';
+  const canAdd=isAdmin||isManager||currentRole==='client';
   document.getElementById('tab-btn-users').style.display=isAdmin?'':'none';
+  // Settings tab: admin only
+  const settingsBtn=document.getElementById('tab-btn-settings');
+  if(settingsBtn)settingsBtn.style.display=isAdmin?'':'none';
   ['btn-add-lot','btn-add-water','btn-add-cassava','btn-add-dry-in','btn-add-dry-out','btn-add-sale'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display=canAdd?'':'none';
   });
@@ -1164,7 +1180,7 @@ function showTab(tab){
   if(tab==='warehouse')renderWarehouse();
   if(tab==='sales')renderSales();
   if(tab==='payments')renderPayments();
-  if(tab==='settings'){renderWarehouses();renderDestWarehouses();}
+  if(tab==='settings'){if(currentRole!=='admin'){showTab('production');return;}renderWarehouses();renderDestWarehouses();}
   if(tab==='users')loadUserList();
 }
 function renderAll(){
@@ -1228,16 +1244,22 @@ function deleteLot(id){
   const lot=lots.find(x=>x.id===id);
   if(!lot)return;
   const hasData=[...water,...cassava,...dryIn,...dryOut].some(x=>x.lotId===id);
-  const warn=hasData?'\n\n⚠️ มีรายการข้อมูลอยู่ใน Lot นี้ แต่จะยังคงอยู่ในระบบ':'';
+  const warn=hasData?'\n\n⚠️ มีรายการข้อมูล (น้ำ A-teins / กากมัน / รับเข้าโกดัง / นำส่ง) ใน Lot นี้ ข้อมูลเหล่านั้นจะถูกลบออกทั้งหมดด้วย':'';
   if(!confirm(`ลบ Lot "${lot.code} — ${lot.desc}" ?${warn}`))return;
   lots=lots.filter(x=>x.id!==id);
+  // Also delete all associated data for this lot
+  water=water.filter(x=>x.lotId!==id);
+  cassava=cassava.filter(x=>x.lotId!==id);
+  dryIn=dryIn.filter(x=>x.lotId!==id);
+  dryOut=dryOut.filter(x=>x.lotId!==id);
   if(currentLotId===id){
     currentLotId='';
     document.getElementById('lot-select').value='';
+    const whSel=document.getElementById('wh-lot-select');if(whSel)whSel.value='';
     const delBtn=document.getElementById('btn-del-lot');
     if(delBtn)delBtn.style.display='none';
   }
-  saveAll();populateLotSelect();renderProduction();
+  saveAll();populateLotSelect();renderProduction();renderWarehouse();
 }
 
 // ─── WAREHOUSES ────────────────────────────────────────────────────
@@ -1249,6 +1271,9 @@ function populateWarehouseSelects(){
   });
   const doTo=document.getElementById('do-to');
   if(doTo){doTo.innerHTML='';destWarehouses.forEach(w=>{doTo.innerHTML+=`<option value="${w}">${w}</option>`;});}
+  // Populate sale warehouse selector from destWarehouses
+  const sWh=document.getElementById('s-warehouse');
+  if(sWh){sWh.innerHTML='<option value="">— ไม่ระบุ —</option>';destWarehouses.forEach(w=>{sWh.innerHTML+=`<option value="${w}">${w}</option>`;});}
   renderWarehouses();renderDestWarehouses();
 }
 function renderWarehouses(){
@@ -1310,8 +1335,8 @@ function openModal(type, entry=null){
     document.getElementById('modal-dryOut').classList.add('open');
   } else if(type==='sale'){
     prefillToday('s');
-    if(entry){setDateParts('s',entry.date);document.getElementById('s-truck').value=entry.truck||'';document.getElementById('s-customer').value=entry.customer||'';document.getElementById('s-weight').value=entry.weightKg;document.getElementById('s-bags').value=entry.bags||'';document.getElementById('s-grind-rate').value=entry.grindRate;document.getElementById('s-grind-total').value=entry.grindTotal;document.getElementById('s-delivery').value=entry.deliveryType||'pickup';document.getElementById('s-transport-rate').value=entry.transportRate!==undefined?entry.transportRate:settings.transportSale;document.getElementById('s-transport').value=entry.transport||0;document.getElementById('s-notes').value=entry.notes||'';document.getElementById('s-paid').value=entry.paid?'yes':'no';setDateParts('s-p',entry.payDate||'');}
-    else{document.getElementById('s-truck').value='';document.getElementById('s-customer').value='';document.getElementById('s-weight').value='';document.getElementById('s-bags').value='';document.getElementById('s-grind-rate').value=settings.grindingCost;document.getElementById('s-grind-total').value='';document.getElementById('s-delivery').value='pickup';document.getElementById('s-transport-rate').value=settings.transportSale||0.4;document.getElementById('s-transport').value=0;document.getElementById('s-notes').value='';document.getElementById('s-paid').value='no';setDateParts('s-p','');}
+    if(entry){setDateParts('s',entry.date);document.getElementById('s-truck').value=entry.truck||'';document.getElementById('s-customer').value=entry.customer||'';document.getElementById('s-weight').value=entry.weightKg;document.getElementById('s-bags').value=entry.bags||'';document.getElementById('s-grind-rate').value=entry.grindRate;document.getElementById('s-grind-total').value=entry.grindTotal;document.getElementById('s-delivery').value=entry.deliveryType||'pickup';document.getElementById('s-transport-rate').value=entry.transportRate!==undefined?entry.transportRate:settings.transportSale;document.getElementById('s-transport').value=entry.transport||0;document.getElementById('s-warehouse').value=entry.saleWarehouse||'';document.getElementById('s-notes').value=entry.notes||'';document.getElementById('s-paid').value=entry.paid?'yes':'no';setDateParts('s-p',entry.payDate||'');}
+    else{document.getElementById('s-truck').value='';document.getElementById('s-customer').value='';document.getElementById('s-weight').value='';document.getElementById('s-bags').value='';document.getElementById('s-grind-rate').value=settings.grindingCost;document.getElementById('s-grind-total').value='';document.getElementById('s-delivery').value='pickup';document.getElementById('s-transport-rate').value=settings.transportSale||0.4;document.getElementById('s-transport').value=0;document.getElementById('s-warehouse').value=destWarehouses[0]||'';document.getElementById('s-notes').value='';document.getElementById('s-paid').value='no';setDateParts('s-p','');}
     document.getElementById('modal-sale').classList.add('open');
     calcSaleCost();
   }
@@ -1343,6 +1368,8 @@ function calcSaleCost(){
 
 // ─── SAVE ENTRY ────────────────────────────────────────────────────
 function saveEntry(type){
+  const canSave=['admin','manager','client'].includes(currentRole);
+  if(!canSave){alert('คุณไม่มีสิทธิ์บันทึกข้อมูล');return;}
   if(!currentLotId && type!=='sale'){alert('กรุณาเลือก Lot ก่อน');return;}
   let entry={id:editingEntry?editingEntry.id:genId()};
   if(type==='water'){
@@ -1389,7 +1416,8 @@ function saveEntry(type){
       truck:document.getElementById('s-truck').value.trim(),customer:document.getElementById('s-customer').value.trim(),
       weightKg:parseFloat(document.getElementById('s-weight').value)||0,bags:parseInt(document.getElementById('s-bags').value)||0,
       grindRate:parseFloat(document.getElementById('s-grind-rate').value)||0,grindTotal:parseFloat(document.getElementById('s-grind-total').value)||0,
-      deliveryType,transportRate,transport,notes:document.getElementById('s-notes').value.trim(),
+      deliveryType,transportRate,transport,saleWarehouse:document.getElementById('s-warehouse').value,
+      notes:document.getElementById('s-notes').value.trim(),
       paid:document.getElementById('s-paid').value==='yes',payDate:getDateStr('s-p')};
     entry.total=(entry.grindTotal+entry.transport);
     if(editingEntry){const i=sales.findIndex(x=>x.id===editingEntry.id);if(i>=0)sales[i]=entry;else sales.push(entry);}
@@ -1515,10 +1543,14 @@ function renderProduction(){
 
   const paidTag=p=>`<span class="${p?'paid-tag':'unpaid-tag'}">${p?'✅ ชำระ':'❌ ค้าง'}</span>`;
   const isAdmin=currentRole==='admin';
+  const isManager=currentRole==='manager';
   const acts=(type,e)=>isAdmin?`<div style="display:flex;gap:4px">
     <button class="btn btn-outline btn-sm" onclick='openModal("${type}",${JSON.stringify(e)})'>✏️</button>
     ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:''}
     <button class="btn btn-red btn-sm" onclick="deleteEntry('${type}','${e.id}')">🗑️</button>
+  </div>`:isManager?`<div style="display:flex;gap:4px">
+    <button class="btn btn-outline btn-sm" onclick='openModal("${type}",${JSON.stringify(e)})'>✏️</button>
+    ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:''}
   </div>`:!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:'';
 
   // Water table
@@ -1571,11 +1603,44 @@ function renderWarehouse(){
   // Inline helpers (same as renderProduction)
   const paidTag=p=>`<span class="${p?'paid-tag':'unpaid-tag'}">${p?'✅ ชำระ':'❌ ค้าง'}</span>`;
   const isAdmin=currentRole==='admin';
+  const isManager=currentRole==='manager';
   const acts=(type,e)=>isAdmin?`<div style="display:flex;gap:4px">
     <button class="btn btn-outline btn-sm" onclick='openModal("${type}",${JSON.stringify(e)})'>✏️</button>
     ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:''}
     <button class="btn btn-red btn-sm" onclick="deleteEntry('${type}','${e.id}')">🗑️</button>
+  </div>`:isManager?`<div style="display:flex;gap:4px">
+    <button class="btn btn-outline btn-sm" onclick='openModal("${type}",${JSON.stringify(e)})'>✏️</button>
+    ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:''}
   </div>`:!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${type}','${e.id}')">💰</button>`:'';
+
+  // Per-warehouse stock breakdown
+  const whStockEl=document.getElementById('wh-stock-breakdown');
+  if(whStockEl){
+    let whHtml='';
+    // Source warehouses: received (dryIn) - shipped out (dryOut.fromWeight)
+    warehouses.forEach(w=>{
+      const rcv=dryIn.filter(x=>x.warehouse===w).reduce((s,x)=>s+(x.weightKg||0),0);
+      const ship=dryOut.filter(x=>x.fromWarehouse===w).reduce((s,x)=>s+(x.fromWeight||0),0);
+      const stk=rcv-ship;
+      whHtml+=`<div style="background:#dbeafe;border:1.5px solid #93c5fd;border-radius:10px;padding:12px 16px;min-width:180px">
+        <div style="font-size:12px;font-weight:600;color:#1e40af;margin-bottom:4px">📦 ${w}</div>
+        <div style="font-size:11px;color:#6b7280">รับเข้า: ${N0(rcv)} กก. | นำส่งออก: ${N0(ship)} กก.</div>
+        <div style="font-size:16px;font-weight:700;color:${stk>=0?'#1d4ed8':'#dc2626'};margin-top:4px">คงเหลือ: ${N0(stk)} กก.</div>
+      </div>`;
+    });
+    // Dest warehouses: received from dryOut (toWeight) - sold (sales.weightKg from this warehouse)
+    destWarehouses.forEach(w=>{
+      const rcv=dryOut.filter(x=>x.toWarehouse===w).reduce((s,x)=>s+(x.toWeight||0),0);
+      const sold=sales.filter(x=>x.saleWarehouse===w).reduce((s,x)=>s+(x.weightKg||0),0);
+      const stk=rcv-sold;
+      whHtml+=`<div style="background:#d1fae5;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 16px;min-width:180px">
+        <div style="font-size:12px;font-weight:600;color:#065f46;margin-bottom:4px">🏬 ${w}</div>
+        <div style="font-size:11px;color:#6b7280">รับจากนำส่ง: ${N0(rcv)} กก. | ขายออก: ${N0(sold)} กก.</div>
+        <div style="font-size:16px;font-weight:700;color:${stk>=0?'#047857':'#dc2626'};margin-top:4px">คงเหลือ: ${N0(stk)} กก.</div>
+      </div>`;
+    });
+    whStockEl.innerHTML=whHtml||'<div class="empty">ยังไม่มีโกดัง</div>';
+  }
 
   // Helper: get lot code for display
   const lotCode=id=>{const l=lots.find(x=>x.id===id);return l?l.code:'—';};
@@ -1763,7 +1828,9 @@ function renderSales(){
   document.getElementById('sale-card-weight').textContent=N0(wt)+' กก.';
   document.getElementById('sale-card-unpaid').textContent=N0(unpaid)+' บาท';
   const isAdmin=currentRole==='admin';
-  document.getElementById('sales-body').innerHTML=rows.length===0?'<tr><td colspan="12" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr>':
+  const isManager=currentRole==='manager';
+  const canEdit=isAdmin||isManager;
+  document.getElementById('sales-body').innerHTML=rows.length===0?'<tr><td colspan="13" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr>':
     rows.map(e=>`<tr>
       <td>${e.date||'—'}</td>
       <td style="font-weight:600">${e.customer||'—'}</td>
@@ -1776,8 +1843,9 @@ function renderSales(){
       <td class="num" style="font-weight:700">${N0(e.total)}</td>
       <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ '+e.payDate:'❌ ค้าง'}</span></td>
       <td style="font-size:12px;color:#6b7280">${e.notes||'—'}</td>
+      <td style="font-size:12px;color:#374151">${e.saleWarehouse||'—'}</td>
       <td><div style="display:flex;gap:4px">
-        ${isAdmin?`<button class="btn btn-outline btn-sm" onclick='openModal("sale",${JSON.stringify(e)})'>✏️</button>`:''}
+        ${canEdit?`<button class="btn btn-outline btn-sm" onclick='openModal("sale",${JSON.stringify(e)})'>✏️</button>`:''}
         ${!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('sale','${e.id}')">💰</button>`:''}
         ${isAdmin?`<button class="btn btn-red btn-sm" onclick="deleteEntry('sale','${e.id}')">🗑️</button>`:''}
       </div></td>
@@ -1842,11 +1910,13 @@ async function loadUserList(){
     let html='';
     snap.forEach(doc=>{
       const u=doc.data(),uid=doc.id;
+      const roleLabel=u.role==='admin'?'Admin':u.role==='manager'?'Manager':u.role==='client'?'Client':'รอการอนุมัติ';
       html+=`<div class="user-row">
         <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${u.email||uid}</div></div>
-        <span class="user-role-badge ${u.role}">${u.role==='admin'?'Admin':u.role==='client'?'Client':'รอการอนุมัติ'}</span>
-        <div style="display:flex;gap:6px">
+        <span class="user-role-badge ${u.role}">${roleLabel}</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${u.role!=='admin'?`<button class="btn btn-green btn-sm" onclick="setUserRole('${uid}','admin')">Admin</button>`:''}
+          ${u.role!=='manager'?`<button class="btn btn-outline btn-sm" onclick="setUserRole('${uid}','manager')" style="background:#ede9fe;color:#5b21b6;border-color:#a78bfa">Manager</button>`:''}
           ${u.role!=='client'?`<button class="btn btn-blue btn-sm" onclick="setUserRole('${uid}','client')">Client</button>`:''}
           ${u.role!=='pending'?`<button class="btn btn-red btn-sm" onclick="setUserRole('${uid}','pending')">ระงับ</button>`:''}
         </div>
