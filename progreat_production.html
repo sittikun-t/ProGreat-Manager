@@ -463,6 +463,20 @@ tr:hover td{background:#f8faff}
       </div>
     </div>
 
+    <!-- Stock Adjustment History -->
+    <div class="panel" id="wh-adjust-panel">
+      <div class="section-header">
+        <div class="section-title">📋 ประวัติการปรับสต็อก</div>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>วันที่</th><th>โกดัง</th><th>ประเภท</th><th class="num">ยอดคำนวน (กก.)</th><th class="num">ยอดจริง (กก.)</th><th class="num">ผลต่าง (กก.)</th><th>ผู้ปรับ</th><th>หมายเหตุ</th><th></th>
+        </tr></thead>
+        <tbody id="stock-adjust-body"><tr><td colspan="9" class="empty">ยังไม่มีการปรับสต็อก</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1021,6 +1035,55 @@ service cloud.firestore {
   </div>
 </div>
 
+<!-- ===== MODAL: STOCK ADJUST ===== -->
+<div class="modal-overlay" id="modal-stock-adjust">
+  <div class="modal" style="max-width:480px">
+    <h2>✏️ ปรับยอดสต็อกโกดัง</h2>
+    <input type="hidden" id="sa-warehouse">
+    <input type="hidden" id="sa-warehouse-type">
+    <input type="hidden" id="sa-calc-stock">
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>โกดัง</label>
+        <div id="sa-warehouse-display" style="padding:10px 14px;background:#f3f4f6;border-radius:8px;font-weight:600;font-size:14px;color:#374151"></div>
+      </div>
+      <div class="form-group">
+        <label>วันที่ปรับ</label>
+        <div class="date-group">
+          <input type="number" id="sa-d" class="date-part" placeholder="วัน" min="1" max="31">
+          <select id="sa-m" class="date-part">
+            <option value="01">ม.ค.</option><option value="02">ก.พ.</option><option value="03">มี.ค.</option>
+            <option value="04">เม.ย.</option><option value="05">พ.ค.</option><option value="06">มิ.ย.</option>
+            <option value="07">ก.ค.</option><option value="08">ส.ค.</option><option value="09">ก.ย.</option>
+            <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+          </select>
+          <input type="number" id="sa-y" class="date-part" placeholder="ปี พ.ศ." min="2560" max="2599">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>ยอดคำนวน (กก.) <span class="hint">จากระบบ</span></label>
+        <div id="sa-calc-display" style="padding:10px 14px;background:#f3f4f6;border-radius:8px;font-weight:700;font-size:15px;color:#374151"></div>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>ยอดจริงที่นับได้ (กก.) <span class="hint">ป้อนตัวเลขที่นับจริง</span></label>
+        <input type="number" id="sa-actual" step="0.01" placeholder="0" oninput="calcStockAdjDiff()">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>ผลต่าง (ยอดจริง − ยอดคำนวน)</label>
+        <div id="sa-diff-display" style="padding:10px 14px;background:#f3f4f6;border-radius:8px;font-weight:700;font-size:15px;color:#374151">—</div>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>หมายเหตุ / เหตุผลที่ปรับ</label>
+        <input type="text" id="sa-reason" placeholder="เช่น ปรับตัวเลขจากการนับจริงประจำเดือน">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-stock-adjust')">ยกเลิก</button>
+      <button class="btn btn-blue" onclick="saveStockAdjust()">💾 บันทึกการปรับ</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── FIREBASE CONFIG ───────────────────────────────────────────────
 const firebaseConfig = {
@@ -1037,7 +1100,7 @@ const db   = firebase.firestore();
 
 // ─── STATE ─────────────────────────────────────────────────────────
 let currentUser = null, currentRole = null;
-let lots = [], water = [], cassava = [], dryIn = [], dryOut = [], sales = [];
+let lots = [], water = [], cassava = [], dryIn = [], dryOut = [], sales = [], stockAdjustments = [];
 let settings = { waterPrice:500, cassavaPrice:1.5, dryingCost:0.5, grindingCost:0.3, transportProd:5000, transportSale:0.4, yield:50 };
 let warehouses = ['โกดัง A','โกดัง B'];
 let destWarehouses = ['โกดัง RBM'];
@@ -1161,6 +1224,7 @@ function setupRealtimeSync(){
       const d=doc.data();
       lots=d.lots||[];water=d.water||[];cassava=d.cassava||[];
       dryIn=d.dryIn||[];dryOut=d.dryOut||[];sales=d.sales||[];
+      stockAdjustments=d.stockAdjustments||[];
       warehouses=d.warehouses||['โกดัง A','โกดัง B'];
       destWarehouses=d.destWarehouses||['โกดัง RBM'];
     }
@@ -1181,7 +1245,7 @@ async function saveAll(){
   ind.textContent='⏳ กำลังบันทึก...';
   try{
     await db.collection('pgp_data').doc('main').set({
-      lots,water,cassava,dryIn,dryOut,sales,warehouses,destWarehouses,
+      lots,water,cassava,dryIn,dryOut,sales,stockAdjustments,warehouses,destWarehouses,
       updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
       updatedBy:currentUser?currentUser.email:'unknown'
     });
@@ -1358,6 +1422,86 @@ function addDestWarehouse(){
 }
 function removeDestWarehouse(i){
   if(confirm(`ลบโกดังปลายทาง "${destWarehouses[i]}"?`)){destWarehouses.splice(i,1);saveAll();populateWarehouseSelects();}
+}
+// ─── STOCK ADJUSTMENT ──────────────────────────────────────────────
+function openStockAdjustModal(warehouse, whType, calcStock){
+  const canAdjust=['admin','manager'].includes(currentRole);
+  if(!canAdjust){alert('เฉพาะ Admin และ Manager เท่านั้นที่ปรับสต็อกได้');return;}
+  document.getElementById('sa-warehouse').value=warehouse;
+  document.getElementById('sa-warehouse-type').value=whType;
+  document.getElementById('sa-calc-stock').value=calcStock;
+  document.getElementById('sa-warehouse-display').textContent=(whType==='source'?'📦 ':'🏬 ')+warehouse;
+  document.getElementById('sa-calc-display').textContent=Number(calcStock).toLocaleString('th-TH',{maximumFractionDigits:2})+' กก.';
+  document.getElementById('sa-actual').value='';
+  document.getElementById('sa-diff-display').textContent='—';
+  document.getElementById('sa-diff-display').style.color='#374151';
+  document.getElementById('sa-reason').value='';
+  prefillToday('sa');
+  document.getElementById('modal-stock-adjust').classList.add('open');
+}
+function calcStockAdjDiff(){
+  const calc=parseFloat(document.getElementById('sa-calc-stock').value)||0;
+  const actual=parseFloat(document.getElementById('sa-actual').value);
+  const el=document.getElementById('sa-diff-display');
+  if(isNaN(actual)){el.textContent='—';el.style.color='#374151';return;}
+  const diff=actual-calc;
+  el.textContent=(diff>0?'+':'')+diff.toLocaleString('th-TH',{maximumFractionDigits:2})+' กก.';
+  el.style.color=diff>0?'#166534':diff<0?'#dc2626':'#374151';
+}
+function saveStockAdjust(){
+  const canAdjust=['admin','manager'].includes(currentRole);
+  if(!canAdjust){alert('คุณไม่มีสิทธิ์ปรับสต็อก');return;}
+  const warehouse=document.getElementById('sa-warehouse').value;
+  const warehouseType=document.getElementById('sa-warehouse-type').value;
+  const calcStock=parseFloat(document.getElementById('sa-calc-stock').value)||0;
+  const actual=parseFloat(document.getElementById('sa-actual').value);
+  if(isNaN(actual)||document.getElementById('sa-actual').value.trim()===''){alert('กรุณากรอกยอดจริงที่นับได้');return;}
+  const adjustKg=actual-calcStock;
+  const reason=document.getElementById('sa-reason').value.trim();
+  const date=getDateStr('sa');
+  const record={
+    id:genId(),date,warehouse,warehouseType,
+    calcStock,actualStock:actual,adjustKg,reason,
+    adjustedBy:currentUser?currentUser.email:'unknown',
+    createdAt:new Date().toISOString()
+  };
+  stockAdjustments.push(record);
+  saveAll();
+  closeModal('modal-stock-adjust');
+  renderWarehouse();
+}
+function deleteStockAdjust(id){
+  if(!confirm('ลบรายการปรับสต็อกนี้?'))return;
+  stockAdjustments=stockAdjustments.filter(x=>x.id!==id);
+  saveAll();renderWarehouse();
+}
+function renderStockAdjustHistory(){
+  const tbody=document.getElementById('stock-adjust-body');
+  if(!tbody)return;
+  if(!stockAdjustments||stockAdjustments.length===0){
+    tbody.innerHTML='<tr><td colspan="9" class="empty">ยังไม่มีการปรับสต็อก</td></tr>';
+    return;
+  }
+  const sorted=[...stockAdjustments].sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt.localeCompare(a.createdAt));
+  const isAdmin=currentRole==='admin';
+  tbody.innerHTML=sorted.map(r=>{
+    const diff=r.adjustKg||0;
+    const diffStr=(diff>0?'+':'')+Number(diff).toLocaleString('th-TH',{maximumFractionDigits:2});
+    const diffColor=diff>0?'#166534':diff<0?'#dc2626':'#6b7280';
+    const typeLbl=r.warehouseType==='source'?'📦 ต้นทาง':'🏬 ปลายทาง';
+    const delBtn=isAdmin?`<button class="btn btn-red btn-sm" onclick="deleteStockAdjust('${r.id}')">🗑️</button>`:'';
+    return`<tr>
+      <td>${r.date||'—'}</td>
+      <td>${r.warehouse||'—'}</td>
+      <td><span style="font-size:11px;background:#f3f4f6;padding:2px 8px;border-radius:10px">${typeLbl}</span></td>
+      <td class="num">${Number(r.calcStock||0).toLocaleString('th-TH',{maximumFractionDigits:2})}</td>
+      <td class="num">${Number(r.actualStock||0).toLocaleString('th-TH',{maximumFractionDigits:2})}</td>
+      <td class="num" style="color:${diffColor};font-weight:600">${diffStr}</td>
+      <td style="font-size:12px;color:#6b7280">${r.adjustedBy||'—'}</td>
+      <td style="font-size:12px;color:#6b7280">${r.reason||'—'}</td>
+      <td>${delBtn}</td>
+    </tr>`;
+  }).join('');
 }
 function copyRules(){
   const code=document.getElementById('rules-code');
@@ -1698,28 +1842,39 @@ function renderWarehouse(){
 
   // Per-warehouse stock breakdown
   const whStockEl=document.getElementById('wh-stock-breakdown');
+  const canAdjust=isAdmin||isManager;
   if(whStockEl){
     let whHtml='';
-    // Source warehouses: received (dryIn) - shipped out (dryOut.fromWeight)
+    // Source warehouses: received (dryIn) - shipped out (dryOut.fromWeight) + adjustments
     warehouses.forEach(w=>{
       const rcv=dryIn.filter(x=>x.warehouse===w).reduce((s,x)=>s+(x.weightKg||0),0);
       const ship=dryOut.filter(x=>x.fromWarehouse===w).reduce((s,x)=>s+(x.fromWeight||0),0);
-      const stk=rcv-ship;
-      whHtml+=`<div style="background:#dbeafe;border:1.5px solid #93c5fd;border-radius:10px;padding:12px 16px;min-width:180px">
+      const adj=stockAdjustments.filter(x=>x.warehouse===w&&x.warehouseType==='source').reduce((s,x)=>s+(x.adjustKg||0),0);
+      const stkCalc=rcv-ship;
+      const stk=stkCalc+adj;
+      const adjTag=adj!==0?`<span style="font-size:11px;color:${adj>0?'#166534':'#991b1b'}"> (ปรับ ${adj>0?'+':''}${N0(adj)})</span>`:'';
+      const adjBtn=canAdjust?`<button onclick="openStockAdjustModal('${w}','source',${stkCalc})" style="margin-top:8px;font-size:11px;padding:3px 10px;border:1px solid #93c5fd;background:#eff6ff;color:#1e40af;border-radius:6px;cursor:pointer;display:block;width:100%">✏️ ปรับสต็อก</button>`:'';
+      whHtml+=`<div style="background:#dbeafe;border:1.5px solid #93c5fd;border-radius:10px;padding:12px 16px;min-width:200px">
         <div style="font-size:12px;font-weight:600;color:#1e40af;margin-bottom:4px">📦 ${w}</div>
         <div style="font-size:11px;color:#6b7280">รับเข้า: ${N0(rcv)} กก. | นำส่งออก: ${N0(ship)} กก.</div>
-        <div style="font-size:16px;font-weight:700;color:${stk>=0?'#1d4ed8':'#dc2626'};margin-top:4px">คงเหลือ: ${N0(stk)} กก.</div>
+        <div style="font-size:16px;font-weight:700;color:${stk>=0?'#1d4ed8':'#dc2626'};margin-top:4px">คงเหลือ: ${N0(stk)} กก.${adjTag}</div>
+        ${adjBtn}
       </div>`;
     });
-    // Dest warehouses: received from dryOut (toWeight) - sold (sales.weightKg from this warehouse)
+    // Dest warehouses: received from dryOut (toWeight) - sold + adjustments
     destWarehouses.forEach(w=>{
       const rcv=dryOut.filter(x=>x.toWarehouse===w).reduce((s,x)=>s+(x.toWeight||0),0);
       const sold=sales.filter(x=>x.saleWarehouse===w).reduce((s,x)=>s+(x.weightKg||0),0);
-      const stk=rcv-sold;
-      whHtml+=`<div style="background:#d1fae5;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 16px;min-width:180px">
+      const adj=stockAdjustments.filter(x=>x.warehouse===w&&x.warehouseType==='dest').reduce((s,x)=>s+(x.adjustKg||0),0);
+      const stkCalc=rcv-sold;
+      const stk=stkCalc+adj;
+      const adjTag=adj!==0?`<span style="font-size:11px;color:${adj>0?'#166534':'#991b1b'}"> (ปรับ ${adj>0?'+':''}${N0(adj)})</span>`:'';
+      const adjBtn=canAdjust?`<button onclick="openStockAdjustModal('${w}','dest',${stkCalc})" style="margin-top:8px;font-size:11px;padding:3px 10px;border:1px solid #6ee7b7;background:#ecfdf5;color:#065f46;border-radius:6px;cursor:pointer;display:block;width:100%">✏️ ปรับสต็อก</button>`:'';
+      whHtml+=`<div style="background:#d1fae5;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 16px;min-width:200px">
         <div style="font-size:12px;font-weight:600;color:#065f46;margin-bottom:4px">🏬 ${w}</div>
         <div style="font-size:11px;color:#6b7280">รับจากนำส่ง: ${N0(rcv)} กก. | ขายออก: ${N0(sold)} กก.</div>
-        <div style="font-size:16px;font-weight:700;color:${stk>=0?'#047857':'#dc2626'};margin-top:4px">คงเหลือ: ${N0(stk)} กก.</div>
+        <div style="font-size:16px;font-weight:700;color:${stk>=0?'#047857':'#dc2626'};margin-top:4px">คงเหลือ: ${N0(stk)} กก.${adjTag}</div>
+        ${adjBtn}
       </div>`;
     });
     whStockEl.innerHTML=whHtml||'<div class="empty">ยังไม่มีโกดัง</div>';
@@ -1760,6 +1915,9 @@ function renderWarehouse(){
         <td>${acts('dryOut',e)}</td>
       </tr>`).join('');
   }
+
+  // Render adjustment history
+  renderStockAdjustHistory();
 }
 
 // ─── DASHBOARD FILTER ───────────────────────────────────────────────
