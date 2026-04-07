@@ -575,6 +575,32 @@ tr:hover td{background:#f8faff}
       </div>
       <div id="dest-warehouse-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
     </div>
+
+    <!-- Firebase Rules Helper -->
+    <div class="panel" style="border:2px solid #fbbf24;background:#fffbeb">
+      <div class="panel-title" style="color:#92400e">🔐 Firebase Security Rules — แก้ไขสิทธิ์ผู้ใช้</div>
+      <p style="font-size:13px;color:#78350f;margin-bottom:12px">หาก Manager หรือ Client บันทึกข้อมูลไม่ได้ (ขึ้น "❌ บันทึกไม่สำเร็จ: permission-denied") ให้แก้ไข Firestore Security Rules ดังนี้</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <a href="https://console.firebase.google.com/project/progreat-manager/firestore/rules" target="_blank" class="btn btn-blue" style="font-size:13px;text-decoration:none">🌐 เปิด Firebase Console → Rules</a>
+        <button class="btn btn-outline btn-sm" onclick="checkFirestoreRules()" style="font-size:13px">🔍 ทดสอบสิทธิ์การบันทึก</button>
+      </div>
+      <div style="font-size:13px;color:#374151;margin-bottom:6px;font-weight:600">Rules ที่ต้องใช้ (copy ไปวางใน Firebase Console):</div>
+      <pre id="rules-code" style="background:#1e293b;color:#e2e8f0;padding:14px 16px;border-radius:8px;font-size:12px;overflow-x:auto;margin:0;cursor:pointer" onclick="copyRules()" title="คลิกเพื่อ copy">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // pgp_data: ผู้ใช้ที่ล็อกอินแล้วทุกคนอ่าน/เขียนได้
+    match /pgp_data/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    // users: อ่านได้ทุกคนที่ล็อกอิน, แก้ไขได้เฉพาะ admin (ผ่าน REST API)
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}</pre>
+      <div style="font-size:11px;color:#9ca3af;margin-top:8px">💡 คลิกที่ code เพื่อ copy → วางใน Firebase Console → กด Publish</div>
+    </div>
   </div>
 </div>
 
@@ -1161,7 +1187,16 @@ async function saveAll(){
     });
     ind.textContent='✅ บันทึกแล้ว '+new Date().toLocaleTimeString('th-TH');
     setTimeout(()=>ind.textContent='☁️ ซิงค์แล้ว',3000);
-  }catch(e){console.error(e);ind.textContent='❌ บันทึกไม่สำเร็จ';}
+  }catch(e){
+    console.error('saveAll error:',e);
+    const code=e.code||e.message||'unknown';
+    ind.textContent='❌ บันทึกไม่สำเร็จ ('+code+')';
+    if(e.code==='permission-denied'||e.code==='PERMISSION_DENIED'){
+      alert('❌ ไม่มีสิทธิ์บันทึกข้อมูล\n\nสาเหตุ: Firestore Security Rules ยังไม่อนุญาตให้ผู้ใช้นี้เขียนข้อมูลได้\n\n📌 Admin ต้องแก้ไข Firebase Rules:\nไปที่ Firebase Console → Firestore → Rules\nแล้วเปลี่ยน rules ให้ผู้ใช้ที่ล็อกอินแล้วสามารถเขียนได้\n\nดูวิธีแก้ไขได้ที่แท็บ ⚙️ ตั้งค่า (เฉพาะ Admin)');
+    } else {
+      alert('❌ บันทึกไม่สำเร็จ\nรหัสข้อผิดพลาด: '+code+'\n\nกรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง');
+    }
+  }
 }
 async function saveSettings(){
   settings.waterPrice=parseFloat(document.getElementById('s-water-price').value)||500;
@@ -1323,6 +1358,40 @@ function addDestWarehouse(){
 }
 function removeDestWarehouse(i){
   if(confirm(`ลบโกดังปลายทาง "${destWarehouses[i]}"?`)){destWarehouses.splice(i,1);saveAll();populateWarehouseSelects();}
+}
+function copyRules(){
+  const code=document.getElementById('rules-code');
+  if(!code)return;
+  const text=code.innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig=code.style.outline;
+    code.style.outline='2px solid #22c55e';
+    setTimeout(()=>code.style.outline=orig,1200);
+    alert('✅ คัดลอก Rules แล้ว!\n\nไปที่ Firebase Console → Firestore → Rules\nวาง (Cmd+V) แล้วกด Publish');
+  }).catch(()=>{
+    window.prompt('Copy ข้อความนี้ (Cmd+C):', text);
+  });
+}
+async function checkFirestoreRules(){
+  const btn=event.target;
+  btn.disabled=true;btn.textContent='⏳ กำลังทดสอบ...';
+  try{
+    // Try a test write to a temporary field (will be overwritten by next real save)
+    await db.collection('pgp_data').doc('main').update({_permTest:true});
+    btn.textContent='✅ สิทธิ์โอเค — บันทึกได้';
+    btn.style.background='#dcfce7';btn.style.color='#166534';btn.style.borderColor='#86efac';
+    setTimeout(()=>{btn.disabled=false;btn.textContent='🔍 ทดสอบสิทธิ์การบันทึก';btn.style='';},4000);
+  }catch(e){
+    if(e.code==='permission-denied'||e.code==='PERMISSION_DENIED'){
+      btn.textContent='❌ permission-denied — ต้องแก้ Rules';
+      btn.style.background='#fee2e2';btn.style.color='#991b1b';btn.style.borderColor='#fca5a5';
+      alert('❌ ยืนยันแล้ว: Firestore Rules บล็อกการเขียนข้อมูล\n\nกด "เปิด Firebase Console → Rules" ด้านบน\nวาง rules ที่แสดงไว้แล้วกด Publish');
+    } else {
+      btn.textContent='⚠️ Error: '+(e.code||e.message);
+      alert('ข้อผิดพลาด: '+(e.code||e.message)+'\n\nอาจเป็นปัญหาเครือข่าย ลองตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+    }
+    setTimeout(()=>{btn.disabled=false;btn.textContent='🔍 ทดสอบสิทธิ์การบันทึก';btn.style='';},5000);
+  }
 }
 
 // ─── MODAL OPEN/CLOSE ──────────────────────────────────────────────
