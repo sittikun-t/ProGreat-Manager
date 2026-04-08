@@ -1890,50 +1890,57 @@ function renderWarehouse(){
   const filterRow=document.getElementById('wh-cmp-filter-row');
   if(filterRow) filterRow.style.display=(isAdmin||isManager)?'':'none';
 
+  // Whether each filter is active (at least one bound set)
+  const hasProdFilter=!!(whCmpFilter.prodFrom||whCmpFilter.prodTo);
+  const hasDryFilter=!!(whCmpFilter.dryFrom||whCmpFilter.dryTo);
+
   // Helper: check if a date falls in a range
   const inProdRange=d=>(!whCmpFilter.prodFrom||d>=whCmpFilter.prodFrom)&&(!whCmpFilter.prodTo||d<=whCmpFilter.prodTo);
   const inDryRange=d=>(!whCmpFilter.dryFrom||d>=whCmpFilter.dryFrom)&&(!whCmpFilter.dryTo||d<=whCmpFilter.dryTo);
 
-  // Filtered production entries (water + cassava by production date)
-  const fWater=water.filter(x=>inProdRange(x.date||''));
-  const fCassava=cassava.filter(x=>inProdRange(x.date||''));
-  const fDryIn=dryIn.filter(x=>inDryRange(x.date||''));
+  // ① Only calculate production-side values when a production date range is selected
+  const fWater=hasProdFilter?water.filter(x=>inProdRange(x.date||'')):[];
+  const fCassava=hasProdFilter?cassava.filter(x=>inProdRange(x.date||'')):[];
+  const filtWetKg=hasProdFilter?(fWater.reduce((s,x)=>s+(x.weightKg||0),0)+fCassava.reduce((s,x)=>s+(x.weightKg||0),0)):0;
+  const filtForecast=hasProdFilter?filtWetKg*yld:0;
 
-  // Calculate wet and forecast from filtered production
-  const filtWetKg=fWater.reduce((s,x)=>s+(x.weightKg||0),0)+fCassava.reduce((s,x)=>s+(x.weightKg||0),0);
-  const filtForecast=filtWetKg*yld;
-  const filtDryInKg=fDryIn.reduce((s,x)=>s+(x.weightKg||0),0);
+  // ② Only calculate dry-in-side values when a dry-in date range is selected
+  const fDryIn=hasDryFilter?dryIn.filter(x=>inDryRange(x.date||'')):[];
+  const filtDryInKg=hasDryFilter?fDryIn.reduce((s,x)=>s+(x.weightKg||0),0):0;
   const filtDiff=filtDryInKg-filtForecast;
-  const filtYield=filtWetKg>0?(filtDryInKg/filtWetKg*100):0;
+  const filtYield=(hasProdFilter&&filtWetKg>0)?(filtDryInKg/filtWetKg*100):0;
 
   // Render range labels and badge
   const fmtRange=(from,to)=>{
-    if(!from&&!to)return'ทั้งหมด';
+    if(!from&&!to)return'กรุณาเลือกช่วงวันที่';
     if(from&&to)return from+' ถึง '+to;
     if(from)return'ตั้งแต่ '+from;
     return'ถึง '+to;
   };
   const prodRangeLbl=document.getElementById('wh-cmp-prod-range-lbl');
-  if(prodRangeLbl){const r=fmtRange(whCmpFilter.prodFrom,whCmpFilter.prodTo);prodRangeLbl.textContent='(วันที่ผลิต: '+r+')';}
+  if(prodRangeLbl){const r=fmtRange(whCmpFilter.prodFrom,whCmpFilter.prodTo);prodRangeLbl.textContent='('+r+')';}
   const dryRangeLbl=document.getElementById('wh-cmp-dryin-range-lbl');
-  if(dryRangeLbl){const r=fmtRange(whCmpFilter.dryFrom,whCmpFilter.dryTo);dryRangeLbl.textContent='(วันที่รับเข้า: '+r+')';}
+  if(dryRangeLbl){const r=fmtRange(whCmpFilter.dryFrom,whCmpFilter.dryTo);dryRangeLbl.textContent='('+r+')';}
   const badge=document.getElementById('wh-cmp-badge');
   if(badge){
-    const hasFilter=whCmpFilter.prodFrom||whCmpFilter.prodTo||whCmpFilter.dryFrom||whCmpFilter.dryTo;
-    badge.textContent=hasFilter?'🗓️ กรองตามช่วงวันที่':'แสดงข้อมูลทั้งหมด';
-    badge.style.background=hasFilter?'#dbeafe':'#f3f4f6';
-    badge.style.color=hasFilter?'#1e40af':'#6b7280';
+    const hasAnyFilter=hasProdFilter||hasDryFilter;
+    badge.textContent=hasAnyFilter?'🗓️ กรองตามช่วงวันที่':'⬆️ เลือกช่วงวันที่เพื่อคำนวน';
+    badge.style.background=hasAnyFilter?'#dbeafe':'#fef9c3';
+    badge.style.color=hasAnyFilter?'#1e40af':'#92400e';
   }
 
   const yd=document.getElementById('wh-yield-display');if(yd)yd.textContent=settings.yield;
-  const wetEl=document.getElementById('wh-cmp-wet');if(wetEl)wetEl.textContent=N0(filtWetKg);
-  const ft=document.getElementById('wh-forecast-total');if(ft)ft.textContent=N0(filtForecast);
-  const cf=document.getElementById('wh-cmp-forecast');if(cf)cf.textContent=N0(filtForecast);
-  const ca=document.getElementById('wh-cmp-actual');if(ca)ca.textContent=N0(filtDryInKg);
+  const wetEl=document.getElementById('wh-cmp-wet');if(wetEl)wetEl.textContent=hasProdFilter?N0(filtWetKg):'—';
+  const ft=document.getElementById('wh-forecast-total');if(ft)ft.textContent=hasProdFilter?N0(filtForecast):'—';
+  const cf=document.getElementById('wh-cmp-forecast');if(cf)cf.textContent=hasProdFilter?N0(filtForecast):'—';
+  const ca=document.getElementById('wh-cmp-actual');if(ca)ca.textContent=hasDryFilter?N0(filtDryInKg):'—';
   const cd=document.getElementById('wh-cmp-diff');
-  if(cd){cd.textContent=N0(filtDiff);cd.style.color=filtDiff>=0?'#16a34a':'#dc2626';}
+  if(cd){
+    if(!hasProdFilter&&!hasDryFilter){cd.textContent='—';cd.style.color='#6b7280';}
+    else{cd.textContent=N0(filtDiff);cd.style.color=filtDiff>=0?'#16a34a':'#dc2626';}
+  }
   const cy=document.getElementById('wh-cmp-yield-actual');
-  if(cy)cy.textContent=filtWetKg>0?N(filtYield,1)+'%':'—';
+  if(cy)cy.textContent=(hasProdFilter&&filtWetKg>0)?N(filtYield,1)+'%':'—';
 
   // Warehouse tab: edit (admin/manager) + delete (admin only). No payment — handled in การชำระเงิน tab.
   const acts=(type,e)=>{
