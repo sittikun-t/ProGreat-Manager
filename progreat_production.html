@@ -1186,10 +1186,11 @@ const N0 = v => N(v,0);
 
 // ─── DATE HELPERS ──────────────────────────────────────────────────
 function getDateStr(p) {
-  const d=(document.getElementById(p+'-d').value||'').toString().padStart(2,'0');
+  const dVal=document.getElementById(p+'-d').value;
   const m=document.getElementById(p+'-m').value;
   const y=document.getElementById(p+'-y').value;
-  if(!d||!m||!y) return '';
+  if(!dVal||!m||!y) return '';
+  const d=dVal.toString().padStart(2,'0');
   return `${y}-${m}-${d}`;
 }
 function setDateParts(p,str) {
