@@ -137,6 +137,20 @@ tr:hover td{background:#f8faff}
 .pay-filter-btn{padding:5px 14px;border-radius:16px;border:1.5px solid #d1d5db;background:#fff;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
 .pay-filter-btn.active{background:#2d7ab8;color:#fff;border-color:#2d7ab8}
 
+/* Customer management */
+.customer-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #e5e7eb;flex-wrap:wrap}
+.customer-row:last-child{border-bottom:none}
+.credit-badge{padding:3px 12px;border-radius:10px;font-size:11px;font-weight:700;background:#ede9fe;color:#5b21b6;white-space:nowrap}
+/* Due date tags */
+.due-tag-overdue{background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap}
+.due-tag-soon{background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap}
+.due-tag-ok{background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:10px;font-size:11px;white-space:nowrap}
+.due-tag-none{color:#9ca3af;font-size:11px}
+/* Overdue notification banner */
+#overdue-banner{display:none;background:#fef2f2;border-bottom:2px solid #fca5a5;padding:9px 20px;font-size:13px;gap:8px;flex-wrap:wrap;align-items:center}
+#overdue-banner .banner-items{flex:1;display:flex;gap:14px;flex-wrap:wrap}
+#overdue-banner .banner-close{cursor:pointer;opacity:.5;font-size:16px;line-height:1;margin-left:auto;padding:0 4px}
+#overdue-banner .banner-close:hover{opacity:1}
 @media(max-width:640px){#header{padding:0 10px}.tab-btn{padding:10px 10px;font-size:12px}#content{padding:10px}}
 </style>
 
@@ -188,6 +202,7 @@ tr:hover td{background:#f8faff}
     <button class="tab-btn" onclick="showTab('warehouse')">📦 คลังสินค้า</button>
     <button class="tab-btn" onclick="showTab('sales')">🛒 การขาย</button>
     <button class="tab-btn" onclick="showTab('payments')">💰 การชำระเงิน</button>
+    <button class="tab-btn" id="tab-btn-customers" onclick="showTab('customers')" style="display:none">👥 ลูกค้า</button>
     <button class="tab-btn" id="tab-btn-settings" onclick="showTab('settings')">⚙️ ตั้งค่า</button>
     <button class="tab-btn" id="tab-btn-users" onclick="showTab('users')" style="display:none">👥 ผู้ใช้</button>
   </div>
@@ -196,6 +211,15 @@ tr:hover td{background:#f8faff}
     <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
   </div>
   <div id="save-indicator" style="margin-left:8px">☁️ กำลังโหลด...</div>
+</div>
+
+<!-- ===== OVERDUE NOTIFICATION BANNER ===== -->
+<div id="overdue-banner" style="display:none">
+  <div class="banner-items">
+    <span id="overdue-banner-overdue" style="color:#dc2626;font-weight:700"></span>
+    <span id="overdue-banner-soon" style="color:#d97706;font-weight:600"></span>
+  </div>
+  <span class="banner-close" onclick="document.getElementById('overdue-banner').style.display='none'" title="ปิด">✕</span>
 </div>
 
 <!-- ===== TAB: DASHBOARD ===== -->
@@ -564,7 +588,7 @@ tr:hover td{background:#f8faff}
       </div>
       <div class="table-wrap">
         <table><thead><tr>
-          <th>วันที่</th><th>ลูกค้า/สถานที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">จำนวนถุง</th><th>การจัดส่ง</th><th class="num">ค่าโม่บด</th><th class="num">ค่าขนส่ง</th><th class="num">รวม (บาท)</th><th>ชำระ</th><th>หมายเหตุ</th><th>โกดัง</th><th></th>
+          <th>วันที่</th><th>ลูกค้า/สถานที่</th><th>ทะเบียนรถ</th><th class="num">น้ำหนัก (กก.)</th><th class="num">จำนวนถุง</th><th>การจัดส่ง</th><th class="num">ค่าโม่บด</th><th class="num">ค่าขนส่ง</th><th class="num">รวม (บาท)</th><th>ชำระ</th><th>กำหนดชำระ</th><th>หมายเหตุ</th><th>โกดัง</th><th></th>
         </tr></thead>
         <tbody id="sales-body"><tr><td colspan="13" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr></tbody>
         </table>
@@ -590,6 +614,22 @@ tr:hover td{background:#f8faff}
         <span style="font-size:12px;color:#9ca3af">💡 ติ๊กเลือกหลายรายการเพื่อชำระพร้อมกัน</span>
       </div>
       <div id="payments-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB: CUSTOMERS ===== -->
+<div id="tab-customers" style="display:none">
+  <div id="content">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px">
+        <div class="section-title">👥 ข้อมูลลูกค้า &amp; เครดิต</div>
+        <button class="btn btn-blue btn-sm" onclick="openCustomerModal()">+ เพิ่มลูกค้า</button>
+      </div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:14px">กำหนดจำนวนวันเครดิตของลูกค้าแต่ละราย ระบบจะคำนวณวันครบกำหนดชำระเงินโดยอัตโนมัติและแจ้งเตือนเมื่อถึง/เลยกำหนด</div>
+      <div id="customer-list" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
+        <div class="empty" style="padding:24px;text-align:center">ยังไม่มีข้อมูลลูกค้า</div>
+      </div>
     </div>
   </div>
 </div>
@@ -988,7 +1028,7 @@ service cloud.firestore {
       </div>
       <div class="form-group">
         <label>ชื่อลูกค้า / สถานที่ส่ง</label>
-        <input type="text" id="s-customer" placeholder="ชื่อลูกค้าหรือสถานที่">
+        <input type="text" id="s-customer" placeholder="ชื่อลูกค้าหรือสถานที่" list="customer-names-datalist" autocomplete="off">
       </div>
       <div class="form-group">
         <label>น้ำหนักสินค้า (กก.)</label>
@@ -1153,6 +1193,32 @@ service cloud.firestore {
   </div>
 </div>
 
+<!-- ===== MODAL: CUSTOMER ===== -->
+<div class="modal-overlay" id="modal-customer">
+  <div class="modal" style="max-width:420px">
+    <h2>👥 ข้อมูลลูกค้า</h2>
+    <div class="form-group">
+      <label>ชื่อลูกค้า / บริษัท</label>
+      <input type="text" id="cust-name" placeholder="เช่น TRF, บริษัท ABC จำกัด">
+    </div>
+    <div class="form-group">
+      <label>เครดิต (วัน)</label>
+      <input type="number" id="cust-credit" min="0" max="365" step="1" placeholder="0 = ชำระทันที">
+      <div class="unit">จำนวนวันนับจากวันที่สั่งซื้อ (0 = ชำระทันที / เงินสด)</div>
+    </div>
+    <div class="form-group">
+      <label>หมายเหตุ (ไม่จำเป็น)</label>
+      <input type="text" id="cust-note" placeholder="บันทึกเพิ่มเติม">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-customer')">ยกเลิก</button>
+      <button class="btn btn-blue" onclick="saveCustomer()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<datalist id="customer-names-datalist"></datalist>
+
 <script>
 // ─── FIREBASE CONFIG ───────────────────────────────────────────────
 const firebaseConfig = {
@@ -1169,7 +1235,7 @@ const db   = firebase.firestore();
 
 // ─── STATE ─────────────────────────────────────────────────────────
 let currentUser = null, currentRole = null;
-let lots = [], water = [], cassava = [], dryIn = [], dryOut = [], sales = [], stockAdjustments = [];
+let lots = [], water = [], cassava = [], dryIn = [], dryOut = [], sales = [], stockAdjustments = [], customers = [];
 let settings = { waterPrice:500, cassavaPrice:1.5, dryingCost:0.5, grindingCost:0.3, transportProd:5000, transportSale:0.4, yield:50 };
 let warehouses = ['โกดัง A','โกดัง B'];
 let destWarehouses = ['โกดัง RBM'];
@@ -1271,6 +1337,7 @@ function applyRoleUI(){
   const isManager=currentRole==='manager';
   const canAdd=isAdmin||isManager||currentRole==='client';
   document.getElementById('tab-btn-users').style.display=isAdmin?'':'none';
+  document.getElementById('tab-btn-customers').style.display=(isAdmin||isManager)?'':'none';
   // Settings tab: admin only
   const settingsBtn=document.getElementById('tab-btn-settings');
   if(settingsBtn)settingsBtn.style.display=isAdmin?'':'none';
@@ -1295,7 +1362,7 @@ function setupRealtimeSync(){
       const d=doc.data();
       lots=d.lots||[];water=d.water||[];cassava=d.cassava||[];
       dryIn=d.dryIn||[];dryOut=d.dryOut||[];sales=d.sales||[];
-      stockAdjustments=d.stockAdjustments||[];
+      stockAdjustments=d.stockAdjustments||[];customers=d.customers||[];
       warehouses=d.warehouses||['โกดัง A','โกดัง B'];
       destWarehouses=d.destWarehouses||['โกดัง RBM'];
     }
@@ -1316,7 +1383,7 @@ async function saveAll(){
   ind.textContent='⏳ กำลังบันทึก...';
   try{
     await db.collection('pgp_data').doc('main').set({
-      lots,water,cassava,dryIn,dryOut,sales,stockAdjustments,warehouses,destWarehouses,
+      lots,water,cassava,dryIn,dryOut,sales,stockAdjustments,customers,warehouses,destWarehouses,
       updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
       updatedBy:currentUser?currentUser.email:'unknown'
     });
@@ -1356,7 +1423,7 @@ function applySettingsToUI(){
 
 // ─── TABS ──────────────────────────────────────────────────────────
 function showTab(tab){
-  ['dashboard','production','warehouse','sales','payments','settings','users'].forEach(t=>{
+  ['dashboard','production','warehouse','sales','payments','customers','settings','users'].forEach(t=>{
     const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
   });
   document.querySelectorAll('.tab-btn').forEach(b=>{
@@ -1366,18 +1433,21 @@ function showTab(tab){
   if(tab==='warehouse')renderWarehouse();
   if(tab==='sales')renderSales();
   if(tab==='payments')renderPayments();
+  if(tab==='customers'){if(!['admin','manager'].includes(currentRole)){showTab('production');return;}renderCustomers();}
   if(tab==='settings'){if(currentRole!=='admin'){showTab('production');return;}renderWarehouses();renderDestWarehouses();}
   if(tab==='users')loadUserList();
 }
 function renderAll(){
   populateLotSelect();
   populateWarehouseSelects();
+  populateCustomerDatalist();
   renderProduction();
   renderWarehouse();
   renderSales();
   renderPayments();
   renderWarehouses();
   renderDestWarehouses();
+  renderOverdueBanner();
 }
 
 // ─── LOTS ──────────────────────────────────────────────────────────
@@ -1859,6 +1929,114 @@ function renderProduction(){
     lotCassava.map(e=>`<tr><td>${e.date||'—'}</td><td class="num">${N0(e.weightKg)}</td><td class="num">${N(e.price,2)}</td><td class="num">${N0(e.total)}</td><td>${acts('cassava',e)}</td></tr>`).join('');
 }
 
+// ─── DATE HELPERS (Buddhist year) ──────────────────────────────────
+function todayBuddhist(){
+  const n=new Date();
+  return (n.getFullYear()+543)+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+}
+function addDaysBuddhist(dateStr,days){
+  if(!dateStr||!days)return dateStr||'';
+  const p=dateStr.split('-');if(p.length!==3)return '';
+  const d=new Date(parseInt(p[0])-543,parseInt(p[1])-1,parseInt(p[2]));
+  d.setDate(d.getDate()+parseInt(days));
+  return(d.getFullYear()+543)+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function getSaleDueDate(sale){
+  if(!sale||!sale.date)return'';
+  const c=customers.find(x=>x.name===sale.customer);
+  if(!c||!c.creditDays)return'';
+  return addDaysBuddhist(sale.date,c.creditDays);
+}
+function getSalePayStatus(sale){
+  // returns {status:'paid'|'overdue'|'due-soon'|'ok'|'no-credit', due:str}
+  if(sale.paid)return{status:'paid',due:''};
+  const due=getSaleDueDate(sale);
+  if(!due)return{status:'no-credit',due:''};
+  const today=todayBuddhist();
+  if(today>due)return{status:'overdue',due};
+  if(addDaysBuddhist(today,3)>=due)return{status:'due-soon',due};
+  return{status:'ok',due};
+}
+
+// ─── CUSTOMER MANAGEMENT ───────────────────────────────────────────
+let editingCustomer=null;
+function openCustomerModal(cust=null){
+  if(!['admin','manager'].includes(currentRole))return;
+  editingCustomer=cust?{id:cust.id}:null;
+  document.getElementById('cust-name').value=cust?cust.name:'';
+  document.getElementById('cust-credit').value=cust?(cust.creditDays||0):'';
+  document.getElementById('cust-note').value=cust?(cust.note||''):'';
+  document.getElementById('modal-customer').classList.add('open');
+}
+function saveCustomer(){
+  if(!['admin','manager'].includes(currentRole))return;
+  const name=document.getElementById('cust-name').value.trim();
+  if(!name){alert('กรุณากรอกชื่อลูกค้า');return;}
+  const creditDays=parseInt(document.getElementById('cust-credit').value)||0;
+  const note=document.getElementById('cust-note').value.trim();
+  const record={id:editingCustomer?editingCustomer.id:genId(),name,creditDays,note};
+  if(editingCustomer){const i=customers.findIndex(x=>x.id===editingCustomer.id);if(i>=0)customers[i]=record;else customers.push(record);}
+  else customers.push(record);
+  editingCustomer=null;
+  saveAll();
+  closeModal('modal-customer');
+  renderCustomers();
+  populateCustomerDatalist();
+  renderOverdueBanner();
+  renderSales();
+}
+function deleteCustomer(id){
+  if(!confirm('ลบข้อมูลลูกค้านี้?'))return;
+  customers=customers.filter(x=>x.id!==id);
+  saveAll();renderCustomers();populateCustomerDatalist();renderOverdueBanner();renderSales();
+}
+function populateCustomerDatalist(){
+  const dl=document.getElementById('customer-names-datalist');
+  if(dl)dl.innerHTML=customers.map(c=>`<option value="${c.name}">`).join('');
+}
+function renderCustomers(){
+  const canEdit=['admin','manager'].includes(currentRole);
+  const el=document.getElementById('customer-list');
+  if(!el)return;
+  if(customers.length===0){
+    el.innerHTML='<div class="empty" style="padding:24px;text-align:center">ยังไม่มีข้อมูลลูกค้า<br><span style="font-size:12px;color:#9ca3af">คลิก "+ เพิ่มลูกค้า" เพื่อเพิ่มรายชื่อ</span></div>';
+    return;
+  }
+  el.innerHTML=customers.map(c=>`<div class="customer-row">
+    <div style="flex:1;min-width:100px">
+      <div style="font-weight:700;font-size:14px;color:#1a4f7a">${c.name}</div>
+      ${c.note?`<div style="font-size:11px;color:#6b7280;margin-top:2px">${c.note}</div>`:''}
+    </div>
+    <span class="credit-badge">${c.creditDays?`💳 ${c.creditDays} วัน`:'💵 เงินสด / ไม่มีเครดิต'}</span>
+    ${canEdit?`<div style="display:flex;gap:6px">
+      <button class="btn btn-outline btn-sm" onclick='openCustomerModal(${JSON.stringify(c).replace(/'/g,"&#39;")})'>✏️</button>
+      <button class="btn btn-red btn-sm" onclick="deleteCustomer('${c.id}')">🗑️</button>
+    </div>`:''}
+  </div>`).join('');
+}
+function renderOverdueBanner(){
+  const banner=document.getElementById('overdue-banner');
+  const elOver=document.getElementById('overdue-banner-overdue');
+  const elSoon=document.getElementById('overdue-banner-soon');
+  if(!banner||!elOver||!elSoon)return;
+  if(!['admin','manager'].includes(currentRole)){banner.style.display='none';return;}
+  const today=todayBuddhist();
+  const soon3=addDaysBuddhist(today,3);
+  const overdueList=sales.filter(s=>{if(s.paid)return false;const d=getSaleDueDate(s);return d&&today>d;});
+  const soonList=sales.filter(s=>{if(s.paid)return false;const d=getSaleDueDate(s);return d&&today<=d&&d<=soon3;});
+  if(overdueList.length===0&&soonList.length===0){banner.style.display='none';return;}
+  banner.style.display='flex';
+  if(overdueList.length>0){
+    const names=[...new Set(overdueList.map(s=>s.customer||'?'))].join(', ');
+    const total=overdueList.reduce((s,x)=>s+(x.total||0),0);
+    elOver.textContent=`🔴 เลยกำหนด ${overdueList.length} รายการ (${N0(total)} บ.) — ${names}`;
+  } else {elOver.textContent='';}
+  if(soonList.length>0){
+    const names=[...new Set(soonList.map(s=>s.customer||'?'))].join(', ');
+    elSoon.textContent=`🟡 ใกล้กำหนด ≤3 วัน: ${soonList.length} รายการ — ${names}`;
+  } else {elSoon.textContent='';}
+}
+
 // ─── RENDER: WAREHOUSE ─────────────────────────────────────────────
 function renderWarehouse(){
   const yld=settings.yield/100;
@@ -2199,8 +2377,17 @@ function renderSales(){
   const isAdmin=currentRole==='admin';
   const isManager=currentRole==='manager';
   const canEdit=isAdmin||isManager;
-  document.getElementById('sales-body').innerHTML=rows.length===0?'<tr><td colspan="13" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr>':
-    rows.map(e=>`<tr>
+  document.getElementById('sales-body').innerHTML=rows.length===0?'<tr><td colspan="14" class="empty"><div class="icon">🛒</div>ยังไม่มีรายการขาย</td></tr>':
+    rows.map(e=>{
+      const ps=getSalePayStatus(e);
+      const rowBg=!e.paid&&ps.status==='overdue'?' style="background:#fff1f2"':!e.paid&&ps.status==='due-soon'?' style="background:#fffbeb"':'';
+      const dueHtml=e.paid
+        ?`<span style="color:#9ca3af;font-size:11px">ชำระแล้ว</span>`
+        :ps.status==='overdue'?`<span class="due-tag-overdue">🔴 ${ps.due}</span>`
+        :ps.status==='due-soon'?`<span class="due-tag-soon">🟡 ${ps.due}</span>`
+        :ps.status==='ok'?`<span class="due-tag-ok">📅 ${ps.due}</span>`
+        :`<span class="due-tag-none">—</span>`;
+      return`<tr${rowBg}>
       <td>${e.date||'—'}</td>
       <td style="font-weight:600">${e.customer||'—'}</td>
       <td>${e.truck||'—'}</td>
@@ -2211,6 +2398,7 @@ function renderSales(){
       <td class="num">${e.transport?N0(e.transport)+(e.transportRate?' ('+e.transportRate+' บ/กก.)':''):'—'}</td>
       <td class="num" style="font-weight:700">${N0(e.total)}</td>
       <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ '+e.payDate:'❌ ค้าง'}</span></td>
+      <td>${dueHtml}</td>
       <td style="font-size:12px;color:#6b7280">${e.notes||'—'}</td>
       <td style="font-size:12px;color:#374151">${e.saleWarehouse||'—'}</td>
       <td><div style="display:flex;gap:4px">
@@ -2218,7 +2406,7 @@ function renderSales(){
         ${isAdmin&&!e.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('sale','${e.id}')">💰</button>`:''}
         ${isAdmin?`<button class="btn btn-red btn-sm" onclick="deleteEntry('sale','${e.id}')">🗑️</button>`:''}
       </div></td>
-    </tr>`).join('');
+    </tr>`;}).join('');
 }
 
 // ─── RENDER: PAYMENTS ──────────────────────────────────────────────
@@ -2256,18 +2444,26 @@ function renderPayments(){
       ${isAdminPay&&hasUnpaid?'<th style="width:32px"><input type="checkbox" class="pay-check" style="width:15px;height:15px;accent-color:#2d7ab8" onchange="toggleSelectAllPay(this)" title="เลือกทั้งหมด"></th>':'<th></th>'}
       <th>วันที่</th><th>ประเภท</th><th>Lot</th><th>รายละเอียด</th><th class="num">จำนวน (บาท)</th><th>สถานะ</th><th>วันที่ชำระ</th><th>ธนาคาร</th><th></th>
     </tr></thead><tbody>${all.length===0?'<tr><td colspan="10" class="empty">ไม่มีรายการ</td></tr>':
-    all.map(e=>`<tr${!e.paid?' style="background:#fffbeb"':''}>
+    all.map(e=>{
+      const ps=e.type==='sale'?getSalePayStatus(e):null;
+      const rowBg=e.type==='sale'&&!e.paid&&ps&&ps.status==='overdue'?' style="background:#fff1f2"'
+        :(!e.paid&&(e.type!=='sale'||(ps&&ps.status==='due-soon')))?' style="background:#fffbeb"':'';
+      const detailExtra=e.type==='sale'&&!e.paid&&ps&&ps.due
+        ?ps.status==='overdue'?`<br><span class="due-tag-overdue">🔴 ครบ ${ps.due}</span>`
+        :ps.status==='due-soon'?`<br><span class="due-tag-soon">🟡 ครบ ${ps.due}</span>`
+        :ps.status==='ok'?`<br><span class="due-tag-ok">📅 ครบ ${ps.due}</span>`:'':'';
+      return `<tr${rowBg}>
       <td>${isAdminPay&&!e.paid?`<input type="checkbox" class="pay-check" data-type="${e.type}" data-id="${e.id}" style="width:15px;height:15px;accent-color:#2d7ab8" onchange="updateBulkBar()">`:''}</td>
       <td style="font-size:12px">${e.date||'—'}</td>
       <td style="font-size:12px">${e.typeLabel}</td>
       <td><span class="lot-badge">${getLotCode(e.lotId)}</span></td>
-      <td style="font-size:12px">${e.truck||e.warehouse||e.customer||e.fromWarehouse||'—'}</td>
+      <td style="font-size:12px">${e.truck||e.warehouse||e.customer||e.fromWarehouse||'—'}${detailExtra}</td>
       <td class="num" style="font-weight:700">${N0(e.amount)}</td>
       <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ ชำระแล้ว':'❌ ค้างชำระ'}</span></td>
       <td style="font-size:12px;color:#6b7280">${e.payDate||'—'}</td>
       <td>${e.payBank?`<span class="bank-badge">${e.payBank}</span>`:'<span style="color:#d1d5db;font-size:12px">—</span>'}</td>
       <td>${currentRole==='admin'?(!e.paid?`<button class="btn btn-green btn-sm" onclick="openPayModal('${e.type}','${e.id}')">💰 ชำระ</button>`:`<button class="btn btn-outline btn-sm" onclick="openPayModal('${e.type}','${e.id}')">✏️</button>`):'—'}</td>
-    </tr>`).join('')}</tbody></table></div>`;
+    </tr>`;}).join('')}</tbody></table></div>`;
 }
 
 // ─── USER MANAGEMENT ───────────────────────────────────────────────
