@@ -503,11 +503,7 @@ function updatePOInfo(){
   const pct=Math.min(100,Math.round(delivered/activePO.totalWeight*100));
   const remColor=remaining<=0?'#dc3545':remaining<activePO.totalWeight*0.2?'#fd7e14':'#0d6efd';
   infoDiv.style.display='block';
-  infoDiv.innerHTML='<div style="background:#edf5ff;border:1px solid #c3d9f0;border-radius:6px;padding:5px 9px;font-size:.73rem;margin-top:4px">'+
-    '<i class="fa fa-file-contract me-1" style="color:#0056b3"></i>'+
-    '<span style="font-weight:700;color:#0056b3">'+(activePO.poNumber||'PO')+'</span> '+
-    '| คงเหลือ <span style="font-weight:700;color:'+remColor+'">'+fmt(remaining,0)+' กก.</span> '+
-    '<span class="text-muted">('+pct+'% ส่งแล้ว)</span></div>';
+  infoDiv.innerHTML='<div style="background:#edf5ff;border:1px solid #c3d9f0;border-radius:6px;padding:5px 9px;font-size:.73rem;margin-top:4px">'+'<i class="fa fa-file-contract me-1" style="color:#0056b3"></i>'+'<span style="font-weight:700;color:#0056b3">'+(activePO.poNumber||'PO')+'</span> '+'| คงเหลือ <span style="font-weight:700;color:'+remColor+'">'+fmt(remaining,0)+' กก.</span> '+'<span class="text-muted">('+pct+'% ส่งแล้ว)</span></div>';
 }
 
 function renderPOTab(){
@@ -534,29 +530,7 @@ function renderPOList(){
     const done=!overShip&&remaining===0;
     const badgeHtml=overShip?'<span class="po-badge-over">เกิน PO</span>':done?'<span class="po-badge-done">ครบแล้ว</span>':'<span class="po-badge-active">กำลังดำเนินการ</span>';
     const barColor=overShip?'#dc3545':done?'#198754':'var(--green)';
-    return '<div class="po-card">'+
-      '<div class="po-card-head">'+
-      '<div class="d-flex align-items-center gap-2 flex-wrap">'+
-      '<span class="po-num-tag">'+(po.poNumber||'(ไม่มีเลข PO)')+'</span>'+
-      '<span class="fw-semibold">'+po.customer+'</span>'+
-      badgeHtml+
-      '<span class="text-muted" style="font-size:.72rem">ยืนยัน '+fmtD(po.confirmedDate)+'</span></div>'+
-      '<div class="d-flex gap-1">'+
-      '<button class="btn btn-outline-primary btn-act" onclick="editPO('+po.origIdx+')"><i class="fa fa-pen"></i></button>'+
-      '<button class="btn btn-outline-danger btn-act" onclick="deletePO('+po.origIdx+')"><i class="fa fa-trash"></i></button>'+
-      '</div></div>'+
-      '<div style="padding:10px 14px">'+
-      '<div class="d-flex justify-content-between mb-1" style="font-size:.78rem">'+
-      '<span class="text-muted">ส่งแล้ว <b>'+fmt(delivered,0)+'</b> กก.</span>'+
-      '<span style="font-weight:700;color:'+(remaining<0?'#dc3545':remaining===0?'#198754':'#0d6efd')+'">คงเหลือ '+fmt(remaining,0)+' กก.</span>'+
-      '<span class="text-muted">รวม '+fmt(po.totalWeight,0)+' กก. ('+fmt(po.totalWeight/1000,1)+' ตัน)</span></div>'+
-      '<div class="po-bar-bg"><div class="po-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>'+
-      '<div class="d-flex justify-content-between mt-1" style="font-size:.72rem;color:#888">'+
-      '<span>ราคาตกลง '+fmt(po.pricePerKg)+' บ./กก.</span>'+
-      '<span>'+pct+'% ส่งแล้ว</span>'+
-      '<span>มูลค่า PO '+fmt(po.totalWeight*(po.pricePerKg||0),0)+' บาท</span></div>'+
-      (po.notes?'<div style="font-size:.72rem;color:#666;margin-top:4px"><i class="fa fa-note-sticky me-1"></i>'+po.notes+'</div>':'')+
-      '</div></div>';
+    return '<div class="po-card">'+'<div class="po-card-head">'+'<div class="d-flex align-items-center gap-2 flex-wrap">'+'<span class="po-num-tag">'+(po.poNumber||'(ไม่มีเลข PO)')+'</span>'+'<span class="fw-semibold">'+po.customer+'</span>'+badgeHtml+'<span class="text-muted" style="font-size:.72rem">ยืนยัน '+fmtD(po.confirmedDate)+'</span></div>'+'<div class="d-flex gap-1">'+'<button class="btn btn-outline-primary btn-act" onclick="editPO('+po.origIdx+')"><i class="fa fa-pen"></i></button>'+'<button class="btn btn-outline-danger btn-act" onclick="deletePO('+po.origIdx+')"><i class="fa fa-trash"></i></button>'+'</div></div>'+'<div style="padding:10px 14px">'+'<div class="d-flex justify-content-between mb-1" style="font-size:.78rem">'+'<span class="text-muted">ส่งแล้ว <b>'+fmt(delivered,0)+'</b> กก.</span>'+'<span style="font-weight:700;color:'+(remaining<0?'#dc3545':remaining===0?'#198754':'#0d6efd')+'">คงเหลือ '+fmt(remaining,0)+' กก.</span>'+'<span class="text-muted">รวม '+fmt(po.totalWeight,0)+' กก. ('+fmt(po.totalWeight/1000,1)+' ตัน)</span></div>'+'<div class="po-bar-bg"><div class="po-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>'+'<div class="d-flex justify-content-between mt-1" style="font-size:.72rem;color:#888">'+'<span>ราคาตกลง '+fmt(po.pricePerKg)+' บ./กก.</span>'+'<span>'+pct+'% ส่งแล้ว</span>'+'<span>มูลค่า PO '+fmt(po.totalWeight*(po.pricePerKg||0),0)+' บาท</span></div>'+(po.notes?'<div style="font-size:.72rem;color:#666;margin-top:4px"><i class="fa fa-note-sticky me-1"></i>'+po.notes+'</div>':'')+'</div></div>';
   }).join('');
 }
 
@@ -617,7 +591,7 @@ function renderMethodSelect(currentVal){
     sel.innerHTML='<option value="'+escHtml(currentVal)+'" selected>'+escHtml(currentVal)+'</option>'+sel.innerHTML;
   }
 }
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>\/g,'&gt;');}
 
 function onMethodChange(){
   const sel=document.getElementById('f_method');
@@ -753,20 +727,7 @@ function renderTable(){
     const note=r.notes||'';
     // แสดงวันที่ชำระจริงเฉพาะเมื่อมีวิธีการชำระด้วย
     const payDateDisplay=paid?'<span style="white-space:nowrap;font-size:.78rem">'+fmtD(r.paymentDate)+'</span>':'<span class="text-muted" style="font-size:.73rem">-</span>';
-    return '<tr'+rc+'><td style="font-size:.73rem;color:#888;font-weight:700">'+(r.id||'')+'</td>'+
-      '<td style="white-space:nowrap">'+fmtD(r.deliveryDate)+'</td>'+
-      '<td class="fw-semibold">'+(r.customer||'')+'</td>'+
-      '<td>'+(r.product||'')+'</td>'+
-      '<td class="text-end">'+fmt(r.price)+'</td>'+
-      '<td class="text-end">'+fmt(r.weight,0)+'</td>'+
-      '<td class="text-end fw-bold">'+fmt(r.amount)+'</td>'+
-      '<td>'+dueDateCell(r)+'</td>'+
-      '<td>'+payDateDisplay+'</td>'+
-      '<td>'+badge+'</td>'+
-      '<td style="font-size:.72rem">'+meth+'</td>'+
-      '<td class="note-td">'+note+'</td>'+
-      '<td><button class="btn btn-outline-primary btn-act" onclick="openEdit('+idx+')"><i class="fa fa-pen"></i></button></td>'+
-      '</tr>';
+    return '<tr'+rc+'><td style="font-size:.73rem;color:#888;font-weight:700">'+(r.id||'')+'</td>'+'<td style="white-space:nowrap">'+fmtD(r.deliveryDate)+'</td>'+'<td class="fw-semibold">'+(r.customer||'')+'</td>'+'<td>'+(r.product||'')+'</td>'+'<td class="text-end">'+fmt(r.price)+'</td>'+'<td class="text-end">'+fmt(r.weight,0)+'</td>'+'<td class="text-end fw-bold">'+fmt(r.amount)+'</td>'+'<td>'+dueDateCell(r)+'</td>'+'<td>'+payDateDisplay+'</td>'+'<td>'+badge+'</td>'+'<td style="font-size:.72rem">'+meth+'</td>'+'<td class="note-td">'+note+'</td>'+'<td><button class="btn btn-outline-primary btn-act" onclick="openEdit('+idx+')"><i class="fa fa-pen"></i></button></td>'+'</tr>';
   }).join('');
 }
 
@@ -778,10 +739,7 @@ function renderCustTable(){
   const tbody=document.getElementById('custTableBody');
   if(!custs.length){tbody.innerHTML='<tr><td colspan="3" class="text-center text-muted">ยังไม่มีลูกค้า</td></tr>';return;}
   tbody.innerHTML=custs.map((c,i)=>
-    '<tr><td>'+c.name+'</td>'+
-    '<td class="text-center"><span class="credit-badge">'+c.creditDays+' วัน</span></td>'+
-    '<td class="text-center"><button class="btn btn-outline-primary btn-act me-1" onclick="editCust('+i+')"><i class="fa fa-pen"></i></button>'+
-    '<button class="btn btn-outline-danger btn-act" onclick="deleteCust('+i+')"><i class="fa fa-trash"></i></button></td></tr>'
+    '<tr><td>'+c.name+'</td>'+'<td class="text-center"><span class="credit-badge">'+c.creditDays+' วัน</span></td>'+'<td class="text-center"><button class="btn btn-outline-primary btn-act me-1" onclick="editCust('+i+')"><i class="fa fa-pen"></i></button>'+'<button class="btn btn-outline-danger btn-act" onclick="deleteCust('+i+')"><i class="fa fa-trash"></i></button></td></tr>'
   ).join('');
   // Update datalist
   const dl=document.getElementById('custList');
@@ -966,7 +924,7 @@ function initBonusSaveYears(){
 
 function saveBonusRecord(){
   const tons=+document.getElementById('b_ton').value||0;
-  const rw=+document.getElementById('b_rw').value||0;
+  const rw=+document".getElementById('b_rw').value||0;
   const rs=+document.getElementById('b_rs').value||0;
   const month=+document.getElementById('b_save_month').value;
   const year=+document.getElementById('b_save_year').value;
