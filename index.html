@@ -1,1 +1,1091 @@
-test_change_x
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProGreat Customer Management</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<style>
+:root{--green:#1a6b3a;--green-dark:#0f4424;--green-light:#2d9e5c;}
+body{font-family:'Segoe UI','Sarabun',sans-serif;background:#f0f4f0;font-size:.88rem;}
+.topbar{background:linear-gradient(135deg,var(--green-dark),var(--green));color:white;padding:16px 24px;}
+.topbar h1{font-size:1.3rem;font-weight:700;margin:0;}
+.topbar .sub{font-size:.78rem;opacity:.8;margin-top:2px;}
+.nav-tabs{border-bottom:1px solid #ddd;background:white;padding:0 12px;border-radius:10px 10px 0 0;flex-wrap:nowrap;overflow-x:auto;}
+.nav-tabs .nav-link{color:#555;font-weight:500;border:none;border-bottom:3px solid transparent;padding:10px 16px;white-space:nowrap;}
+.nav-tabs .nav-link.active{color:var(--green);font-weight:700;border-bottom:3px solid var(--green);background:none;}
+.section{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:20px;margin-bottom:20px;}
+.sec-title{font-weight:700;color:var(--green);margin-bottom:14px;font-size:.94rem;display:flex;align-items:center;gap:7px;}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px;}
+.stat-card{background:white;border-radius:10px;padding:13px 16px;box-shadow:0 2px 6px rgba(0,0,0,.07);border-left:4px solid var(--green);}
+.stat-card.orange{border-color:#fd7e14;}.stat-card.red{border-color:#dc3545;}.stat-card.blue{border-color:#0d6efd;}
+.stat-val{font-size:1.3rem;font-weight:700;color:#1a1a1a;}.stat-lbl{font-size:.73rem;color:#888;margin-top:2px;}
+table thead th{background:var(--green);color:white;font-size:.74rem;font-weight:600;white-space:nowrap;padding:8px 9px;position:sticky;top:0;z-index:2;}
+table td{padding:7px 9px;font-size:.79rem;vertical-align:middle;border-bottom:1px solid #f0f0f0;}
+table tbody tr:hover td{background:#f0fff4!important;}
+.unpaid-row td{background:#fffbea!important;}
+.badge-paid{background:#d4edda;color:#155724;border-radius:12px;padding:2px 8px;font-size:.69rem;font-weight:600;white-space:nowrap;}
+.badge-unpaid{background:#ffeeba;color:#856404;border-radius:12px;padding:2px 8px;font-size:.69rem;font-weight:600;white-space:nowrap;}
+.due-normal{color:#0d6efd;font-weight:600;font-size:.78rem;white-space:nowrap;}
+.due-overdue{color:#dc3545;font-weight:700;font-size:.78rem;white-space:nowrap;}
+.due-paid{color:#888;font-size:.78rem;white-space:nowrap;}
+.btn-act{padding:3px 7px;font-size:.7rem;border-radius:6px;}
+.note-td{font-size:.71rem;color:#666;max-width:160px;white-space:pre-line;}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f2f2f2;}
+.calc-row:last-child{border:none;}
+.calc-label{color:#555;font-size:.81rem;}.calc-val{font-weight:600;color:#1a1a1a;font-size:.86rem;}
+.result-box{background:#f0fff4;border:1px solid #a8d5b5;border-radius:10px;padding:13px;margin-top:9px;}
+.input-group-text{font-size:.77rem;background:#f8f9fa;}
+.form-label{font-size:.8rem;font-weight:600;color:#444;}
+.modal-header{background:var(--green);color:white;}.modal-header .btn-close{filter:invert(1);}
+.modal-title{font-weight:700;}
+.customer-tag{display:inline-block;background:#e8f4fd;color:#0d6efd;border-radius:20px;padding:2px 10px;font-size:.75rem;margin:2px;}
+.credit-badge{background:#1a6b3a;color:white;border-radius:12px;padding:2px 8px;font-size:.72rem;}
+.po-card{border:1px solid #c3d9f0;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.po-card-head{background:#edf5ff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.po-bar-bg{background:#e9ecef;border-radius:5px;height:10px;overflow:hidden;margin:5px 0;}
+.po-bar-fill{height:100%;transition:width .5s;}
+.po-num-tag{font-weight:700;color:#0056b3;font-size:.85rem;}
+.po-badge-active{background:#fff3cd;color:#856404;border-radius:10px;padding:1px 7px;font-size:.7rem;font-weight:600;}
+.po-badge-done{background:#d4edda;color:#155724;border-radius:10px;padding:1px 7px;font-size:.7rem;font-weight:600;}
+.po-badge-over{background:#f8d7da;color:#721c24;border-radius:10px;padding:1px 7px;font-size:.7rem;font-weight:600;}
+.bh-card{border:1px solid #d4edda;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.bh-header{background:#f0fff4;padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.bh-header:hover{background:#d4edda;}
+.bh-label{font-weight:700;color:var(--green);font-size:.88rem;}
+.bh-meta{font-size:.73rem;color:#888;}
+.bh-body{padding:12px 14px;display:none;border-top:1px solid #d4edda;}
+.bh-body.show{display:block;}
+@media(max-width:768px){.calc-grid{grid-template-columns:1fr;}.topbar h1{font-size:1.05rem;}table td,table thead th{font-size:.7rem;padding:5px 6px;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>&#127807; ProGreat Customer Management</h1>
+  <div class="sub">ระบบจัดการยอดขายและสถานะลูกค้า</div>
+</div>
+<div class="container-fluid p-3 p-md-4">
+<ul class="nav nav-tabs mb-3" id="mainTabs">
+  <li class="nav-item"><button class="nav-link active" data-tab="records"><i class="fa fa-list me-1"></i>รายการขายสินค้า</button></li>
+  <li class="nav-item"><button class="nav-link" data-tab="customers"><i class="fa fa-users me-1"></i>ลูกค้า &amp; เครดิต</button></li>
+  <li class="nav-item"><button class="nav-link" data-tab="po"><i class="fa fa-file-contract me-1"></i>PO สั่งซื้อล่วงหน้า</button></li>
+  <li class="nav-item"><button class="nav-link" data-tab="cost"><i class="fa fa-calculator me-1"></i>คำนวณต้นทุน</button></li>
+  <li class="nav-item"><button class="nav-link" data-tab="bonus"><i class="fa fa-award me-1"></i>คำนวณโบนัส</button></li>
+</ul>
+
+<!-- ===== RECORDS ===== -->
+<div id="tab-records">
+  <div class="stat-cards" id="statsArea"></div>
+  <div class="section">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <div class="sec-title mb-0"><i class="fa fa-table"></i>รายการทั้งหมด (ล่าสุดก่อน)</div>
+      <div class="d-flex gap-2 flex-wrap">
+        <input type="text" class="form-control form-control-sm" id="searchBox" placeholder="&#128269; ค้นหา..." style="width:170px">
+        <select class="form-select form-select-sm" id="filterStatus" style="width:130px">
+          <option value="">ทุกสถานะ</option><option value="paid">ชำระแล้ว</option><option value="unpaid">รอชำระ</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()"><i class="fa fa-plus me-1"></i>เพิ่มรายการ</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:65vh;overflow-y:auto;">
+      <table class="table table-sm mb-0">
+        <thead>
+          <tr>
+            <th>Lot#</th><th>วันที่ส่ง</th><th>ลูกค้า</th><th>สินค้า</th>
+            <th class="text-end">ราคา<br><small style="opacity:.75">บ./กก.</small></th>
+            <th class="text-end">น้ำหนัก<br><small style="opacity:.75">กก.</small></th>
+            <th class="text-end">ยอดชำระ<br><small style="opacity:.75">บาท</small></th>
+            <th>วันที่ต้องชำระ</th>
+            <th>วันที่ชำระจริง</th>
+            <th>สถานะ</th>
+            <th>วิธีชำระ</th>
+            <th>หมายเหตุ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CUSTOMERS ===== -->
+<div id="tab-customers" style="display:none">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="section">
+        <div class="sec-title"><i class="fa fa-user-plus"></i>เพิ่ม / แก้ไขลูกค้า</div>
+        <input type="hidden" id="editCustIdx">
+        <div class="mb-3"><label class="form-label">ชื่อลูกค้า</label>
+          <input type="text" id="custName" class="form-control form-control-sm" placeholder="ชื่อลูกค้า"></div>
+        <div class="mb-3"><label class="form-label">เครดิต (วัน) — ระยะเวลาที่ให้ชำระเงินหลังส่งสินค้า</label>
+          <div class="input-group input-group-sm">
+            <input type="number" id="custCredit" class="form-control" value="30" min="0" step="1">
+            <span class="input-group-text">วัน</span>
+          </div></div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success btn-sm" onclick="saveCust()"><i class="fa fa-save me-1"></i>บันทึก</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearCustForm()">ล้าง</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="section">
+        <div class="sec-title"><i class="fa fa-table"></i>รายชื่อลูกค้าทั้งหมด</div>
+        <table class="table table-sm">
+          <thead><tr><th>ชื่อลูกค้า</th><th class="text-center">เครดิต</th><th class="text-center">จัดการ</th></tr></thead>
+          <tbody id="custTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title"><i class="fa fa-info-circle"></i>วิธีใช้งาน</div>
+    <p class="text-muted mb-1">• เพิ่มลูกค้าพร้อมกำหนดจำนวนวันเครดิต เช่น TRF = 14 วัน, โซรอน = 23 วัน</p>
+    <p class="text-muted mb-1">• เมื่อเพิ่มรายการขายสินค้า เลือกชื่อลูกค้า ระบบจะคำนวณ "วันที่ต้องชำระ" อัตโนมัติจาก วันที่ส่ง + เครดิต</p>
+    <p class="text-muted mb-0">• ตารางรายการ: วันที่ต้องชำระเป็น <span style="color:#0d6efd;font-weight:700">สีน้ำเงิน</span> = ยังไม่เกินกำหนด, <span style="color:#dc3545;font-weight:700">สีแดง</span> = เกินกำหนดแล้ว</p>
+  </div>
+</div>
+
+<!-- ===== COST ===== -->
+<div id="tab-cost" style="display:none">
+  <div class="calc-grid">
+    <div class="section">
+      <div class="sec-title"><i class="fa fa-sliders"></i>ตั้งค่าต้นทุน ProGreat</div>
+      <div class="mb-2"><label class="form-label">ราคากาก (บาท/กก.)</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_gak" class="form-control" value="5.2" step="0.05" oninput="calcCost()"><span class="input-group-text">บ./กก.</span></div></div>
+      <div class="mb-2"><label class="form-label">ราคาน้ำ (บาท/kL) — factor 1L=1.16kg</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_water" class="form-control" value="1.575" step="0.025" oninput="calcCost()"><span class="input-group-text">บ./kL</span></div></div>
+      <div class="mb-2"><label class="form-label">% น้ำหนักของแห้ง (Dry Matter)</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_dry" class="form-control" value="50" step="1" oninput="calcCost()"><span class="input-group-text">%</span></div></div>
+      <div class="mb-2"><label class="form-label">ราคาขายเฉลี่ย (บาท/กก.)</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_sell" class="form-control" value="9.9" step="0.1" oninput="calcCost()"><span class="input-group-text">บ./กก.</span></div></div>
+      <hr class="my-2">
+      <div class="mb-2"><label class="form-label">ค่าถุง (บาท/ถุง ÷ กก./ถุง)</label>
+        <div class="row g-2"><div class="col-6"><div class="input-group input-group-sm"><input type="number" id="c_bag_b" class="form-control" value="9" step="1" oninput="calcCost()"><span class="input-group-text">บ./ถุง</span></div></div>
+        <div class="col-6"><div class="input-group input-group-sm"><input type="number" id="c_bag_kg" class="form-control" value="50" step="1" oninput="calcCost()"><span class="input-group-text">กก./ถุง</span></div></div></div></div>
+      <div class="mb-2"><label class="form-label">ค่าตาก โคราช</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_dry_cost" class="form-control" value="0.9" step="0.05" oninput="calcCost()"><span class="input-group-text">บ./กก.</span></div></div>
+      <div class="mb-2"><label class="form-label">ค่าขนส่ง โคราช→ราชบุรี</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_trans1" class="form-control" value="0.5" step="0.05" oninput="calcCost()"><span class="input-group-text">บ./กก.</span></div></div>
+      <div class="mb-2"><label class="form-label">ค่าขนส่งถึงลูกค้า + ผลิต</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_trans2" class="form-control" value="0.6" step="0.05" oninput="calcCost()"><span class="input-group-text">บ./กก.</span></div></div>
+      <div class="mb-2"><label class="form-label">% ศูนย์เสีย</label>
+        <div class="input-group input-group-sm"><input type="number" id="c_loss" class="form-control" value="1.5" step="0.1" oninput="calcCost()"><span class="input-group-text">%</span></div></div>
+    </div>
+    <div>
+      <div class="section">
+        <div class="sec-title"><i class="fa fa-chart-pie"></i>ผลการคำนวณ (ต่อ 1 กก.)</div>
+        <div class="calc-row"><span class="calc-label">ค่ากาก+น้ำ/กก. <small class="text-muted">(กาก×0.25 + น้ำ/1.16×0.75)</small></span><span class="calc-val" id="r_raw">-</span></div>
+        <div class="calc-row"><span class="calc-label">ค่าวัตถุดิบ/กก. <small class="text-muted">(หลัง Dry Matter)</small></span><span class="calc-val" id="r_mat">-</span></div>
+        <div class="calc-row"><span class="calc-label">ค่าถุง</span><span class="calc-val" id="r_bag">-</span></div>
+        <div class="calc-row"><span class="calc-label">ค่าตาก โคราช</span><span class="calc-val" id="r_dry_c">-</span></div>
+        <div class="calc-row"><span class="calc-label">ค่าขนส่ง โคราช→ราชบุรี</span><span class="calc-val" id="r_t1">-</span></div>
+        <div class="calc-row"><span class="calc-label">ค่าขนส่งถึงลูกค้า+ผลิต</span><span class="calc-val" id="r_t2">-</span></div>
+        <div class="calc-row"><span class="calc-label">หักน้ำหนักถุง ณ ปลายทาง <small class="text-muted">(60×ราคาขาย/15000)</small></span><span class="calc-val" id="r_bagw">-</span></div>
+        <div class="calc-row"><span class="calc-label">ต้นทุนสูญเสียผลิต <small class="text-muted">(ศูนย์เสีย%×ราคาขาย)</small></span><span class="calc-val" id="r_lp">-</span></div>
+        <div class="calc-row"><span class="calc-label">ต้นทุนสูญเสียขนส่ง <small class="text-muted">(50×ราคาขาย/15000)</small></span><span class="calc-val" id="r_lt">-</span></div>
+        <div class="result-box">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-bold">ต้นทุนรวม</span>
+            <span class="calc-val fw-bold" style="font-size:1rem;color:var(--green)" id="r_total">-</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span>ราคาขายเฉลี่ย</span><span class="calc-val" id="r_sell_d">-</span>
+          </div>
+          <hr class="my-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold fs-6">Margin เฉลี่ย</span>
+            <span class="fw-bold" style="font-size:1rem" id="r_margin">-</span>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sec-title"><i class="fa fa-weight-hanging"></i>คำนวณกำไรตามน้ำหนักขาย</div>
+        <div class="mb-2"><label class="form-label">น้ำหนัก (กก.)</label>
+          <div class="input-group input-group-sm"><input type="number" id="c_wt_calc" class="form-control" value="30000" step="1000" oninput="calcByWt()"><span class="input-group-text">กก.</span></div></div>
+        <div class="result-box">
+          <div class="d-flex justify-content-between mb-1"><span class="text-muted">ต้นทุนรวม</span><span class="fw-bold" id="wc_cost">-</span></div>
+          <div class="d-flex justify-content-between mb-1"><span class="text-muted">รายรับ</span><span class="fw-bold" id="wc_rev">-</span></div>
+          <div class="d-flex justify-content-between"><span class="fw-bold">กำไร (Margin)</span><span class="fw-bold" id="wc_profit">-</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BONUS ===== -->
+<div id="tab-bonus" style="display:none">
+  <div class="calc-grid">
+    <div class="section">
+      <div class="sec-title"><i class="fa fa-award"></i>ตั้งค่าโบนัส</div>
+      <div class="mb-3"><label class="form-label">ปริมาณ ProGreat ที่ขายได้เดือนนี้ (ตัน)</label>
+        <div class="input-group input-group-sm"><input type="number" id="b_ton" class="form-control" value="223" step="1" oninput="calcBonus()"><span class="input-group-text">ตัน</span></div>
+        <div class="form-text">กรอกเป็น ตัน เช่น 223 ตัน</div></div>
+      <div class="mb-3"><label class="form-label">อัตราโบนัส คนงาน</label>
+        <div class="input-group input-group-sm"><input type="number" id="b_rw" class="form-control" value="250" step="50" oninput="calcBonus()"><span class="input-group-text">บาท/30ตัน</span></div></div>
+      <div class="mb-3"><label class="form-label">อัตราโบนัส หัวหน้าฝ่ายผลิต</label>
+        <div class="input-group input-group-sm"><input type="number" id="b_rs" class="form-control" value="500" step="50" oninput="calcBonus()"><span class="input-group-text">บาท/30ตัน</span></div></div>
+      <hr>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label class="form-label mb-0">รายชื่อพนักงาน</label>
+        <button class="btn btn-sm btn-outline-success" onclick="addWorker()"><i class="fa fa-plus me-1"></i>เพิ่ม</button>
+      </div>
+      <div id="workerList">
+        <div class="d-flex gap-2 mb-2 align-items-center worker-row"><input type="text" class="form-control form-control-sm worker-name" value="ตาสายัน"><select class="form-select form-select-sm worker-role" style="width:110px"><option value="super" selected>&#128081; หัวหน้า</option><option value="worker">&#128119; คนงาน</option></select><button class="btn btn-sm btn-outline-danger" onclick="removeWorker(this)"><i class="fa fa-times"></i></button></div>
+        <div class="d-flex gap-2 mb-2 align-items-center worker-row"><input type="text" class="form-control form-control-sm worker-name" value="พุฒ"><select class="form-select form-select-sm worker-role" style="width:110px"><option value="worker" selected>&#128119; คนงาน</option><option value="super">&#128081; หัวหน้า</option></select><button class="btn btn-sm btn-outline-danger" onclick="removeWorker(this)"><i class="fa fa-times"></i></button></div>
+        <div class="d-flex gap-2 mb-2 align-items-center worker-row"><input type="text" class="form-control form-control-sm worker-name" value="ใหญ่"><select class="form-select form-select-sm worker-role" style="width:110px"><option value="worker" selected>&#128119; คนงาน</option><option value="super">&#128081; หัวหน้า</option></select><button class="btn btn-sm btn-outline-danger" onclick="removeWorker(this)"><i class="fa fa-times"></i></button></div>
+        <div class="d-flex gap-2 mb-2 align-items-center worker-row"><input type="text" class="form-control form-control-sm worker-name" value="หญิง"><select class="form-select form-select-sm worker-role" style="width:110px"><option value="worker" selected>&#128119; คนงาน</option><option value="super">&#128081; หัวหน้า</option></select><button class="btn btn-sm btn-outline-danger" onclick="removeWorker(this)"><i class="fa fa-times"></i></button></div>
+        <div class="d-flex gap-2 mb-2 align-items-center worker-row"><input type="text" class="form-control form-control-sm worker-name" value="นุตา"><select class="form-select form-select-sm worker-role" style="width:110px"><option value="worker" selected>&#128119; คนงาน</option><option value="super">&#128081; หัวหน้า</option></select><button class="btn btn-sm btn-outline-danger" onclick="removeWorker(this)"><i class="fa fa-times"></i></button></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title"><i class="fa fa-table"></i>ผลการคำนวณโบนัส</div>
+      <div class="result-box mb-3">
+        <div class="d-flex justify-content-between mb-1"><span class="text-muted">ปริมาณขาย</span><span class="fw-bold" id="b_ton_d">-</span></div>
+        <div class="d-flex justify-content-between"><span class="text-muted">จำนวน 30-ตัน units</span><span class="fw-bold" id="b_units">-</span></div>
+      </div>
+      <table class="table table-sm">
+        <thead><tr><th>ชื่อ</th><th>ตำแหน่ง</th><th class="text-end">อัตรา/30ตัน</th><th class="text-end">โบนัส (บาท)</th></tr></thead>
+        <tbody id="bonusBody"></tbody>
+        <tfoot><tr class="fw-bold" style="background:#f0fff4"><td colspan="3">รวมทั้งหมด</td><td class="text-end text-success" id="b_grand">-</td></tr></tfoot>
+      </table>
+      <hr class="my-3">
+      <div class="sec-title mb-2"><i class="fa fa-bookmark"></i>บันทึกโบนัสเดือนนี้</div>
+      <div class="row g-2 mb-2">
+        <div class="col-5">
+          <select id="b_save_month" class="form-select form-select-sm">
+            <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option>
+            <option value="3">มีนาคม</option><option value="4">เมษายน</option>
+            <option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
+            <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option>
+            <option value="9">กันยายน</option><option value="10">ตุลาคม</option>
+            <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+          </select>
+        </div>
+        <div class="col-4">
+          <select id="b_save_year" class="form-select form-select-sm"></select>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-success btn-sm w-100" onclick="saveBonusRecord()"><i class="fa fa-save me-1"></i>บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- BONUS HISTORY -->
+  <div class="section mt-3" id="bonusHistSection">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="sec-title mb-0"><i class="fa fa-history"></i>ประวัติการให้โบนัส</div>
+      <span class="text-muted" style="font-size:.78rem">บันทึกทั้งหมด <span id="bhCount">0</span> รายการ</span>
+    </div>
+    <div id="bonusHistList"></div>
+  </div>
+</div>
+</div><!-- /container -->
+
+<!-- ===== PO ===== -->
+<div id="tab-po" style="display:none">
+  <div class="row g-3">
+    <div class="col-md-5">
+      <div class="section">
+        <div class="sec-title"><i class="fa fa-file-contract"></i>เพิ่ม / แก้ไข PO</div>
+        <input type="hidden" id="po_idx">
+        <div class="mb-2"><label class="form-label">ลูกค้า</label>
+          <select id="po_cust" class="form-select form-select-sm"><option value="">— เลือกลูกค้า —</option></select></div>
+        <div class="mb-2"><label class="form-label">เลขที่ PO</label>
+          <input type="text" id="po_num" class="form-control form-control-sm" placeholder="เช่น PO-TRF-001"></div>
+        <div class="mb-2"><label class="form-label">จำนวนสั่งซื้อรวม</label>
+          <div class="row g-2">
+            <div class="col-7"><div class="input-group input-group-sm">
+              <input type="number" id="po_wt" class="form-control" step="1000" placeholder="150000" oninput="poKgToTon()">
+              <span class="input-group-text">กก.</span></div></div>
+            <div class="col-5"><div class="input-group input-group-sm">
+              <input type="number" id="po_wt_ton" class="form-control" step="1" placeholder="150" oninput="poTonToKg()">
+              <span class="input-group-text">ตัน</span></div></div>
+          </div></div>
+        <div class="mb-2"><label class="form-label">ราคาที่ตกลง (บ./กก.)</label>
+          <div class="input-group input-group-sm">
+            <input type="number" id="po_price" class="form-control" step="0.05" placeholder="9.50">
+            <span class="input-group-text">บ./กก.</span></div></div>
+        <div class="mb-2"><label class="form-label">วันที่ยืนยัน PO</label>
+          <div class="d-flex gap-1">
+            <select id="po_conf_d" class="form-select form-select-sm" style="width:58px"></select>
+            <select id="po_conf_m" class="form-select form-select-sm"></select>
+            <select id="po_conf_y" class="form-select form-select-sm" style="width:82px"></select>
+          </div></div>
+        <div class="mb-3"><label class="form-label">หมายเหตุ</label>
+          <textarea id="po_note" class="form-control form-control-sm" rows="2"></textarea></div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success btn-sm" onclick="savePO()"><i class="fa fa-save me-1"></i>บันทึก PO</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearPOForm()"><i class="fa fa-times me-1"></i>ล้าง</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-7">
+      <div class="section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="sec-title mb-0"><i class="fa fa-list-alt"></i>รายการ PO ทั้งหมด</div>
+          <span class="text-muted" style="font-size:.78rem"><span id="poCount">0</span> รายการ</span>
+        </div>
+        <div id="poList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECORD MODAL -->
+<div class="modal fade" id="recModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mTitle">เพิ่มรายการ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="f_idx">
+        <div class="row g-3">
+          <div class="col-md-3"><label class="form-label">Lot # (ลำดับที่)</label>
+            <input type="number" id="f_id" class="form-control form-control-sm"></div>
+          <div class="col-md-3"><label class="form-label">วันที่ส่งสินค้า (พ.ศ.)</label>
+            <div class="d-flex gap-1">
+              <select id="f_deliv_d" class="form-select form-select-sm" style="width:58px" onchange="autoFillDue()"></select>
+              <select id="f_deliv_m" class="form-select form-select-sm" onchange="autoFillDue()"></select>
+              <select id="f_deliv_y" class="form-select form-select-sm" style="width:82px" onchange="autoFillDue()"></select>
+            </div></div>
+          <div class="col-md-3"><label class="form-label">ลูกค้า</label>
+            <input type="text" id="f_cust" class="form-control form-control-sm" list="custList" oninput="onCustChange()">
+            <datalist id="custList"></datalist>
+            <div id="f_cust_po_info" style="display:none"></div></div>
+          <div class="col-md-3"><label class="form-label">สินค้า</label>
+            <input type="text" id="f_prod" class="form-control form-control-sm" list="prodList">
+            <datalist id="prodList"><option value="ProGreat"><option value="กากเบียร์ (Bags)"><option value="ผงข้าวโอ๊ตแห้ง"></datalist></div>
+          <div class="col-md-2"><label class="form-label">ราคา (บ./กก.)</label>
+            <input type="number" id="f_price" class="form-control form-control-sm" step="0.05" oninput="autoAmt()"></div>
+          <div class="col-md-3"><label class="form-label">น้ำหนัก (กก.)</label>
+            <input type="number" id="f_wt" class="form-control form-control-sm" step="0.1" oninput="autoAmt()"></div>
+          <div class="col-md-3"><label class="form-label">ยอดชำระ (บาท) <small class="text-success">auto</small></label>
+            <input type="number" id="f_amt" class="form-control form-control-sm" step="0.01"></div>
+          <div class="col-md-4"><label class="form-label">วิธีชำระเงิน</label>
+            <select id="f_method" class="form-select form-select-sm" onchange="onMethodChange()"></select>
+            <div id="f_method_new_wrap" style="display:none;margin-top:5px" class="d-flex gap-1">
+              <input type="text" id="f_method_new" class="form-control form-control-sm" placeholder="พิมพ์วิธีชำระเงินใหม่...">
+              <button type="button" class="btn btn-sm btn-outline-success px-2" onclick="confirmNewMethod()" title="บันทึกตัวเลือกใหม่"><i class="fa fa-check"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary px-2" onclick="cancelNewMethod()" title="ยกเลิก"><i class="fa fa-times"></i></button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" style="color:#0d6efd;font-weight:700">&#128197; วันที่ต้องชำระ <small class="text-muted fw-normal">(คำนวณจากเครดิต)</small></label>
+            <input type="hidden" id="f_due">
+            <div id="f_due_display" class="form-control form-control-sm" style="border-color:#0d6efd;color:#0d6efd;font-weight:600;background:#f0f4ff;min-height:31px;cursor:default">-</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">วันที่ชำระจริง <small class="text-muted fw-normal">(เว้นว่างถ้ายังไม่ชำระ)</small></label>
+            <div class="d-flex gap-1">
+              <select id="f_pay_d" class="form-select form-select-sm" style="width:58px"></select>
+              <select id="f_pay_m" class="form-select form-select-sm"></select>
+              <select id="f_pay_y" class="form-select form-select-sm" style="width:82px"></select>
+              <button type="button" class="btn btn-sm btn-outline-secondary px-2" onclick="clearPayDate()" title="ล้างวันที่ชำระ">&#10005;</button>
+            </div>
+          </div>
+          <div class="col-12"><label class="form-label">หมายเหตุ</label>
+            <textarea id="f_note" class="form-control form-control-sm" rows="2"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ยกเลิก</button>
+        <button type="button" class="btn btn-danger btn-sm d-none" id="delBtn" onclick="doDelete()"><i class="fa fa-trash me-1"></i>ลบ</button>
+        <button type="button" class="btn btn-success btn-sm" onclick="doSave()"><i class="fa fa-save me-1"></i>บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+const SEED=[{"id":336,"deliveryDate":"2568-06-07","customer":"TRF","product":"ProGreat","price":9.75,"weight":28017.4,"amount":273169.65,"paymentDate":"2568-06-20","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"เริ่ม PO 120 ton","poRemain":"91982.6","poSold":"28017.4","dueDate":"2568-06-21"},{"id":337,"deliveryDate":"2568-06-13","customer":"TRF","product":"ProGreat","price":9.75,"weight":29242.0,"amount":285109.5,"paymentDate":"2568-06-27","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"62740.600000000006","poSold":"29242.0","dueDate":"2568-06-27"},{"id":338,"deliveryDate":"2568-06-16","customer":"โซรอน","product":"กากเบียร์ (Bags)","price":12.9,"weight":19640.0,"amount":253356.0,"paymentDate":"2568-07-09","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"62740.600000000006","poSold":"0.0","dueDate":"2568-07-09"},{"id":339,"deliveryDate":"2568-06-28","customer":"TRF","product":"ProGreat","price":9.75,"weight":29312.0,"amount":285792.0,"paymentDate":"11/7/25668","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"33428.600000000006","poSold":"29312.0","dueDate":"2568-07-12"},{"id":340,"deliveryDate":"2568-07-01","customer":"ปริศนา","product":"ProGreat","price":9.8,"weight":2958.0,"amount":28988.4,"paymentDate":"2568-07-01","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"33428.600000000006","poSold":"0.0","dueDate":"2568-07-01"},{"id":341,"deliveryDate":"2568-07-01","customer":"โซรอน","product":"กากเบียร์ (Bags)","price":12.9,"weight":21190.0,"amount":273351.0,"paymentDate":"2568-07-22","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"33428.600000000006","poSold":"0.0","dueDate":"2568-07-24"},{"id":342,"deliveryDate":"2568-07-17","customer":"TRF","product":"ProGreat","price":9.75,"weight":29112.0,"amount":283842.0,"paymentDate":"2568-08-01","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"4316.600000000006","poSold":"29112.0","dueDate":"2568-07-31"},{"id":343,"deliveryDate":"2568-07-30","customer":"TRF","product":"ProGreat","price":9.75,"weight":29252.0,"amount":285207.0,"paymentDate":"2568-08-15","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"35748.0","poSold":"29252.0","dueDate":"2568-08-13"},{"id":344,"deliveryDate":"2568-08-08","customer":"TRF","product":"ProGreat","price":9.75,"weight":28286.2,"amount":275790.45,"paymentDate":"2568-08-22","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"7461.799999999999","poSold":"28286.2","dueDate":"2568-08-22"},{"id":345,"deliveryDate":"2568-08-18","customer":"TRF","product":"ProGreat","price":9.4,"weight":29402.0,"amount":276378.8,"paymentDate":"2568-09-05","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"90000.0","poSold":"29402.0","dueDate":"2568-09-01"},{"id":346,"deliveryDate":"2568-08-19","customer":"กฤตนัย","product":"ProGreat","price":9.6,"weight":1500.0,"amount":14400.0,"paymentDate":"2568-08-19","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"90000.0","poSold":"0.0","dueDate":"2568-08-19"},{"id":347,"deliveryDate":"2568-08-29","customer":"โซรอน","product":"กากเบียร์ (Bags)","price":12.9,"weight":22230.0,"amount":286767.0,"paymentDate":"2568-09-16","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"90000.0","poSold":"0.0","dueDate":"2568-09-21"},{"id":348,"deliveryDate":"2568-09-06","customer":"TRF","product":"ProGreat","price":9.4,"weight":12559.6,"amount":118060.24,"paymentDate":"2568-09-19","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"77440.4","poSold":"12559.6","dueDate":"2568-09-20"},{"id":349,"deliveryDate":"2568-09-30","customer":"TRF","product":"ProGreat","price":9.4,"weight":6254.6,"amount":58793.240000000005,"paymentDate":"2568-10-17","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"71185.79999999999","poSold":"6254.6","dueDate":"2568-10-14"},{"id":350,"deliveryDate":"2568-10-03","customer":"เฮียสูง","product":"ProGreat","price":9.5,"weight":4220.0,"amount":40090.0,"paymentDate":"แบ่งชำระ 2 งวด\n4/10/68 จำนวน 10,000 บาท\n11/11/68 จำนวน 30,000 บาท","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"71185.79999999999","poSold":"0.0","dueDate":"2568-11-02"},{"id":351,"deliveryDate":"2568-10-15","customer":"โซรอน","product":"กากเบียร์ (Bags)","price":12.9,"weight":19850.0,"amount":256065.0,"paymentDate":"2568-11-11","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"71185.79999999999","poSold":"0.0","dueDate":"2568-11-07"},{"id":352,"deliveryDate":"2568-10-23","customer":"TRF","product":"ProGreat","price":9.4,"weight":28883.4,"amount":271503.96,"paymentDate":"2568-11-07","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"42302.39999999999","poSold":"28883.4","dueDate":"2568-11-06"},{"id":353,"deliveryDate":"2568-11-01","customer":"กฤตนัย","product":"ProGreat","price":9.6,"weight":3000.0,"amount":28800.0,"paymentDate":"2568-11-01","paymentMethod":"เงินสด","notes":"","po":"","poRemain":"42302.39999999999","poSold":"0.0","dueDate":"2568-11-01"},{"id":354,"deliveryDate":"2568-11-04","customer":"โภคาฟีด","product":"ProGreat","price":9.5,"weight":14920.0,"amount":141140.0,"paymentDate":"2568-12-04","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"42302.39999999999","poSold":"0.0","dueDate":"2568-12-04"},{"id":355,"deliveryDate":"2568-11-12","customer":"Soron","product":"กากเบียร์ (Bags)","price":12.9,"weight":17490.0,"amount":225621.0,"paymentDate":"2568-12-16","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"42302.39999999999","poSold":"0.0","dueDate":"2568-12-05"},{"id":356,"deliveryDate":"2568-11-14","customer":"TRF","product":"ProGreat","price":9.4,"weight":11245.2,"amount":105704.88,"paymentDate":"2568-11-28","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"31057.199999999986","poSold":"11245.2","dueDate":"2568-11-28"},{"id":357,"deliveryDate":"2568-11-21","customer":"เฮียสูง","product":"ProGreat","price":9.5,"weight":3960.0,"amount":37620.0,"paymentDate":"2569-01-17","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"จ่าย 17600 วันที่ 7/1/69\nจ่าย 20000 วันที่ 17/1/69","po":"เริ่ม PO 14/11/68 (96 ton)","poRemain":"96000.0","poSold":"0.0","dueDate":"2568-12-21"},{"id":358,"deliveryDate":"2568-11-24","customer":"TRF","product":"ProGreat","price":9.4,"weight":25117.8,"amount":236107.32,"paymentDate":"2568-12-12","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"70882.2","poSold":"25117.8","dueDate":"2568-12-08"},{"id":359,"deliveryDate":"2568-12-01","customer":"คุณกิ๊ฟ","product":"ProGreat","price":9.5,"weight":40.0,"amount":380.0,"paymentDate":"2568-12-02","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"70882.2","poSold":"0.0","dueDate":"2568-12-01"},{"id":360,"deliveryDate":"2568-12-12","customer":"TRF","product":"ProGreat","price":9.4,"weight":28216.0,"amount":265230.4,"paymentDate":"2568-12-26","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"42666.2","poSold":"28216.0","dueDate":"2568-12-26"},{"id":361,"deliveryDate":"2568-12-18","customer":"TRF","product":"ProGreat","price":9.4,"weight":28664.2,"amount":269443.48000000004,"paymentDate":"2569-01-09","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"14001.999999999996","poSold":"28664.2","dueDate":"2569-01-01"},{"id":362,"deliveryDate":"2568-12-19","customer":"โซรอน","product":"กากเบียร์ (Bags)","price":12.9,"weight":23970.0,"amount":309213.0,"paymentDate":"2569-01-13","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"14001.999999999996","poSold":"0.0","dueDate":"2569-01-11"},{"id":363,"deliveryDate":"2569-01-06","customer":"ปริศนา","product":"ProGreat","price":9.3,"weight":1992.0,"amount":18525.600000000002,"paymentDate":"2569-01-06","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"เริ่ม PO 5/1/69 (120 ton)","poRemain":"120000.0","poSold":"0.0","dueDate":"2569-01-06"},{"id":0,"deliveryDate":"2569-01-06","customer":"TRF","product":"ProGreat","price":8.9,"weight":28086.8,"amount":249972.52,"paymentDate":"2569-01-23","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"91913.2","poSold":"28086.8","dueDate":"2569-01-20"},{"id":365,"deliveryDate":"2569-01-12","customer":"TRF","product":"ProGreat","price":8.9,"weight":29859.6,"amount":265750.44,"paymentDate":"2569-01-30","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"62053.6","poSold":"29859.6","dueDate":"2569-01-26"},{"id":366,"deliveryDate":"2569-01-16","customer":"TRF","product":"ProGreat","price":8.9,"weight":27887.6,"amount":248199.63999999998,"paymentDate":"","paymentMethod":"","notes":"","po":"","poRemain":"34166.0","poSold":"27887.6","dueDate":"2569-01-30"},{"id":367,"deliveryDate":"2569-01-20","customer":"โภคาฟีด","product":"ProGreat","price":9.15,"weight":14880.0,"amount":135552.0,"paymentDate":"2569-02-26","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"หักค่าถุง 60kg ค่าลงของ 600 บาท","po":"","poRemain":"34166.0","poSold":"0.0","dueDate":"2569-02-19"},{"id":368,"deliveryDate":"2569-01-23","customer":"เฮียสูง","product":"ProGreat","price":9.5,"weight":3980.0,"amount":37810.0,"paymentDate":"2569-02-22","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"จ่ายรวมกับค่าข้าวโอ๊ตแห้ง 7/2/2569","po":"","poRemain":"34166.0","poSold":"0.0","dueDate":"2569-02-22"},{"id":369,"deliveryDate":"2569-01-26","customer":"TRF","product":"ProGreat","price":8.9,"weight":28146.6,"amount":250504.74,"paymentDate":"2569-02-10","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"6019.4000000000015","poSold":"28146.6","dueDate":"2569-02-09"},{"id":370,"deliveryDate":"2569-02-07","customer":"เฮียสูง","product":"ผงข้าวโอ๊ตแห้ง","price":8.0,"weight":1130.0,"amount":9040.0,"paymentDate":"2569-03-09","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"","poSold":"","dueDate":"2569-03-09"},{"id":371,"deliveryDate":"2569-02-10","customer":"TRF","product":"ProGreat","price":9.15,"weight":28367.4,"amount":259561.71000000002,"paymentDate":"2569-02-27","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"เริ่ม PO 7/2/69 (120 ton)","poRemain":"91632.6","poSold":"28367.4","dueDate":"2569-02-24"},{"id":372,"deliveryDate":"2569-02-18","customer":"TRF","product":"ProGreat","price":9.15,"weight":30310.0,"amount":277336.5,"paymentDate":"2569-03-06","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"61322.600000000006","poSold":"30310.0","dueDate":"2569-03-04"},{"id":373,"deliveryDate":"2569-02-26","customer":"กฤตนัย","product":"ProGreat","price":9.35,"weight":1540.0,"amount":14399.0,"paymentDate":"2569-02-26","paymentMethod":"เงินสด","notes":"","po":"","poRemain":"61322.600000000006","poSold":"0.0","dueDate":"2569-02-26"},{"id":374,"deliveryDate":"2569-02-28","customer":"TRF","product":"ProGreat","price":9.15,"weight":28397.8,"amount":259839.87,"paymentDate":"2569-03-13","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"32924.8","poSold":"28397.8","dueDate":"2569-03-14"},{"id":375,"deliveryDate":"2569-03-10","customer":"โคสุรินทร์วากิว","product":"ProGreat","price":9.2,"weight":4080.0,"amount":43536.0,"paymentDate":"2569-03-10","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"ค่ารถบรรทุก 6000 บาท","po":"","poRemain":"32924.8","poSold":"0.0","dueDate":"2569-03-10"},{"id":376,"deliveryDate":"2569-03-12","customer":"Soul of siam","product":"ProGreat","price":9.3,"weight":2000.0,"amount":18600.0,"paymentDate":"2569-03-12","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"32924.8","poSold":"0.0","dueDate":"2569-03-12"},{"id":377,"deliveryDate":"2569-03-13","customer":"TRF","product":"ProGreat","price":9.15,"weight":27968.0,"amount":255907.2,"paymentDate":"2569-03-27","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"4956.800000000003","poSold":"27968.0","dueDate":"2569-03-27"},{"id":378,"deliveryDate":"2569-03-21","customer":"กฤตนัย","product":"ProGreat","price":9.6,"weight":1510.0,"amount":14496.0,"paymentDate":"2569-03-21","paymentMethod":"เงินสด","notes":"","po":"","poRemain":"4956.800000000003","poSold":"0.0","dueDate":"2569-03-21"},{"id":379,"deliveryDate":"2569-03-21","customer":"โภคาฟีด","product":"ProGreat","price":9.6,"weight":15109.6,"amount":145052.16,"paymentDate":"","paymentMethod":"","notes":"","po":"","poRemain":"4956.800000000003","poSold":"0.0","dueDate":"2569-04-20"},{"id":380,"deliveryDate":"2569-03-25","customer":"หมอหยัก","product":"ProGreat","price":9.85,"weight":1000.0,"amount":9850.0,"paymentDate":"2569-03-25","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"เริ่ม PO 19/3/69 (180 ton)","poRemain":"180000.0","poSold":"0.0","dueDate":"2569-03-25"},{"id":381,"deliveryDate":"2569-03-26","customer":"เฮียชัย สุดฤทธิ์ ฟาร์ม","product":"ProGreat","price":9.7,"weight":1980.0,"amount":19206.0,"paymentDate":"2569-03-26","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"180000.0","poSold":"0.0","dueDate":"2569-03-26"},{"id":382,"deliveryDate":"2569-03-26","customer":"TRF","product":"ProGreat","price":9.35,"weight":29492.0,"amount":275750.2,"paymentDate":"2569-04-10","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"150508.0","poSold":"29492.0","dueDate":"2569-04-09"},{"id":383,"deliveryDate":"2569-03-31","customer":"โภคาฟีด","product":"ProGreat","price":9.6,"weight":16574.0,"amount":159110.4,"paymentDate":"","paymentMethod":"","notes":"","po":"","poRemain":"150508.0","poSold":"0.0","dueDate":"2569-04-30"},{"id":384,"deliveryDate":"2569-03-31","customer":"Soul of siam","product":"ProGreat","price":9.7,"weight":4010.0,"amount":38897.0,"paymentDate":"2569-03-31","paymentMethod":"โอนเข้า บช. BBL 53035xxx","notes":"","po":"","poRemain":"150508.0","poSold":"0.0","dueDate":"2569-03-31"},{"id":385,"deliveryDate":"2569-04-04","customer":"เฮียสูง","product":"ProGreat","price":9.9,"weight":4060.0,"amount":40194.0,"paymentDate":"","paymentMethod":"","notes":"","po":"","poRemain":"","poSold":"","dueDate":"2569-05-04"},{"id":386,"deliveryDate":"2569-04-06","customer":"โภคาฟีด","product":"ProGreat","price":9.8,"weight":15856.8,"amount":155396.64,"paymentDate":"","paymentMethod":"","notes":"","po":"","poRemain":"","poSold":"","dueDate":"2569-05-06"},{"id":387,"deliveryDate":"2569-04-08","customer":"TRF","product":"ProGreat","price":9.6,"weight":30130.0,"amount":289248.0,"paymentDate":"","paymentMethod":"","notes":"","po":"","poRemain":"","poSold":"","dueDate":"2569-04-22"},{"id":388,"deliveryDate":"2569-04-10","customer":"TRF","product":"ProGreat","price":9.6,"weight":28007.8,"amount":268874.88,"paymentDate":"","paymentMethod":""","notes":"","po":"","poRemain":"","poSold":"","dueDate":"2569-04-24"}];
+
+const DEFAULT_CUSTS=[
+  {name:'TRF',creditDays:14},{name:'โซรอน',creditDays:23},{name:'Soron',creditDays:23},
+  {name:'ปริศนา',creditDays:0},{name:'กฤตนัย',creditDays:0},{name:'เฮียสูง',creditDays:30},
+  {name:'โภคาฟีด',creditDays:30},{name:'คุณกิ๊ฟ',creditDays:0},{name:'โคสุรินทร์วากิว',creditDays:0},
+  {name:'Soul of siam',creditDays:0},{name:'หมอหยัก',creditDays:0},{name:'เฮียชัย สุดฤทธิ์ ฟาร์ม',creditDays:0}
+];
+
+const DEFAULT_METHODS=['โอนเข้า บช. BBL 53035xxx','เงินสด'];
+const DEFAULT_POS=[];
+
+function loadData(){const s=localStorage.getItem('pgm3');if(s){const d=JSON.parse(s);if(d&&d.length)return d;}localStorage.setItem('pgm3',JSON.stringify(SEED));return JSON.parse(JSON.stringify(SEED));}
+function saveData(r){localStorage.setItem('pgm3',JSON.stringify(r));}
+function loadCusts(){const s=localStorage.getItem('pgm3_custs');if(s)return JSON.parse(s);localStorage.setItem('pgm3_custs',JSON.stringify(DEFAULT_CUSTS));return JSON.parse(JSON.stringify(DEFAULT_CUSTS));}
+function saveCusts(c){localStorage.setItem('pgm3_custs',JSON.stringify(c));}
+function loadMethods(){const s=localStorage.getItem('pgm3_methods');if(s)return JSON.parse(s);localStorage.setItem('pgm3_methods',JSON.stringify(DEFAULT_METHODS));return[...DEFAULT_METHODS];}
+function saveMethods(m){localStorage.setItem('pgm3_methods',JSON.stringify(m));}
+function loadPOs(){const s=localStorage.getItem('pgm3_pos');if(s)return JSON.parse(s);localStorage.setItem('pgm3_pos',JSON.stringify(DEFAULT_POS));return JSON.parse(JSON.stringify(DEFAULT_POS));}
+function savePOs(p){localStorage.setItem('pgm3_pos',JSON.stringify(p));}
+
+let recs=loadData(), custs=loadCusts(), methods=loadMethods(), pos=loadPOs(), modal=null;
+let lastTotal=7.04, lastSell=9.9;
+
+// ===== DATE SELECT HELPERS =====
+const MONTHS_TH=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const YEARS_BE=[2563,2564,2565,2566,2567,2568,2569,2570,2571,2572,2573,2574,2575];
+
+function populateDateSelect(prefix){
+  const dayOpts='<option value="">วัน</option>'+Array.from({length:31},(_,i)=>{const v=String(i+1).padStart(2,'0');return'<option value="'+v+'">'+(i+1)+'</option>';}).join('');
+  const monthOpts='<option value="">เดือน</option>'+MONTHS_TH.map((m,i)=>'<option value="'+String(i+1).padStart(2,'0')+'">'+m+'</option>').join('');
+  const yearOpts='<option value="">ปี พ.ศ.</option>'+YEARS_BE.map(y=>'<option value="'+y+'">'+y+'</option>').join('');
+  const dEl=document.getElementById(prefix+'_d'); if(dEl)dEl.innerHTML=dayOpts;
+  const mEl=document.getElementById(prefix+'_m'); if(mEl)mEl.innerHTML=monthOpts;
+  const yEl=document.getElementById(prefix+'_y'); if(yEl)yEl.innerHTML=yearOpts;
+}
+function initDateSelects(){
+  populateDateSelect('f_deliv');
+  populateDateSelect('f_pay');
+  populateDateSelect('po_conf');
+}
+
+function getDateFromSelects(prefix){
+  const d=document.getElementById(prefix+'_d').value;
+  const m=document.getElementById(prefix+'_m').value;
+  const y=document.getElementById(prefix+'_y').value;
+  if(!d||!m||!y)return'';
+  return y+'-'+m+'-'+d;
+}
+
+function setDateToSelects(prefix,beStr){
+  const dEl=document.getElementById(prefix+'_d');
+  const mEl=document.getElementById(prefix+'_m');
+  const yEl=document.getElementById(prefix+'_y');
+  if(!beStr||!beStr.includes('-')||beStr.length<8){if(dEl)dEl.value='';if(mEl)mEl.value='';if(yEl)yEl.value='';return;}
+  const parts=beStr.split('-');
+  if(parts.length!==3)return;
+  const[y,mo,da]=parts;
+  if(dEl)dEl.value=da;
+  if(mEl)mEl.value=mo;
+  if(yEl)yEl.value=y;
+}
+
+function clearPayDate(){
+  setDateToSelects('f_pay','');
+}
+
+// ===== PO SYSTEM =====
+function getDeliveredForPO(po){
+  const custPOs=pos.filter(p=>p.customer===po.customer).sort((a,b)=>a.confirmedDate.localeCompare(b.confirmedDate));
+  const idx=custPOs.findIndex(p=>p.id===po.id);
+  const nextPO=custPOs[idx+1];
+  return recs.filter(r=>{
+    if(r.customer!==po.customer)return false;
+    if(!r.deliveryDate||r.deliveryDate<po.confirmedDate)return false;
+    if(nextPO&&r.deliveryDate>=nextPO.confirmedDate)return false;
+    return true;
+  }).reduce((sum,r)=>sum+(r.weight||0),0);
+}
+
+function getRemainingForPO(po){return po.totalWeight-getDeliveredForPO(po);}
+
+function getActivePOForCustomer(custName){
+  const custPOs=pos.filter(p=>p.customer===custName).sort((a,b)=>b.confirmedDate.localeCompare(a.confirmedDate));
+  return custPOs.find(po=>getRemainingForPO(po)>0)||custPOs[0]||null;
+}
+
+function updatePOInfo(){
+  const infoDiv=document.getElementById('f_cust_po_info');
+  if(!infoDiv)return;
+  const custName=document.getElementById('f_cust').value.trim();
+  if(!custName){infoDiv.style.display='none';infoDiv.innerHTML='';return;}
+  const activePO=getActivePOForCustomer(custName);
+  if(!activePO){infoDiv.style.display='none';infoDiv.innerHTML='';return;}
+  const delivered=getDeliveredForPO(activePO);
+  const remaining=activePO.totalWeight-delivered;
+  const pct=Math.min(100,Math.round(delivered/activePO.totalWeight*100));
+  const remColor=remaining<=0?'#dc3545':remaining<activePO.totalWeight*0.2?'#fd7e14':'#0d6efd';
+  infoDiv.style.display='block';
+  infoDiv.innerHTML='<div style="background:#edf5ff;border:1px solid #c3d9f0;border-radius:6px;padding:5px 9px;font-size:.73rem;margin-top:4px">'+
+    '<i class="fa fa-file-contract me-1" style="color:#0056b3"></i>'+
+    '<span style="font-weight:700;color:#0056b3">'+(activePO.poNumber||'PO')+'</span> '+
+    '| คงเหลือ <span style="font-weight:700;color:'+remColor+'">'+fmt(remaining,0)+' กก.</span> '+
+    '<span class="text-muted">('+pct+'% ส่งแล้ว)</span></div>';
+}
+
+function renderPOTab(){
+  // Populate customer select
+  const sel=document.getElementById('po_cust');
+  if(sel){
+    const cur=sel.value;
+    sel.innerHTML='<option value="">— เลือกลูกค้า —</option>'+custs.map(c=>'<option value="'+escHtml(c.name)+'"'+(c.name===cur?' selected':'')+'>'+c.name+'</option>').join('');
+  }
+  renderPOList();
+}
+
+function renderPOList(){
+  const container=document.getElementById('poList');
+  if(!container)return;
+  document.getElementById('poCount').textContent=pos.length;
+  if(!pos.length){container.innerHTML='<p class="text-muted text-center py-4"><i class="fa fa-file-contract me-2"></i>ยังไม่มี PO บันทึกไว้<br><small>เพิ่ม PO ได้ที่แบบฟอร์มด้านซ้าย</small></p>';return;}
+  const sorted=[...pos].map((po,origIdx)=>({...po,origIdx})).sort((a,b)=>b.confirmedDate.localeCompare(a.confirmedDate));
+  container.innerHTML=sorted.map(po=>{
+    const delivered=getDeliveredForPO(po);
+    const remaining=po.totalWeight-delivered;
+    const pct=Math.min(100,Math.round(delivered/po.totalWeight*100));
+    const overShip=remaining<0;
+    const done=!overShip&&remaining===0;
+    const badgeHtml=overShip?'<span class="po-badge-over">เกิน PO</span>':done?'<span class="po-badge-done">ครบแล้ว</span>':'<span class="po-badge-active">กำลังดำเนินการ</span>';
+    const barColor=overShip?'#dc3545':done?'#198754':'var(--green)';
+    return '<div class="po-card">'+
+      '<div class="po-card-head">'+
+      '<div class="d-flex align-items-center gap-2 flex-wrap">'+
+      '<span class="po-num-tag">'+(po.poNumber||'(ไม่มีเลข PO)')+'</span>'+
+      '<span class="fw-semibold">'+po.customer+'</span>'+
+      badgeHtml+
+      '<span class="text-muted" style="font-size:.72rem">ยืนยัน '+fmtD(po.confirmedDate)+'</span></div>'+
+      '<div class="d-flex gap-1">'+
+      '<button class="btn btn-outline-primary btn-act" onclick="editPO('+po.origIdx+')"><i class="fa fa-pen"></i></button>'+
+      '<button class="btn btn-outline-danger btn-act" onclick="deletePO('+po.origIdx+')"><i class="fa fa-trash"></i></button>'+
+      '</div></div>'+
+      '<div style="padding:10px 14px">'+
+      '<div class="d-flex justify-content-between mb-1" style="font-size:.78rem">'+
+      '<span class="text-muted">ส่งแล้ว <b>'+fmt(delivered,0)+'</b> กก.</span>'+
+      '<span style="font-weight:700;color:'+(remaining<0?'#dc3545':remaining===0?'#198754':'#0d6efd')+'">คงเหลือ '+fmt(remaining,0)+' กก.</span>'+
+      '<span class="text-muted">รวม '+fmt(po.totalWeight,0)+' กก. ('+fmt(po.totalWeight/1000,1)+' ตัน)</span></div>'+
+      '<div class="po-bar-bg"><div class="po-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>'+
+      '<div class="d-flex justify-content-between mt-1" style="font-size:.72rem;color:#888">'+
+      '<span>ราคาตกลง '+fmt(po.pricePerKg)+' บ./กก.</span>'+
+      '<span>'+pct+'% ส่งแล้ว</span>'+
+      '<span>มูลค่า PO '+fmt(po.totalWeight*(po.pricePerKg||0),0)+' บาท</span></div>'+
+      (po.notes?'<div style="font-size:.72rem;color:#666;margin-top:4px"><i class="fa fa-note-sticky me-1"></i>'+po.notes+'</div>':'')+
+      '</div></div>';
+  }).join('');
+}
+
+function savePO(){
+  const idx=document.getElementById('po_idx').value;
+  const cust=document.getElementById('po_cust').value;
+  const num=document.getElementById('po_num').value.trim();
+  const wt=parseFloat(document.getElementById('po_wt').value)||0;
+  const price=parseFloat(document.getElementById('po_price').value)||0;
+  const conf=getDateFromSelects('po_conf');
+  const note=document.getElementById('po_note').value.trim();
+  if(!cust){alert('กรุณาเลือกลูกค้า');return;}
+  if(!wt){alert('กรุณาระบุจำนวนสั่งซื้อ');return;}
+  if(!conf){alert('กรุณาระบุวันที่ยืนยัน PO');return;}
+  const rec={id:idx===''?Date.now():pos[parseInt(idx)].id,poNumber:num,customer:cust,totalWeight:wt,pricePerKg:price,confirmedDate:conf,notes:note};
+  if(idx==='')pos.push(rec);
+  else pos[parseInt(idx)]=rec;
+  savePOs(pos);renderPOList();clearPOForm();
+}
+
+function editPO(idx){
+  const po=pos[idx];
+  document.getElementById('po_idx').value=idx;
+  document.getElementById('po_cust').value=po.customer;
+  document.getElementById('po_num').value=po.poNumber||'';
+  document.getElementById('po_wt').value=po.totalWeight||'';
+  document.getElementById('po_wt_ton').value=po.totalWeight?(po.totalWeight/1000).toFixed(1):'';
+  document.getElementById('po_price').value=po.pricePerKg||'';
+  setDateToSelects('po_conf',po.confirmedDate||'');
+  document.getElementById('po_note').value=po.notes||'';
+}
+
+function deletePO(idx){
+  if(confirm('ลบ PO "'+(pos[idx].poNumber||pos[idx].customer)+'"?')){pos.splice(idx,1);savePOs(pos);renderPOList();}
+}
+
+function clearPOForm(){
+  document.getElementById('po_idx').value='';
+  ['po_num','po_wt','po_wt_ton','po_price','po_note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('po_cust').value='';
+  setDateToSelects('po_conf','');
+}
+
+function poTonToKg(){const t=parseFloat(document.getElementById('po_wt_ton').value);if(!isNaN(t))document.getElementById('po_wt').value=(t*1000).toFixed(0);}
+function poKgToTon(){const k=parseFloat(document.getElementById('po_wt').value);if(!isNaN(k))document.getElementById('po_wt_ton').value=(k/1000).toFixed(1);}
+
+// ===== PAYMENT METHOD SELECT =====
+function renderMethodSelect(currentVal){
+  const sel=document.getElementById('f_method');
+  if(!sel)return;
+  // options: blank, each method, separator, add new
+  sel.innerHTML='<option value="">— เลือกวิธีชำระเงิน —</option>'+
+    methods.map(m=>'<option value="'+escHtml(m)+'"'+(m===currentVal?' selected':'')+'>'+escHtml(m)+'</option>').join('')+
+    '<option disabled>──────────────</option>'+
+    '<option value="__new__">+ เพิ่มวิธีใหม่...</option>';
+  if(!methods.includes(currentVal)&&currentVal){
+    // เพิ่ม option ชั่วคราวสำหรับค่าที่ไม่อยู่ใน list (legacy data)
+    sel.innerHTML='<option value="'+escHtml(currentVal)+'" selected>'+escHtml(currentVal)+'</option>'+sel.innerHTML;
+  }
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function onMethodChange(){
+  const sel=document.getElementById('f_method');
+  const wrap=document.getElementById('f_method_new_wrap');
+  if(sel.value==='__new__'){
+    wrap.style.display='flex';
+    document.getElementById('f_method_new').value='';
+    document.getElementById('f_method_new').focus();
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function confirmNewMethod(){
+  const inp=document.getElementById('f_method_new');
+  const val=inp.value.trim();
+  if(!val){inp.focus();return;}
+  if(!methods.includes(val)){
+    methods.push(val);
+    saveMethods(methods);
+  }
+  renderMethodSelect(val);
+  document.getElementById('f_method_new_wrap').style.display='none';
+}
+
+function cancelNewMethod(){
+  renderMethodSelect('');
+  document.getElementById('f_method_new_wrap').style.display='none';
+}
+
+function getMethodValue(){
+  const sel=document.getElementById('f_method');
+  if(sel.value==='__new__'){
+    // ยังไม่กด confirm — ใช้ค่าที่พิมพ์
+    const v=document.getElementById('f_method_new').value.trim();
+    if(v&&!methods.includes(v)){methods.push(v);saveMethods(methods);}
+    return v;
+  }
+  return sel.value==='— เลือกวิธีชำระเงิน —'?'':sel.value;
+}
+
+// TABS
+document.querySelectorAll('[data-tab]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-tab]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const t=b.getAttribute('data-tab');
+    ['records','customers','po','cost','bonus'].forEach(x=>document.getElementById('tab-'+x).style.display=x===t?'':'none');
+    if(t==='customers')renderCustTable();
+    if(t==='po')renderPOTab();
+    if(t==='cost')calcCost();
+    if(t==='bonus')calcBonus();
+  });
+});
+
+// UTILS
+function fmt(n,d=2){if(n===null||n===undefined||n==='')return'-';const f=parseFloat(n);if(isNaN(f))return String(n);return f.toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function fmtD(s){if(!s)return'';if(typeof s==='string'&&s.includes('-')){const[y,m,d]=s.split('-');return d+'/'+m+'/'+y;}return String(s);}
+
+// DATE UTILS - BE calendar (stored as 2568-xx-xx)
+function beToCe(beStr){
+  if(!beStr||!beStr.includes('-'))return null;
+  const[y,m,d]=beStr.split('-').map(Number);
+  if(isNaN(y))return null;
+  return new Date(y-543,m-1,d);
+}
+function addDaysBe(beStr,days){
+  const ce=beToCe(beStr);
+  if(!ce)return'';
+  ce.setDate(ce.getDate()+days);
+  const y=ce.getFullYear()+543;
+  const m=String(ce.getMonth()+1).padStart(2,'0');
+  const d=String(ce.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+d;
+}
+function isOverdue(beStr){
+  const ce=beToCe(beStr);
+  if(!ce)return false;
+  const today=new Date(); today.setHours(0,0,0,0);
+  return ce<today;
+}
+
+// ชำระแล้ว = มีทั้งวันที่ชำระ และ วิธีการชำระ
+function isPaid(r){return !!(r.paymentDate&&r.paymentMethod);}
+
+// DUE DATE DISPLAY
+function dueDateCell(r){
+  if(!r.dueDate)return'<span class="text-muted" style="font-size:.73rem">-</span>';
+  const paid=isPaid(r);
+  const overdue=isOverdue(r.dueDate);
+  if(paid)return'<span class="due-paid">'+fmtD(r.dueDate)+'</span>';
+  if(overdue)return'<span class="due-overdue"><i class="fa fa-exclamation-circle me-1"></i>'+fmtD(r.dueDate)+'</span>';
+  return'<span class="due-normal">'+fmtD(r.dueDate)+'</span>';
+}
+
+// STATS + TABLE
+function renderStats(){
+  const tot=recs.length;
+  const amt=recs.reduce((s,r)=>s+(r.amount||0),0);
+  const wt=recs.reduce((s,r)=>s+(r.weight||0),0);
+  const up=recs.filter(r=>!isPaid(r)).length;
+  const overdue=recs.filter(r=>!isPaid(r)&&r.dueDate&&isOverdue(r.dueDate)).length;
+  document.getElementById('statsArea').innerHTML=
+    '<div class="stat-card"><div class="stat-val">'+tot+'</div><div class="stat-lbl">Lot ทั้งหมด</div></div>'+
+    '<div class="stat-card blue"><div class="stat-val">'+fmt(amt/1e6)+'M</div><div class="stat-lbl">ยอดรวม (บาท)</div></div>'+
+    '<div class="stat-card orange"><div class="stat-val">'+fmt(wt/1000,1)+' ตัน</div><div class="stat-lbl">น้ำหนักรวม</div></div>'+
+    '<div class="stat-card red"><div class="stat-val">'+overdue+'/'+up+'</div><div class="stat-lbl">เกินกำหนด/รอชำระ</div></div>';
+}
+
+function getFiltered(){
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  const st=document.getElementById('filterStatus').value;
+  return recs.filter(r=>{
+    if(q&&![(r.customer||''),(r.product||''),String(r.id||'')].some(s=>s.toLowerCase().includes(q)))return false;
+    if(st==='paid'&&!isPaid(r))return false;
+    if(st==='unpaid'&&isPaid(r))return false;
+    return true;
+  }).sort((a,b)=>(b.id||0)-(a.id||0));
+}
+
+function renderTable(){
+  renderStats();
+  const rows=getFiltered();
+  const tbody=document.getElementById('tableBody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="13" class="text-center text-muted py-4">ไม่พบรายการ</td></tr>';return;}
+  tbody.innerHTML=rows.map(r=>{
+    const idx=recs.findIndex(x=>x===r||(x.id===r.id&&x.deliveryDate===r.deliveryDate));
+    const paid=isPaid(r);
+    const overdue=r.dueDate&&isOverdue(r.dueDate)&&!paid;
+    const rc=overdue?' class="unpaid-row"':paid?'':' class="unpaid-row"';
+    const badge=paid?'<span class="badge-paid">&#10004; ชำระแล้ว</span>':'<span class="badge-unpaid">&#9201; รอชำระ</span>';
+    const meth=(r.paymentMethod||'').includes('BBL')?'โอน BBL':(r.paymentMethod||'');
+    const note=r.notes||'';
+    // แสดงวันที่ชำระจริงเฉพาะเมื่อมีวิธีการชำระด้วย
+    const payDateDisplay=paid?'<span style="white-space:nowrap;font-size:.78rem">'+fmtD(r.paymentDate)+'</span>':'<span class="text-muted" style="font-size:.73rem">-</span>';
+    return '<tr'+rc+'><td style="font-size:.73rem;color:#888;font-weight:700">'+(r.id||'')+'</td>'+
+      '<td style="white-space:nowrap">'+fmtD(r.deliveryDate)+'</td>'+
+      '<td class="fw-semibold">'+(r.customer||'')+'</td>'+
+      '<td>'+(r.product||'')+'</td>'+
+      '<td class="text-end">'+fmt(r.price)+'</td>'+
+      '<td class="text-end">'+fmt(r.weight,0)+'</td>'+
+      '<td class="text-end fw-bold">'+fmt(r.amount)+'</td>'+
+      '<td>'+dueDateCell(r)+'</td>'+
+      '<td>'+payDateDisplay+'</td>'+
+      '<td>'+badge+'</td>'+
+      '<td style="font-size:.72rem">'+meth+'</td>'+
+      '<td class="note-td">'+note+'</td>'+
+      '<td><button class="btn btn-outline-primary btn-act" onclick="openEdit('+idx+')"><i class="fa fa-pen"></i></button></td>'+
+      '</tr>';
+  }).join('');
+}
+
+document.getElementById('searchBox').addEventListener('input',renderTable);
+document.getElementById('filterStatus').addEventListener('change',renderTable);
+
+// CUSTOMER FUNCTIONS
+function renderCustTable(){
+  const tbody=document.getElementById('custTableBody');
+  if(!custs.length){tbody.innerHTML='<tr><td colspan="3" class="text-center text-muted">ยังไม่มีลูกค้า</td></tr>';return;}
+  tbody.innerHTML=custs.map((c,i)=>
+    '<tr><td>'+c.name+'</td>'+
+    '<td class="text-center"><span class="credit-badge">'+c.creditDays+' วัน</span></td>'+
+    '<td class="text-center"><button class="btn btn-outline-primary btn-act me-1" onclick="editCust('+i+')"><i class="fa fa-pen"></i></button>'+
+    '<button class="btn btn-outline-danger btn-act" onclick="deleteCust('+i+')"><i class="fa fa-trash"></i></button></td></tr>'
+  ).join('');
+  // Update datalist
+  const dl=document.getElementById('custList');
+  dl.innerHTML=custs.map(c=>'<option value="'+c.name+'">').join('');
+}
+
+function saveCust(){
+  const idx=document.getElementById('editCustIdx').value;
+  const name=document.getElementById('custName').value.trim();
+  const credit=parseInt(document.getElementById('custCredit').value)||0;
+  if(!name){alert('กรุณาใส่ชื่อลูกค้า');return;}
+  const obj={name,creditDays:credit};
+  if(idx==='')custs.push(obj);
+  else custs[parseInt(idx)]=obj;
+  saveCusts(custs);renderCustTable();clearCustForm();
+}
+function clearCustForm(){document.getElementById('editCustIdx').value='';document.getElementById('custName').value='';document.getElementById('custCredit').value=30;}
+function editCust(i){document.getElementById('editCustIdx').value=i;document.getElementById('custName').value=custs[i].name;document.getElementById('custCredit').value=custs[i].creditDays;}
+function deleteCust(i){if(confirm('ลบลูกค้า "'+custs[i].name+'"?')){custs.splice(i,1);saveCusts(custs);renderCustTable();}}
+
+function getCustCredit(name){
+  const c=custs.find(x=>x.name.toLowerCase()===name.toLowerCase());
+  return c?c.creditDays:null;
+}
+
+// MODAL
+function getModal(){if(!modal)modal=new bootstrap.Modal(document.getElementById('recModal'));return modal;}
+
+function onCustChange(){autoFillDue();updatePOInfo();}
+function autoFillDue(){
+  const nm=document.getElementById('f_cust').value.trim();
+  const deliv=getDateFromSelects('f_deliv');
+  if(nm&&deliv){
+    const credit=getCustCredit(nm);
+    if(credit!==null){
+      const due=addDaysBe(deliv,credit);
+      document.getElementById('f_due').value=due;
+      document.getElementById('f_due_display').textContent=due?fmtD(due):'-';
+    }
+  }
+}
+
+function openAddModal(){
+  document.getElementById('mTitle').textContent='เพิ่มรายการใหม่';
+  document.getElementById('delBtn').classList.add('d-none');
+  document.getElementById('f_idx').value='';
+  ['f_id','f_cust','f_price','f_wt','f_amt','f_note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_prod').value='ProGreat';
+  renderMethodSelect('โอนเข้า บช. BBL 53035xxx');
+  document.getElementById('f_method_new_wrap').style.display='none';
+  setDateToSelects('f_deliv','');
+  setDateToSelects('f_pay','');
+  document.getElementById('f_due').value='';
+  document.getElementById('f_due_display').textContent='-';
+  const infoDiv=document.getElementById('f_cust_po_info');
+  if(infoDiv){infoDiv.style.display='none';infoDiv.innerHTML='';}
+  const mx=recs.reduce((m,r)=>Math.max(m,r.id||0),0);
+  document.getElementById('f_id').value=mx+1;
+  getModal().show();
+}
+
+function openEdit(idx){
+  const r=recs[idx];
+  document.getElementById('mTitle').textContent='แก้ไข Lot #'+(r.id||'');
+  document.getElementById('delBtn').classList.remove('d-none');
+  document.getElementById('f_idx').value=idx;
+  document.getElementById('f_id').value=r.id||'';
+  setDateToSelects('f_deliv',r.deliveryDate||'');
+  document.getElementById('f_cust').value=r.customer||'';
+  document.getElementById('f_prod').value=r.product||'';
+  document.getElementById('f_price').value=r.price||'';
+  document.getElementById('f_wt').value=r.weight||'';
+  document.getElementById('f_amt').value=r.amount||'';
+  renderMethodSelect(r.paymentMethod||'');
+  document.getElementById('f_method_new_wrap').style.display='none';
+  document.getElementById('f_due').value=r.dueDate||'';
+  document.getElementById('f_due_display').textContent=r.dueDate?fmtD(r.dueDate):'-';
+  setDateToSelects('f_pay',r.paymentDate||'');
+  document.getElementById('f_note').value=r.notes||'';
+  updatePOInfo();
+  getModal().show();
+}
+
+function autoAmt(){
+  const p=parseFloat(document.getElementById('f_price').value);
+  const w=parseFloat(document.getElementById('f_wt').value);
+  if(!isNaN(p)&&!isNaN(w))document.getElementById('f_amt').value=(p*w).toFixed(2);
+}
+
+function doSave(){
+  const idx=document.getElementById('f_idx').value;
+  const note=document.getElementById('f_note').value.trim();
+  const rec={
+    id:parseInt(document.getElementById('f_id').value)||0,
+    deliveryDate:getDateFromSelects('f_deliv'),
+    customer:document.getElementById('f_cust').value.trim(),
+    product:document.getElementById('f_prod').value.trim(),
+    price:parseFloat(document.getElementById('f_price').value)||0,
+    weight:parseFloat(document.getElementById('f_wt').value)||0,
+    amount:parseFloat(document.getElementById('f_amt').value)||0,
+    paymentMethod:getMethodValue(),
+    dueDate:document.getElementById('f_due').value.trim(),
+    paymentDate:getDateFromSelects('f_pay'),
+    notes:note,po:'',poRemain:'',poSold:''
+  };
+  if(idx==='')recs.push(rec);
+  else recs[parseInt(idx)]=rec;
+  saveData(recs);getModal().hide();renderTable();
+  // Refresh PO list if visible
+  if(document.getElementById('tab-po').style.display!=='none')renderPOList();
+}
+
+function doDelete(){
+  const idx=parseInt(document.getElementById('f_idx').value);
+  if(confirm('ลบ Lot #'+recs[idx].id+'?')){recs.splice(idx,1);saveData(recs);getModal().hide();renderTable();}
+}
+
+// COST CALC — ใช้สูตรจาก Excel จริง
+function calcCost(){
+  const gak=+document.getElementById('c_gak').value||0;
+  const wat=+document.getElementById('c_water').value||0;
+  const dry=(+document.getElementById('c_dry').value||50)/100;
+  const sell=+document.getElementById('c_sell').value||0;
+  const bagB=+document.getElementById('c_bag_b').value||0;
+  const bagKg=+document.getElementById('c_bag_kg').value||1;
+  const dc=+document.getElementById('c_dry_cost').value||0;
+  const t1=+document.getElementById('c_trans1').value||0;
+  const t2=+document.getElementById('c_trans2').value||0;
+  const lp=(+document.getElementById('c_loss').value||0)/100;
+
+  // สูตรจาก Excel: =(C4*0.25)+(C5/1.16*0.75)
+  const raw=(gak*0.25)+(wat/1.16*0.75);
+  // ค่าวัตถุดิบ/กก. = raw * 100 / (%แห้ง)
+  const mat=raw*100/(dry*100);
+  // ค่าถุง = ราคาถุง / กก.ต่อถุง (สูตร Excel: 9/50)
+  const bag=bagB/bagKg;
+  // หักน้ำหนักถุง ณ ปลายทาง = 60*ราคาขาย/15000
+  const bagw=60*sell/15000;
+  // ต้นทุนสูญเสียผลิต = ศูนย์เสีย% * ราคาขาย
+  const lossProd=lp*sell;
+  // ต้นทุนสูญเสียขนส่ง = 50*ราคาขาย/15000
+  const lossTrans=50*sell/15000;
+  // ต้นทุนรวม = SUM(mat, bag, dc, t1, t2, bagw, lossProd, lossTrans)
+  const total=mat+bag+dc+t1+t2+bagw+lossProd+lossTrans;
+  const margin=sell-total;
+  lastTotal=total; lastSell=sell;
+
+  const v=(id,val)=>document.getElementById(id).textContent=fmt(val)+' บ./กก.';
+  v('r_raw',raw);v('r_mat',mat);v('r_bag',bag);v('r_dry_c',dc);v('r_t1',t1);v('r_t2',t2);v('r_bagw',bagw);v('r_lp',lossProd);v('r_lt',lossTrans);
+  document.getElementById('r_total').textContent=fmt(total)+' บ./กก.';
+  document.getElementById('r_sell_d').textContent=fmt(sell)+' บ./กก.';
+  const me=document.getElementById('r_margin');
+  me.textContent=(margin>=0?'+':'')+fmt(margin)+' บ./กก.';
+  me.style.color=margin>=0?'#0d6efd':'#dc3545';
+  calcByWt();
+}
+
+function calcByWt(){
+  const wkg=+document.getElementById('c_wt_calc').value||0;
+  const tc=lastTotal*wkg,rev=lastSell*wkg,prof=rev-tc;
+  document.getElementById('wc_cost').textContent=fmt(tc,0)+' บาท';
+  document.getElementById('wc_rev').textContent=fmt(rev,0)+' บาท';
+  const pe=document.getElementById('wc_profit');
+  pe.textContent=(prof>=0?'+':'')+fmt(prof,0)+' บาท';
+  pe.style.color=prof>=0?'#198754':'#dc3545';
+}
+
+// ===== BONUS HISTORY =====
+function loadBonusHist(){const s=localStorage.getItem('pgm3_bonus_hist');return s?JSON.parse(s):[];}
+function saveBonusHist(h){localStorage.setItem('pgm3_bonus_hist',JSON.stringify(h));}
+
+function initBonusSaveYears(){
+  const sel=document.getElementById('b_save_year');
+  const opts=[2566,2567,2568,2569,2570,2571,2572];
+  // ตั้งค่า default เป็นปีปัจจุบัน (CE+543)
+  const curYear=new Date().getFullYear()+543;
+  sel.innerHTML=opts.map(y=>'<option value="'+y+'"'+(y===curYear?' selected':'')+'>'+y+'</option>').join('');
+  // ตั้งค่า default เดือนเป็นเดือนปัจจุบัน
+  const curMonth=new Date().getMonth()+1;
+  document.getElementById('b_save_month').value=curMonth;
+}
+
+function saveBonusRecord(){
+  const tons=+document.getElementById('b_ton').value||0;
+  const rw=+document.getElementById('b_rw').value||0;
+  const rs=+document.getElementById('b_rs').value||0;
+  const month=+document.getElementById('b_save_month').value;
+  const year=+document.getElementById('b_save_year').value;
+  const units=tons/30;
+  const MONTHS_TH2=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const label='โบนัส '+MONTHS_TH2[month-1]+' '+year;
+
+  const names=document.querySelectorAll('.worker-name');
+  const roles=document.querySelectorAll('.worker-role');
+  let grand=0, workers=[];
+  names.forEach((ne,i)=>{
+    const nm=ne.value.trim()||'-';
+    const role=roles[i].value;
+    const rate=role==='super'?rs:rw;
+    const bonus=rate*units;
+    grand+=bonus;
+    workers.push({name:nm,role,rate,bonus});
+  });
+
+  const hist=loadBonusHist();
+  // ตรวจว่ามีบันทึกเดือน+ปีนี้แล้วหรือไม่
+  const existIdx=hist.findIndex(h=>h.month===month&&h.year===year);
+  const rec={id:Date.now(),month,year,label,tons,units,rw,rs,workers,totalBonus:grand};
+  if(existIdx>=0){
+    if(!confirm('มีบันทึกของ '+label+' อยู่แล้ว ต้องการเขียนทับหรือไม่?'))return;
+    hist[existIdx]=rec;
+  } else {
+    hist.unshift(rec);
+  }
+  saveBonusHist(hist);
+  renderBonusHist();
+  alert('บันทึก '+label+' สำเร็จ!');
+}
+
+function deleteBonusRecord(id){
+  const hist=loadBonusHist();
+  const rec=hist.find(h=>h.id===id);
+  if(!rec||!confirm('ลบบันทึก "'+rec.label+'"?'))return;
+  saveBonusHist(hist.filter(h=>h.id!==id));
+  renderBonusHist();
+}
+
+function toggleBonusCard(id){
+  const body=document.getElementById('bh-body-'+id);
+  if(body)body.classList.toggle('show');
+}
+
+function renderBonusHist(){
+  const hist=loadBonusHist();
+  document.getElementById('bhCount').textContent=hist.length;
+  const container=document.getElementById('bonusHistList');
+  if(!hist.length){container.innerHTML='<p class="text-muted text-center py-3">ยังไม่มีบันทึกโบนัส</p>';return;}
+  container.innerHTML=hist.map(h=>{
+    const workerRows=h.workers.map(w=>
+      '<tr><td>'+w.name+'</td><td>'+(w.role==='super'?'&#128081; หัวหน้า':'&#128119; คนงาน')+'</td>'+
+      '<td class="text-end">'+fmt(w.rate,0)+' บ.</td>'+
+      '<td class="text-end fw-bold text-success">'+fmt(w.bonus,2)+' บาท</td></tr>'
+    ).join('');
+    return '<div class="bh-card">'+
+      '<div class="bh-header" onclick="toggleBonusCard('+h.id+')">'+
+      '<div><span class="bh-label">'+h.label+'</span>'+
+      '<span class="bh-meta ms-3">'+fmt(h.tons,0)+' ตัน</span></div>'+
+      '<div class="d-flex align-items-center gap-3">'+
+      '<span class="fw-bold text-success" style="font-size:.88rem">รวม '+fmt(h.totalBonus,2)+' บาท</span>'+
+      '<button class="btn btn-outline-danger btn-act" onclick="event.stopPropagation();deleteBonusRecord('+h.id+')" title="ลบ"><i class="fa fa-trash"></i></button>'+
+      '<i class="fa fa-chevron-down text-muted"></i></div></div>'+
+      '<div class="bh-body" id="bh-body-'+h.id+'">'+
+      '<table class="table table-sm mb-0">'+
+      '<thead><tr><th>ชื่อ</th><th>ตำแหน่ง</th><th class="text-end">อัตรา/30ตัน</th><th class="text-end">โบนัส</th></tr></thead>'+
+      '<tbody>'+workerRows+'</tbody>'+
+      '<tfoot><tr class="fw-bold" style="background:#f0fff4"><td colspan="3">รวม | '+fmt(h.tons,0)+' ตัน = '+fmt(h.units,2)+' หน่วย</td>'+
+      '<td class="text-end text-success">'+fmt(h.totalBonus,2)+' บาท</td></tr></tfoot>'+
+      '</table></div></div>';
+  }).join('');
+}
+
+// BONUS — input in ตัน (tons), formula: tons*rate/30
+function addWorker(){
+  const d=document.createElement('div');
+  d.className='d-flex gap-2 mb-2 align-items-center worker-row';
+  d.innerHTML='<input type="text" class="form-control form-control-sm worker-name" placeholder="ชื่อ"><select class="form-select form-select-sm worker-role" style="width:110px"><option value="worker">&#128119; คนงาน</option><option value="super">&#128081; หัวหน้า</option></select><button class="btn btn-sm btn-outline-danger" onclick="removeWorker(this)"><i class="fa fa-times"></i></button>';
+  document.getElementById('workerList').appendChild(d);
+}
+function removeWorker(btn){btn.closest('.worker-row').remove();calcBonus();}
+
+function calcBonus(){
+  const tons=+document.getElementById('b_ton').value||0;
+  const rw=+document.getElementById('b_rw').value||0;
+  const rs=+document.getElementById('b_rs').value||0;
+  const units=tons/30;
+  document.getElementById('b_ton_d').textContent=fmt(tons,0)+' ตัน';
+  document.getElementById('b_units').textContent=fmt(units,4)+' หน่วย';
+  const names=document.querySelectorAll('.worker-name');
+  const roles=document.querySelectorAll('.worker-role');
+  let grand=0,rows='';
+  names.forEach((ne,i)=>{
+    const nm=ne.value.trim()||'-';
+    const r=roles[i].value;
+    const rate=r==='super'?rs:rw;
+    const bon=rate*units;
+    grand+=bon;
+    rows+='<tr><td>'+nm+'</td><td>'+(r==='super'?'&#128081; หัวหน้า':'&#128119; คนงาน')+'</td><td class="text-end">'+fmt(rate,0)+' บ.</td><td class="text-end fw-bold text-success">'+fmt(bon,2)+' บาท</td></tr>';
+  });
+  document.getElementById('bonusBody').innerHTML=rows;
+  document.getElementById('b_grand').textContent=fmt(grand,2)+' บาท';
+}
+
+// INIT
+initDateSelects();
+renderMethodSelect('โอนเข้า บช. BBL 53035xxx');
+initBonusSaveYears();
+renderTable();
+renderCustTable();
+renderBonusHist();
+calcCost();
+calcBonus();
+// Pre-populate PO customer select (for when tab is first opened)
+document.addEventListener('DOMContentLoaded',()=>{});
+
+</script>
+</body>
+</html>
