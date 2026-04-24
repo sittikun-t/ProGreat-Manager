@@ -2426,7 +2426,7 @@ function renderPayments(){
   ].filter(x=>payFilter==='all'||x.type===payFilter)
    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const totalUnpaid=all.filter(x=>!x.paid).reduce((s,x)=>s+(x.amount||0),0);
-  const totalPaid=all.filter(x=>x.paid).reduce((s,x)=>s+(x.amount||0),0);
+  const totalPaid=all.filter(x=>x.paid).reduce((s,x)=>s+(x.payAmount!=null?x.payAmount:(x.amount||0)),0);
   const hasUnpaid=all.some(x=>!x.paid);
   const isAdminPay=currentRole==='admin';
   const getLotCode=id=>{ const l=lots.find(x=>x.id===id);return l?l.code:'—'; };
@@ -2448,6 +2448,8 @@ function renderPayments(){
       const ps=e.type==='sale'?getSalePayStatus(e):null;
       const rowBg=e.type==='sale'&&!e.paid&&ps&&ps.status==='overdue'?' style="background:#fff1f2"'
         :(!e.paid&&(e.type!=='sale'||(ps&&ps.status==='due-soon')))?' style="background:#fffbeb"':'';
+      const displayAmt=e.paid&&e.payAmount!=null?e.payAmount:(e.amount||0);
+      const amtNote=e.paid&&e.payAmount!=null&&Math.abs(e.payAmount-(e.amount||0))>0.01?`<br><span style="color:#9ca3af;font-size:11px">ยอดตั้ง ${N0(e.amount)}</span>`:'';
       const detailExtra=e.type==='sale'&&!e.paid&&ps&&ps.due
         ?ps.status==='overdue'?`<br><span class="due-tag-overdue">🔴 ครบ ${ps.due}</span>`
         :ps.status==='due-soon'?`<br><span class="due-tag-soon">🟡 ครบ ${ps.due}</span>`
@@ -2458,7 +2460,7 @@ function renderPayments(){
       <td style="font-size:12px">${e.typeLabel}</td>
       <td><span class="lot-badge">${getLotCode(e.lotId)}</span></td>
       <td style="font-size:12px">${e.truck||e.warehouse||e.customer||e.fromWarehouse||'—'}${detailExtra}</td>
-      <td class="num" style="font-weight:700">${N0(e.amount)}</td>
+      <td class="num" style="font-weight:700">${N0(displayAmt)}${amtNote}</td>
       <td><span class="${e.paid?'paid-tag':'unpaid-tag'}">${e.paid?'✅ ชำระแล้ว':'❌ ค้างชำระ'}</span></td>
       <td style="font-size:12px;color:#6b7280">${e.payDate||'—'}</td>
       <td>${e.payBank?`<span class="bank-badge">${e.payBank}</span>`:'<span style="color:#d1d5db;font-size:12px">—</span>'}</td>
